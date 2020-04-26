@@ -1,0 +1,79 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Dependra Singh
+@date      		18  July 2018
+@description 	Upload XSLT Component. It also contains iFrame to show file upload component.
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" access="global"
+                extends="c:GlAp_LightningComponentBase" >
+    
+    <!-- Component variables -->
+    <aura:attribute access="public" name="isActive"         	type="boolean"  default="false" /> 
+    <aura:attribute access="public" name="isVfFrameActive"  	type="boolean"  default="false" /> 
+    <aura:attribute access="public" name="fileName" 	    	type="String"   default="Select File" />
+    <aura:attribute access="public" name="importFileName"   	type="String"   />  
+    <aura:attribute access="public" name="uploadXSLT" 	    	type="Boolean"  default="false" />
+    <aura:attribute access="public" name="xsltDocumentList" 	type="String[]" />
+    <aura:attribute access="public" name="frameWidth" 	    	type="String"   default="100%" /><!--250-->
+    <aura:attribute access="public" name="frameHeight" 	    	type="String"   default="74" /><!--30-->
+    <aura:attribute access="public" name="fileSizeMessage"  	type="String"   default="" />
+    <aura:attribute access="public" name="fileTypeMessage"  	type="String"   default="" />
+    <aura:attribute access="public" name="fileSelectedMessage"  type="String" 	default="" />
+    
+    <aura:attribute access="public" name="savePressed"  type="Boolean" default="false"/>
+    <aura:attribute access="public" name="isSetTab" 	type="Boolean" />
+    
+    <aura:registerEvent name="refreshEvent" type="c:BlAp_RefreshEvent"/>
+    <!-- Domain of LC for VF to send message -->
+    <aura:attribute name="lcHost" type="String" />
+    <aura:attribute name="frameSrc" type="String" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="init event handler"/>  
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    <aura:attribute name="vfHost" type="String"/>
+    
+     <aura:if isTrue="{!v.isActive}" >
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" 
+                 class="slds-modal slds-fade-in-open slds-modal_large">
+            <div class="slds-modal__container modal_top_padding">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+									xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>   
+                    <div class="slds-modal__content slds-p-around--medium">	
+                        <!-- Notifications -->
+                        <c:GlAp_NotificationComponent aura:id="notifier"/>
+                        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                    </div>
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.LoAp_SelectImportFile}</h2>
+                </header>
+                <div class="slds-modal__content slds-p-around--medium">	
+                    <form class="slds-form slds-form_compound slds-p-top_medium"> 
+                        <div class="demo-only demo-only--sizing slds-grid slds-wrap slds-m-bottom_medium">
+                            <div class="slds-size_1-of-2 ">
+                                <c:GlAp_InputField type="text" value="{!v.importFileName}" label="{!$Label.c.BlAp_ImportFileName}"/>
+                            </div>
+                        </div>
+                        <div>
+                            <!--<div aura:id="uiMessage">{!v.body}</div>--> <!--AT-4889 Code Check marx Changes Starts/Ends here-->
+                               <!-- Iframe to keep file component in vf page.-->
+                            <iframe aura:id="vfFrame" src="{! v.frameSrc}" width="{!v.frameWidth}" height="{!v.frameHeight}" class="vfFrame" style="border-style: none;width: 100%;"/>
+                        </div>
+                        <div class="slds-grid"> &nbsp;
+                        </div>
+                        <div class="slds-p-top_medium">
+                        </div>
+                    </form>
+                </div>
+                <footer class="slds-modal__footer ">
+                    <button type="button" aura:id="cancelButton" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                    <button type="button" aura:id="saveButton" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                </footer>   
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </aura:if>
+</aura:component>

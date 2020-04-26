@@ -1,0 +1,7 @@
+<aura:documentation>
+	<aura:description>        
+        <strong>CuAp_SelectLocationPage</strong> is component page of the Customer Moves Wizard, the wizard allows the user to search for a location using 
+        address fields. The search is based on a combination of each of the fields entered.
+        When a Location is selected from the results list, the Location Id is added to the wizard properties object.
+ 	</aura:description>
+</aura:documentation>

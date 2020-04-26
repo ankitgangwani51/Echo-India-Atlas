@@ -1,0 +1,64 @@
+<aura:component access="global" >
+    <aura:attribute name="stageList" type="List" access="public"/>
+    
+    <div class="slds-path-coach">
+        <div class="slds-grid">
+            <div class="slds-tabs_path" role="application">
+                <ul class="slds-tabs_path__nav" role="listbox" aria-orientation="horizontal">
+                    <aura:iteration items="{!v.stageList}" var="stgItem" indexVar="Idx" >
+                        
+                        <!--Finished but Incomplete -->
+                        <aura:if isTrue="{!stgItem.Status=='PastIncomplete'}">
+                            <li class="slds-tabs_path__item slds-is-complete slds-is-incomplete slds-is-current" role="presentation">
+                                <a aria-selected="false" class="slds-tabs_path__link" href="javascript:void(0);" id="path-1" role="option" tabindex="-1">
+                                    <span class="slds-tabs_path__stage">                                
+                                        <c:GlAp_Svg class="slds-icon slds-icon_x-small" aria-hidden="true" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#check'}" />                                
+                                        <span class="slds-assistive-text">Stage Complete</span>
+                                    </span>
+                                    <span class="slds-tabs_path__title">{!stgItem.Name}</span>
+                                </a>
+                            </li>
+                        </aura:if>
+                        
+                        <!-- Finished and Completed -->
+                        <aura:if isTrue="{!stgItem.Status=='PastComplete'}">
+                            <li class="slds-tabs_path__item slds-is-complete" role="presentation">
+                                <a aria-selected="false" class="slds-tabs_path__link" href="javascript:void(0);" id="path-2" role="option" tabindex="-1">
+                                    <span class="slds-tabs_path__stage">
+                                        <c:GlAp_Svg class="slds-icon slds-icon_x-small" aria-hidden="true" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#check'}" />                               
+                                        <span class="slds-assistive-text">Stage Complete</span>
+                                    </span>
+                                    <span class="slds-tabs_path__title">{!stgItem.Name}</span>
+                                </a>
+                            </li>
+                        </aura:if>
+                        <!-- Current Stage -->
+                        <aura:if isTrue="{!stgItem.Status=='Current'}">
+                            <li class="slds-tabs_path__item slds-is-current" role="presentation">
+                                <a aria-selected="true" class="slds-tabs_path__link" href="javascript:void(0);" id="path-3" role="option" tabindex="0">
+                                    <span class="slds-tabs_path__stage">
+                                        <c:GlAp_Svg class="slds-icon slds-icon_x-small" aria-hidden="true" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#check'}" />                                                              
+                                        <span class="slds-assistive-text">Current Stage:</span>
+                                    </span>
+                                    <span class="slds-tabs_path__title">{!stgItem.Name}</span>
+                                </a>
+                            </li>
+                        </aura:if>
+                        
+                        <!-- Not Finished and Incomplete -->
+                        <aura:if isTrue="{!stgItem.Status=='Future'}">
+                            <li class="slds-tabs_path__item slds-is-incomplete" role="presentation">
+                                <a aria-selected="false" class="slds-tabs_path__link" href="javascript:void(0);" id="path-4" role="option" tabindex="-1">
+                                    <span class="slds-tabs_path__stage">
+                                        <c:GlAp_Svg class="slds-icon slds-icon_x-small" aria-hidden="true" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#check'}" />             
+                                    </span>
+                                    <span class="slds-tabs_path__title">{!stgItem.Name}</span>
+                                </a>
+                            </li>
+                        </aura:if>
+                    </aura:iteration>                  
+                </ul>
+            </div>                                                                                          
+        </div>
+    </div>
+</aura:component>

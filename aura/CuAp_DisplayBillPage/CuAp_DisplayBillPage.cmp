@@ -1,0 +1,68 @@
+<!--
+**********************************************************************************************
+@author			Accenture : Sucharu Gupta
+@date			20-Nov-2017
+@description	WS8: Display Bill & Bill Items
+    Wizard screen to show a bill as part of the Move In/Out Wizards
+
+    wizardprop			
+@param			none (requires the bill Id as the recordId)
+@return			none
+
+@revision(s)	Accenture : Vandana Anshu  29-Nov-2014
+    15 Jan 2018, P Dixon - cleanup
+    21 March 2018, Amit K. - (AT-1923) Bug
+@Revision	 	AT-3979, Tarun - Modified as per security review
+**********************************************************************************************
+-->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="CuAp_DisplayBillPageCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="object" name="wizardprop" description="object that holds all the wizard properties"/>
+    <aura:attribute access="public" type="boolean" name="isActive" default="true" description="true if this is the active page"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!--Page specific attributes -->
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="List" name="fieldList" />
+    <aura:attribute access="private" type="List" name="recordList"/>
+    <aura:attribute access="private" type="double" name="billAmount"/>
+    
+    <!--Page specific handlers -->
+    <aura:handler name="change" value="{!v.recordId}" action="{!c.recordIdChangeHandler}"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <aura:if isTrue="{!v.recordId}"> <!--Amit K.: Condition to check billId (AT-1923) -->
+            <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+                <div class="slds-tile__detail slds-p-bottom_small">
+                    <dl class="slds-dl_inline slds-p-bottom_x-small">
+                        <dt class="slds-dl_inline__label slds-text-heading_small">
+                            {!$Label.c.CuAp_DisplayBillBillAmount}
+                        </dt>
+                        <dd class="slds-dl_inline__detail">
+                            <ui:outputCurrency value="{!v.billAmount}"/>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="slds-p-bottom_medium">
+                    <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.BlAp_LatestBillItem}</legend>
+                </div>
+                <div class="slds-container_fluid">
+                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/>
+                </div>
+            </div>
+        </aura:if>
+    </aura:if>
+</aura:component>

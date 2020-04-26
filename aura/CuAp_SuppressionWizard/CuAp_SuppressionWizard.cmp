@@ -1,0 +1,118 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Vivek Chauhan
+@date      		05 Sep 2017
+@description 	Suppression wizard component
+@revision(s)	12 Dev 2017, P Dixon
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="CuAp_SuppressionWizardCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+		
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    <aura:attribute access="private" type="List" name="fieldListAccSup"/>
+    <aura:attribute access="private" type="List" name="recordListAccSup"/>
+
+    <aura:attribute access="private" type="Boolean" name="manageSuppressions" default="false" />
+    <aura:attribute access="private" type="Boolean" name="suppressSelectedContracts" default="false" />
+    <aura:attribute access="private" type="Boolean" name="suppressAccount" default="false" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>     
+
+	<!-- Spinner -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+	
+	<aura:if isTrue="{!v.manageSuppressions}">
+
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+        		role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding">
+                
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                        		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.CuAp_SuppressionWizardManageSuppressions}</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around--medium">
+	
+					<!-- Notifications -->
+					<c:GlAp_NotificationComponent aura:id="notification"/>
+					
+					<!-- Radio button selection -->
+					<div class="slds-grid slds-wrap">
+                        <div class="slds-size--1-of-2 slds-large-size--1-of-2">
+                            <div class="slds-grid slds-grid_align-end slds-p-right_medium">{!$Label.c.CuAp_SuppressionWizardSelectSuppressionType}</div>                            
+                        </div>
+                        <div class="slds-size--1-of-2 slds-large-size--1-of-2 slds-p-bottom_medium">
+                            <div class="slds-grid_align-center">
+                                <fieldset class="slds-form-element">
+                                    <div class="slds-form-element__control">
+                                        <span class="slds-radio">
+                                        	<aura:if isTrue="{!v.suppressAccount}">
+	                                           	<input type="radio" id="accountSelected" name="manageSuppression" value="account" 
+	                                           			onchange="{!c.startSuppressAccount}" checked="checked"/>
+	                                        	<aura:set attribute="else">
+	                                           		<input type="radio" id="accountSelected" name="manageSuppression" value="account" 
+	                                           				onchange="{!c.startSuppressAccount}"/>
+	                                        	</aura:set>
+	                                        </aura:if>
+                                            <label class="slds-radio__label" for="accountSelected">
+                                                <span class="slds-radio_faux"></span>
+                                                <span class="slds-form-element__label">{!$Label.c.CuAp_SuppressionWizardAccountSuppression}</span>
+                                            </label>
+                                        </span>
+                                        <span class="slds-radio">
+                         					<aura:if isTrue="{!v.suppressSelectedContracts}">
+												<input type="radio" id="contractSelected" name="manageSuppression" value="contracts" 
+														onchange="{!c.startSuppressSelectedContracts}" checked="checked"/>
+	                                        	<aura:set attribute="else">
+	                                           		<input type="radio" id="contractSelected" name="manageSuppression" value="contracts"  
+	                                           				onchange="{!c.startSuppressSelectedContracts}"/>
+	                                        	</aura:set>
+	                                        </aura:if>
+											<label class="slds-radio__label" for="contractSelected">
+                                               	<span class="slds-radio_faux"></span>
+                                               	<span class="slds-form-element__label">{!$Label.c.CuAp_SuppressionWizardContractSuppression}</span>
+                                            </label>
+                                        </span>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+	
+						<!-- Contracts -->
+		                <aura:if isTrue="{!v.suppressSelectedContracts}"> 
+		                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true"/>
+		                </aura:if>
+		
+						<!-- Account -->
+						<aura:if isTrue="{!v.suppressAccount}"> 
+						    <c:GlAp_GenericTable fieldList="{!v.fieldListAccSup}" recordList="{!v.recordListAccSup}" showSelect="true" />
+						</aura:if>
+
+                    </div>                   
+                </div>
+				<footer class="slds-modal__footer">
+				    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+					<button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+				</footer>       
+            </div>
+        </section>
+
+		<div class="slds-backdrop slds-backdrop_open"></div>
+		<aura:set attribute="else">
+			<button type="button" class="slds-button slds-button--neutral slds-truncate" onclick="{!c.doManageSuppression}">
+				{!$Label.c.CuAp_SuppressionWizardManageSuppressions}
+			</button>
+		</aura:set>
+	</aura:if>
+
+</aura:component>

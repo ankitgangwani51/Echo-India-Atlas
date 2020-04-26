@@ -1,0 +1,22 @@
+  .upload-btn-wrapper {
+	position: relative;
+	overflow: hidden;
+	display: inline-block;
+	}
+	
+	.newButton{
+	padding: 0 15px;
+	border-radius: 4px;
+	font-size: 17px;
+	font-weight: 100;
+	color: rgb(27, 82, 151);
+	margin-left: 14px;
+	}
+	
+   .upload-btn-wrapper input[type=file] {
+	font-size: 100px;
+	position: absolute;
+	left: 0;
+	top: 0;
+	opacity: 0;
+	}

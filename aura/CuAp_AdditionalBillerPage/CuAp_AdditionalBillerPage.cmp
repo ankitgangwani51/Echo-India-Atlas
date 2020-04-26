@@ -1,0 +1,108 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Gopal Gupta
+@date      		06-Nov-2017
+@description 	WS3: Additional Biller
+				Wizard screen to add additional biller as part of the Move In Wizard
+	
+@param			wizardprop - need it from the previous screen to fetch the locationId
+							and to set the variables to be returned to next screen
+@return			additionalLocationOccupants - the list of the additional billers added
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+                controller="CuAp_AdditionalBillerPageCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+
+	<!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<c:GlAp_Notifier aura:id="notifier"/>
+	<!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->  
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <!-- Commented By Dependra 10-03-2018 -->  
+    <!--aura:attribute access="private" name="billerInfoList" type="CuAp_AdditionalBillerPageCtrlr.BillerInfo[]" /--> 
+    <aura:attribute access="private" name="billerInfoList" type="object[]" />
+    <aura:attribute access="private" name="occTypeOptions" type="String[]" />
+        
+    <aura:if isTrue="{!v.isActive}">    
+    	<div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <div class="slds-p-bottom_medium">
+				<legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_AdditionalBillerPageHeaderFillInfo}</legend>
+				<legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_AdditionalBillerSubHeading}</legend>
+			</div>
+			   
+            <div class="slds-container_fluid">
+                <table class="slds-table slds-table_fixed-layout slds-table--bordered slds-table--col-bordered">
+                    <thead>
+                        <tr class="slds-text-title--caps" >
+                            <th scope="col" class="column1" >
+                                <div class="slds-truncate" title="Name">{!$Label.c.CuAp_AccountNameLabel}</div>
+                            </th>
+                            <th scope="col" class="column2" >
+                                <div class="slds-truncate" title="Email">{!$Label.c.CuAp_AccountEmailLabel}</div>
+                            </th>
+                            <th scope="col" class="column3" >
+                                <div class="slds-truncate" title="Mobile">{!$Label.c.CuAp_AccountMobileLabel}</div>
+                            </th>
+                            <th scope="col" class="column4" >
+                                <div class="slds-truncate" title="Occupancy Type">{!$Label.c.CuAp_LocationOccupantOccupancyTypeLabel}</div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <aura:iteration items="{!v.billerInfoList}" var="bInfo" indexVar="index">
+                            <tr class="slds-text-title--caps" >
+                                <td data-label="Name" style="slds-cell-wrap" >
+                                    <c:GlAp_CustomLookup objectName="Account"
+										  field_API_text="{!bInfo.displayFields}"
+										  limit="6"
+										  field_API_search="Name"
+										  field_API_FilterText="RecordType.Name"
+										  field_API_FilterVal="Household Account"
+										  lookupIcon="standard:account" 
+										  selItem="{!bInfo.acc}" 
+                                          itemFieldValues="{!bInfo.accFieldValues}"               
+										  placeholder="{!$Label.c.CuAp_SearchText}"
+                                          field_API_Field_Concatenate = "{!v.namespace + 'AccountReference__c'}"/> <!--Changes for AT-1742 Starts/Ends Here -->
+                                </td>
+                                <td data-label="Email" style="slds-cell-wrap" >
+                                    <!-- Changed By Dependra -->
+                                     <c:GlAp_OutputField label="" value="{!bInfo.accFieldValues[2]}" type="email"/>				 
+                                </td>
+                                <td data-label="MobilePhone" style="slds-cell-wrap" >
+                                    <!-- Changed By Dependra -->
+                                     <c:GlAp_OutputField label="" value="{!bInfo.accFieldValues[3]}" type="tel"/>				 
+                                </td>
+                                <td data-label="v.namespace + 'LocationOccupant__c'" style="slds-cell-wrap" >
+                                    <!-- had to use this because of the Multiple Items Set issue with the Generic Field -->
+                                    <ui:inputSelect aura:id="picklist" value="{!bInfo.occTypeValue}">
+                                        <aura:iteration items="{!bInfo.occTypeOptions}" var="picklistValue">
+                                            <ui:inputSelectOption text="{!picklistValue}" label="{!picklistValue}"/>
+                                        </aura:iteration>                
+                                    </ui:inputSelect> 
+                                </td>
+                            </tr>
+                        </aura:iteration>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="slds-container_fluid slds-p-top_medium">
+                <button type="button" class="slds-button slds-button--neutral slds-float_right" onclick="{!c.addMoreRows}">
+                	{!$Label.c.CuAp_AddMoreButton}
+                </button>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

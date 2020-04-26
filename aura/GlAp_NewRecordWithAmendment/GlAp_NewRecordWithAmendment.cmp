@@ -1,0 +1,198 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		23 Feb 2018
+@description 	Component to implement the New Record with Amendment page
+@Revisions	 	14-06-18,Tarun,AT-2658,Made changes to take last reading before the estimated date for validation
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+		controller="GlAp_NewRecordWithAmendmentCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+
+	<!-- Attributes -->
+    <aura:attribute access="public" type="Id" name="recordId" description="the parent record Id"/>
+    <aura:attribute access="public" type="String" name="sObjectName" description="the parent record object type"/> 
+    <aura:attribute access="public" type="Boolean" name="isActive" default="false" description="true if the component is active"/>
+    <aura:attribute access="public" type="String" name="title" default="New Record" description="The title heading"/>
+    <aura:attribute access="public" type="String" name="buttonName" default="New" description="The button name"/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="neutral" description="The button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <aura:attribute access="public" type="String" name="objectName" description="related object API name"/>
+    <aura:attribute access="public" type="String" name="parentField" description="API name of the field on the object 
+    																	(corresponds to the id which is passed in as the record id so that related records can be retrieved)"/>
+    <aura:attribute access="public" type="String" name="detailListFields" description="name of the detail list fieldset"/>
+    <aura:attribute access="public" type="String" name="newRecordFields" description="name of the new record fieldset"/>
+    <aura:attribute access="public" type="String" name="selfLookupField" description="The API name of the amended by field"/>
+    <aura:attribute access="public" type="String" name="lastReadingRecord" description="Latest Reading Record"/>  <!--AT-2188 -->
+    
+    <aura:attribute access="public" type="Boolean" name="amendAllAfter" description="true if the amendment should be for all records 
+    																		after the record selected"/>      
+    <aura:attribute access="private" type="List" name="selectedRecords" description="these are the selected records to amend"/>
+    <aura:attribute access="public" type="Object" name="selectedRecord" description="this is the selected record"/> <!-- Changes for AT-5193 Starts/Ends here -->
+    <aura:attribute access="private" type="Id" name="newRecordId" description="this is the new record Id"/>
+    <!--AT-3854-->
+    <aura:attribute access="public" type="Boolean" name="lowerThresholdWarningPopup" default="false"/>   
+    <aura:attribute access="public" type="Boolean" name="lowerThresholdWarningAccept" default="false"/>
+    <aura:attribute access="public" type="Boolean" name="upperThresholdWarningPopup" default="false"/>   
+    <!--AT-3854-->
+    <!-- Event handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleNavigationEvent}" description="handler for navigation button events"/>
+	<aura:handler name="change" value="{!v.recordId}" action="{!c.parentRecordChange}"/>
+	<aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+			description="handler for bill calculation complete events"/>
+
+	<!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+
+	<!-- event used to signal to the parent component that a new record was added -->
+    <aura:registerEvent name="wizEvent" type="c:GlAp_WizardEvent"/>
+
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<aura:if isTrue="{!v.isActive}">   
+
+		<!-- Calculate Bill Component -->
+    	<c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" recordId="{!v.newRecordId}" sObjectName="{!v.objectName}" showButton="false" 
+    			calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+
+   		<!-- Modal -->
+		<section class="slds-modal slds-slide-up-open slds-modal_medium" role="dialog" tabindex="-1" aria-labelledby="heading">
+		   <div class="slds-modal__container modal_top_padding">
+				<header class="slds-modal__header">
+					<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+		               <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+		               		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+		               <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+					</button>
+		           
+					<!-- Page Header -->
+					<h2 id="heading" class="slds-text-heading_medium slds-hyphenate">
+						{!v.title}
+					</h2>
+				</header>
+		
+				<div class="slds-modal__content slds-p-around_medium">
+					<div class="slds-grid slds-grid_vertical">
+			            
+		                <!-- Notifications -->
+		                <c:GlAp_NotificationComponent aura:id="notification"/>
+		            
+					    <!-- Create New Record -->
+					    <aura:if isTrue="{!v.objectName == v.namespace + 'Reading__c'}">
+					    
+					    	<!-- Reading -->
+						    <c:CuAp_NewReadingForm aura:id="newReadingForm" recordId="{!v.recordId}" sObjectName="{!v.sObjectName}" 
+						    			objectType="{!v.namespace + 'Reading__c'}" fieldSet="{!v.newRecordFields}"  
+						    			headerLabel="{!$Label.c.CuAp_InformationSection}" editMode="true"/>
+
+							<!-- Other Object Types -->
+					    	<aura:set attribute="else">
+							    <c:GlAp_GenericFormComponent aura:id="newComponent" recordId="{!v.recordId}" 
+							    		objectType="{!v.objectName}" fieldSet="{!v.newRecordFields}" 
+							    		headerLabel="{!$Label.c.CuAp_InformationSection}" editMode="true"/>
+							</aura:set>
+						</aura:if>
+					    		
+						<!-- Related Unamended Records -->
+						<div class="slds-box slds-theme--default slds-container">
+							<div class="slds-section slds-is-open">
+								<h3 class="slds-section__title slds-button slds-section__title-action">
+									<aura:if isTrue="{!v.amendAllAfter}">{!$Label.c.GlAp_AmendmentSelectLastGoodMsg}
+										<aura:set attribute="else">{!$Label.c.GlAp_AmendmentSelectionMsg}</aura:set>
+									</aura:if>
+								</h3>
+								<div class="slds-section__content">
+                                    <!--Changes for AT-5193 Starts here-->
+									<c:GlAp_RelatedRecordList aura:id="relatedList" objectName="{!v.objectName}" detailListFields="{!v.detailListFields}" 
+                                                              recordId="{!v.recordId}" parentField="{!v.parentField}" selectedRecords="{!v.selectedRecords}" selectedRecord="{!v.selectedRecord}" 
+											showNew="false" forAmendments="true" amendAllAfter="{!v.amendAllAfter}" filter="{!v.selfLookupField + ' = null'}"/>
+								    <!--Changes for AT-5193 Ends here-->
+                                </div>
+							</div>
+						</div>
+		
+						<!-- Navigation -->
+						<div class="slds-container_fluid">
+						    <c:GlAp_WizardButtons startStep="true" cancelStep="true" endStep="true"/>
+						</div>
+					</div>
+		        </div>               
+		    </div>
+		</section>
+		<div class="slds-backdrop slds-backdrop_open"/>
+
+   		<!-- Start button -->
+		<aura:set attribute="else">
+			<lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doStart}" />
+		</aura:set>
+    </aura:if>
+    <!--AT-3854    Lower Threshold Popup  -->
+    <aura:if isTrue="{!v.lowerThresholdWarningPopup}">
+        <div>                       
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" 
+                     class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="modal-container slds-modal__container" style="width:30%;">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancelQuestion}">
+                                <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                            xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#edit'}" />
+                                <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                            </button>
+                            <section>
+                                <lightning:icon iconName="action:record"/>
+                                <label>
+                                    <div class="slds-text-body_regular">{!$Label.c.LoAp_ReadingOutsideThreshold}</div>
+                                </label>
+                            </section>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">                            
+                            <div class="slds-text-heading_medium">{!$Label.c.GlAp_SaveAlert}</div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancelQuestion}">{!$Label.c.LoAp_No}</button>
+                            <button type="button" class="slds-button slds-button--brand" onclick="{!c.doAcceptQuestion}">{!$Label.c.LoAp_Yes}</button>
+                        </footer>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </aura:if>
+    <!--AT-3854   Upper Threshold Popup -->
+    <aura:if isTrue="{!v.upperThresholdWarningPopup}">
+        <div>                       
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" 
+                     class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="modal-container slds-modal__container" style="width:30%;">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancelQuestion}">
+                                <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                            xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                            </button>
+                            <section>
+                                <lightning:icon iconName="action:record"/>
+                                <label>
+                                    <div class="slds-text-body_regular">{!$Label.c.LoAp_ReadingOutsideUpperThreshold}</div>
+                                </label>
+                            </section>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">                            
+                            <div class="slds-text-heading_medium">{!$Label.c.LoAp_HighReadingAlert}</div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doNo}">{!$Label.c.LoAp_No}</button>
+                            <button type="button" class="slds-button slds-button--brand" onclick="{!c.doYes}">{!$Label.c.LoAp_Yes}</button>
+                        </footer>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </aura:if>
+    <!--AT-3854   -->
+</aura:component>

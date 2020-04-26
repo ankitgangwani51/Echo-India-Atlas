@@ -1,0 +1,89 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" >
+    
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}"/>
+    
+    
+    
+    <lightning:layout>
+        <lightning:layoutItem flexibility="auto">
+            <div class="slds-notify_container slds-is-relative">
+                <div class="slds-notify slds-theme_error" role="status">
+                    <span class="slds-assistive-text">error</span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small">26 potential duplicate leads were found. <a href="javascript:void(0);">Select Leads to Merge</a></h2>
+                    </div>
+                    <button class="slds-button slds-button_icon-inverse slds-notify__close" title="Close" onclick="{!c.clearNotification}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <div class="slds-notify__close">
+                        
+                    </div>
+                </div>
+            </div>
+        </lightning:layoutItem>
+    </lightning:layout>
+    
+    
+    <lightning:layout multipleRows="true" >
+        <lightning:layoutItem flexibility="auto" class="border" padding="around-small">
+            <lightning:layout multipleRows="true">
+                <lightning:layoutItem  flexibility="auto" size="12" class="border">
+                    <!-- Product Column -->
+                    Product Name Data Value.
+                </lightning:layoutItem>
+                <lightning:layoutItem  flexibility="auto" size="12" class="border">
+                    <!-- Location Column --> 
+                    Location Name Data Value
+                </lightning:layoutItem>
+            </lightning:layout>
+        </lightning:layoutItem>
+        <lightning:layoutItem  flexibility="auto" class="border" padding="around-small">
+            <lightning:layout multipleRows="true">
+                <lightning:layoutItem  flexibility="auto" size="12" class="border">
+                    - 01/01/2001 To 31/02/2019
+                </lightning:layoutItem>
+                <lightning:layoutItem  flexibility="auto" size="12" class="border">
+                    - Range Value
+                </lightning:layoutItem>
+                <lightning:layoutItem  flexibility="auto"  size="12" class="border">
+                    - Event Value
+                </lightning:layoutItem>
+                <lightning:layoutItem   flexibility="auto" size="12" class="border">
+                    - Age Value
+                </lightning:layoutItem>
+                <lightning:layoutItem   flexibility="auto" size="12" class="border">
+                    - Grade Range
+                </lightning:layoutItem>
+                <lightning:layoutItem  flexibility="auto"  size="12" class="border">
+                    - Event Season
+                </lightning:layoutItem>
+            </lightning:layout>
+        </lightning:layoutItem>
+        <lightning:layoutItem   flexibility="auto" class="border" padding="around-small">
+            <lightning:layout multipleRows="true">
+                <lightning:layoutItem   flexibility="auto" size="4" class="border">
+                    Member
+                </lightning:layoutItem>
+                <lightning:layoutItem   flexibility="auto" size="4" class="border"/>
+                <lightning:layoutItem   flexibility="auto" size="4" class="border">
+                    10.00/Weekly
+                </lightning:layoutItem>
+                <lightning:layoutItem   flexibility="auto" size="4" class="border">
+                    Non-Member
+                </lightning:layoutItem>
+                <lightning:layoutItem   flexibility="auto" size="4" class="border"/>
+                43.99/Daily
+            </lightning:layout>
+        </lightning:layoutItem>
+        <lightning:layoutItem flexibility="auto" class="border" padding="around-small">
+            <lightning:layout multipleRows="true">
+                <lightning:layoutItem   flexibility="auto" size="12" class="border">
+                    Select Participant
+                </lightning:layoutItem>
+            </lightning:layout>
+        </lightning:layoutItem>
+    </lightning:layout>
+    
+</aura:component>

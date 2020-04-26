@@ -1,0 +1,262 @@
+<!--
+/******************************************************************************
+@author    	 :	Echo : Ankit Gangwani
+@date      	 :	25-Nov-2017
+@description : 	Component to select field criteria for void management & select schedule types for batch class
+*******************************************************************************/
+-->
+
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId,force:appHostable" 
+                access="global" 
+                extends="c:GlAp_LightningComponentBase"
+                controller="VmUl_RecordSelectionCtrlr">
+    
+    <!-- Component Variables -->
+    <aura:attribute access="public" name="voidManagementProcess" type="object"/>
+    <aura:attribute access="private" name="immediate" 	type="boolean" default="true" />
+    <aura:attribute access="private" name="daily" 		type="boolean" default="false" />
+    <aura:attribute access="private" name="weekly" 		type="boolean" default="false" />
+    <aura:attribute access="private" name="monthly" 	type="boolean" default="false" />
+    <aura:attribute access="private" name="day" 		type="boolean" default="true" />
+    <aura:attribute access="private" name="dayInput" 	type="String"/>
+    <aura:attribute access="private" name="dayPicklist" type="String[]"/>
+    <aura:attribute access="private" name="selectTime" 	type="String" />   
+    <aura:attribute access="private" name="resultLimit" type="Integer" default="2000"/>       
+    
+    <aura:attribute access="private" name="Monday"    type="boolean" default="false" />
+    <aura:attribute access="private" name="Tuesday"   type="boolean" default="false" />
+    <aura:attribute access="private" name="Wednesday" type="boolean" default="false" />
+    <aura:attribute access="private" name="Thursday"  type="boolean" default="false" />
+    <aura:attribute access="private" name="Friday"    type="boolean" default="false" />
+    <aura:attribute access="private" name="Saturday"  type="boolean" default="false" />
+    <aura:attribute access="private" name="Sunday"    type="boolean" default="false" />
+    
+    <!-- Init Method -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <!-- UI Block -->
+    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium" style="width:75%;margin-left:12.5%;">
+        
+        <!-- Notification Component to show Toast (Error/Info) -->
+        <c:GlAp_NotificationComponent aura:id="notification"/>        
+        
+        <div class="slds-container_fluid">
+            <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.VmDr_FieldCriteriaLabel}</b></div>           
+        </div>       
+        
+        <div class="slds-border_top slds-border_bottom slds-border_right slds-border_left">
+            <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element slds-size_1-of-1">
+                    <div class="slds-form-element__group">
+                        <aura:iteration items="{!v.fieldSetResultsList}" var="FSR">	
+                            <div class="slds-form-element__row">                                
+                                <div class="slds-form-element slds-p-right_medium slds-p-left_medium slds-size_1-of-1">
+                                    <c:GlAp_GenericField aura:id="{!FSR.fieldName}"
+                                                         recordId=""
+                                                         object="{!v.voidManagementProcess}" 
+                                                         objectName="{!v.namespace + 'VoidManagementProcess__c'}"     
+                                                         fieldType="{!FSR.fieldType}" 
+                                                         fieldName="{!FSR.fieldName}" 
+                                                         editMode="true" 
+                                                         isEditable="{!and(FSR.isEditable, true)}" 
+                                                         picklistValues="{!FSR.pickListValues}" 
+                                                         label="{!FSR.fieldLabel}"  
+                                                         required="{! if(FSR.fieldName == (v.namespace + $Label.c.VmUI_VoidManagementProfile),true,false)}" 
+                                                         helpText="{!FSR.fldHelpText}"/>
+                                </div>
+                            </div>
+                        </aura:iteration>
+                        <div class="slds-form-element__row">                             
+                            <div class="slds-form-element slds-p-right_medium slds-p-left_medium slds-size_1-of-1" >
+                                <c:GlAp_InputField type="number" label="Result Limit" required="true" value="{!v.resultLimit}"/>
+                            </div>
+                        </div>
+                    </div>                    
+                </fieldset>
+            </div>
+        </div>
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+        <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+        
+        <div class="slds-container_fluid">
+            <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.VmDr_ScheduleLabel}</b></div>
+        </div>  
+        <div class="slds-border_top slds-border_bottom slds-border_right slds-border_left">            
+            <aura:if isTrue="{!v.immediate != true}">
+                <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                <div class="slds-form slds-form_compound">
+                    <fieldset class="slds-form-element">                        
+                        <div class="slds-form-element__control">
+                            <span class="slds-label">
+                                <div class="slds-form-element__row">
+                                    <div class="slds-form-element slds-size_1-of-6">
+                                        <label class="slds-form-element__label"><span class="slds-required">*</span>{!$Label.c.VmDr_TimeLabel}</label>
+                                    </div>
+                                    <div class="slds-form-element slds-size_1-of-6">
+                                        <lightning:select class="slds-col" label="" variant="label-hidden" name="selectTime"  value="{!v.selectTime}" >
+                                            <option value="">--None--</option>
+                                            <option text="00:00" value="00"/>
+                                            <option text="01:00" value="01"/>
+                                            <option text="02:00" value="02"/>
+                                            <option text="03:00" value="03"/>
+                                            <option text="04:00" value="04"/>
+                                            <option text="05:00" value="05"/>
+                                            <option text="06:00" value="06"/>
+                                            <option text="07:00" value="07"/>
+                                            <option text="08:00" value="08"/>
+                                            <option text="09:00" value="09"/>
+                                            <option text="10:00" value="10"/>
+                                            <option text="11:00" value="11"/>
+                                            <option text="12:00" value="12"/>
+                                            <option text="13:00" value="13"/>
+                                            <option text="14:00" value="14"/>
+                                            <option text="15:00" value="15"/>
+                                            <option text="16:00" value="16"/>
+                                            <option text="17:00" value="17"/>
+                                            <option text="18:00" value="18"/>
+                                            <option text="19:00" value="19"/>
+                                            <option text="20:00" value="20"/>
+                                            <option text="21:00" value="21"/>
+                                            <option text="22:00" value="22"/>
+                                            <option text="23:00" value="23"/>                                        
+                                        </lightning:select>                            
+                                    </div>
+                                </div>
+                            </span>                            
+                        </div>
+                    </fieldset>
+                </div>
+            </aura:if>     
+            
+            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+            
+            <div class="slds-grid ">
+                <div class="slds-size_1-of-8">                    
+                    <fieldset class="slds-form-element">
+                        <legend class="slds-form-element__legend slds-form-element__label"></legend>
+                        <div class="slds-form-element__control">
+                            <span class="slds-radio">
+                                <input type="radio" id="immediate" name="immediate" checked="{!v.immediate}" onchange="{!c.setImmediate}"/>
+                                <label class="slds-radio__label" for="immediate">
+                                    <span class="slds-radio_faux"></span>
+                                    <span class="slds-form-element__label">{!$Label.c.VmDr_ImmediateLabel}</span>
+                                </label>
+                            </span>
+                            <span class="slds-p-top_xx-small slds-radio">
+                                <input type="radio" id="daily" name="daily" checked="{!v.daily}" onchange="{!c.setDaily}"/>
+                                <label class="slds-radio__label" for="daily">
+                                    <span class="slds-radio_faux"></span>
+                                    <span class="slds-form-element__label">{!$Label.c.VmDr_DailyLabel}</span>
+                                </label>
+                            </span>
+                            <span class="slds-p-top_xx-small slds-radio">
+                                <input type="radio" id="weekly" name="weekly" checked="{!v.weekly}" onchange="{!c.setWeekly}"/>
+                                <label class="slds-radio__label" for="weekly">
+                                    <span class="slds-radio_faux"></span>
+                                    <span class="slds-form-element__label">{!$Label.c.VmDr_WeeklyLabel}</span>
+                                </label>
+                            </span>
+                            <span class="slds-p-top_xx-small slds-radio">
+                                <input type="radio" id="monthly" name="monthly" checked="{!v.monthly}" onchange="{!c.setMonthly}"/>
+                                <label class="slds-radio__label" for="monthly">
+                                    <span class="slds-radio_faux"></span>
+                                    <span class="slds-form-element__label">{!$Label.c.VmDr_MonthlyLabel}</span>
+                                </label>
+                            </span>
+                        </div>
+                    </fieldset>
+                </div>
+                
+                <div class="slds-border_right"/> 
+                
+                <aura:if isTrue="{!v.weekly == true}">                    
+                    <div class="slds-p-left_x-small slds-size_7-of-8">
+                        <fieldset class="slds-form-element">
+                            <legend class="slds-form-element__legend slds-form-element__label">{!$Label.c.VmDr_RecurEveryWeekLabel}</legend>
+                            <div class="slds-form-element__control">
+                                <div class="slds-checkbox_button-group">
+                                    <span class="slds-button slds-checkbox_button">
+                                        <input type="checkbox" id="monday" name="checkbox" value="on" />
+                                        <label class="slds-checkbox_button__label" for="monday">
+                                            <span class="slds-checkbox_faux">{!$Label.c.VmDr_MondayLabel}</span>
+                                        </label>
+                                    </span>
+                                    <span class="slds-button slds-checkbox_button">
+                                        <input type="checkbox" id="tuesday" name="checkbox" value="on" />
+                                        <label class="slds-checkbox_button__label" for="tuesday">
+                                            <span class="slds-checkbox_faux">{!$Label.c.VmDr_TuesdayLabel}</span>
+                                        </label>
+                                    </span>
+                                    <span class="slds-button slds-checkbox_button">
+                                        <input type="checkbox" id="wednesday" name="checkbox" value="on" />
+                                        <label class="slds-checkbox_button__label" for="wednesday">
+                                            <span class="slds-checkbox_faux">{!$Label.c.VmDr_WednesdayLabel}</span>
+                                        </label>
+                                    </span>
+                                    <span class="slds-button slds-checkbox_button">
+                                        <input type="checkbox" id="thursday" name="checkbox" value="on" />
+                                        <label class="slds-checkbox_button__label" for="thursday">
+                                            <span class="slds-checkbox_faux">{!$Label.c.VmDr_ThursdayLabel}</span>
+                                        </label>
+                                    </span>
+                                    <span class="slds-button slds-checkbox_button">
+                                        <input type="checkbox" id="friday" name="checkbox" value="on" />
+                                        <label class="slds-checkbox_button__label" for="friday">
+                                            <span class="slds-checkbox_faux">{!$Label.c.VmDr_FridayLabel}</span>
+                                        </label>
+                                    </span>
+                                    <span class="slds-button slds-checkbox_button">
+                                        <input type="checkbox" id="saturday" name="checkbox" value="on" />
+                                        <label class="slds-checkbox_button__label" for="saturday">
+                                            <span class="slds-checkbox_faux">{!$Label.c.VmDr_SaturdayLabel}</span>
+                                        </label>
+                                    </span>
+                                    <span class="slds-button slds-checkbox_button">
+                                        <input type="checkbox" id="sunday" name="checkbox" value="on" />
+                                        <label class="slds-checkbox_button__label" for="sunday">
+                                            <span class="slds-checkbox_faux">{!$Label.c.VmDr_SundayLabel}</span>
+                                        </label>
+                                    </span>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </aura:if>
+                
+                <aura:if isTrue="{!v.monthly == true}">
+                    <div class="slds-size_7-of-8">
+                        <div class="slds-grid">
+                            <div class="slds-size_1-of-6">
+                                <span class="slds-p-left_x-small slds-radio">
+                                    <input type="radio" id="day" name="day" checked="{!v.day}"/>
+                                    <label class="slds-radio__label" for="day">
+                                        <span class="slds-radio_faux"></span>
+                                        <span class="slds-form-element__label">{!$Label.c.VmDr_DayLabel}</span>
+                                    </label>
+                                </span>                                
+                            </div>
+                            <div class="slds-size_1-of-6">
+                                <lightning:select class="slds-col" label="" variant="label-hidden" name="dayInput"  value="{!v.dayInput}" >
+                                    <aura:iteration items="{!v.dayPicklist}" var="dayList">
+                                        <option text="{!dayList}" value="{!dayList}"/>                                                
+                                    </aura:iteration>
+                                    <option text="Last" value="last"/>                                             
+                                </lightning:select>
+                            </div>
+                            <div class="slds-size_1-of-6">
+                                <label>{!$Label.c.VmDr_ofEveryMonthLabel}</label>
+                            </div>
+                        </div>
+                    </div>
+                </aura:if>
+            </div>
+        </div>
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        
+        <div class="slds-container_fluid" align="right">
+            <lightning:button variant="brand" label="Run" onclick="{!c.runReport}" />
+        </div>        
+    </div>    
+</aura:component>

@@ -1,0 +1,54 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Mohit Tayal
+@date      		05 April 2018
+@description 	Component used in community to recieve payment from the logged in account 
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,forceCommunity:availableForAllPageTypes"
+                access="global" 
+                controller="CmAp_MakePaymentCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+
+    <aura:attribute access="public" type="boolean" name="showMakePayment" default="false" />
+    <aura:attribute access="private" type="Integer" name="payAmount" default="0" />
+    
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    <aura:registerEvent name="refreshMyPayments" type="c:CmAp_RefreshEvent" />
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <section class="slds-modal slds-slide-up-open slds-modal_small" role="dialog" tabindex="-1" aria-labelledby="wizardHeading">
+        <div class="slds-modal__container modal_top_padding">
+            
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.myPayments}">
+                    <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                    <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                </button>
+                
+                <!-- Page Header -->
+                <h2 id="wizardHeading" class="slds-text-heading_medium slds-hyphenate">
+                    {!$Label.c.CmAp_MakePaymentHeader}
+                </h2>
+            </header>
+            
+            <div class="slds-modal__content slds-p-around_medium">
+                <c:GlAp_NotificationComponent aura:id="notification"/>
+                <div style="background-color: #ecebea;">
+                    <c:GlAp_OutputField value="{!$Label.c.CmAp_PleaseEnter}" type="text"/>
+                </div>
+                <div class="slds-m-top_xx-small"> </div>
+                <c:GlAp_OutputField value="{!$Label.c.CmAp_PaymentAmount}" type="text"/>
+                <div class="slds-m-top_x-small"> </div>
+                <div class="slds-form-element">
+                    <c:GlAp_InputField value="{!v.payAmount}" type="currency"/>		<!-- Sudhir: AT-2343 -->
+                </div>
+            </div>
+            <div class="slds-modal__footer">
+                <button type="button" class="slds-button slds-button--neutral" onclick="{!c.makePayments}">{!$Label.c.CmAp_PayButton}</button>
+            </div>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop--open"></div>
+</aura:component>

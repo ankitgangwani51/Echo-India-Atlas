@@ -1,0 +1,122 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		01 Aug 2018
+@description 	Bill Transfer Lightning Component
+@param			
+*******************************************************************************/
+-->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:lightningQuickAction"
+                access="global"                
+                extends="c:GlAp_LightningComponentBase"
+                controller="CuAp_BillTransferCtrlr">    
+    
+    <!-- Component variables -->
+    <aura:attribute name="isActive" type="Boolean" default="false"/>  
+    <aura:attribute access="global" name="sObjectName" type="String" />     
+    <aura:attribute access="private" type="List" name="recordList" />
+    <aura:attribute access="private" type="List" name="fieldList" />
+    <aura:attribute access="public" type="String" name="buttonName" default="Bill Transfer "  description="The button name to start the Wizard"/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <aura:attribute access="private" type="object" name="objBillTransfer" />
+    <aura:attribute access="public" type="String" name="accId"/>
+    <aura:attribute access="private" type="List" name="BillFieldsForGeneric"/>
+    <aura:attribute access="private" type="string"  name="selectedContractId" />
+    
+    <!--<aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>-->
+    
+    <aura:if isTrue="{!v.isActive}">        
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding"> 
+                
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>   
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.CuAp_BillTransfer}</h2>
+                </header>
+                <div class="slds-modal__content ">	
+                    <!-- Notifications -->
+                    <c:GlAp_NotificationComponent aura:id="notification"/>
+                    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                    <div class="slds-p-around--medium">
+                        {!$Label.c.CuAp_BillsToTransfer}
+                    </div>
+                    <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+                        <div class="slds-card__body slds-scrollable_y medium_height slds-p-around--medium">
+                            <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                                <!-- <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" showSelectButton="true"  / -->
+                                <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false" forceEditMode="false"  />
+                                
+                            </div>
+                            <aura:if isTrue="{!v.recordList.length == 0}">
+                                <div class="slds-align_absolute-center">
+                                    {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                                </div>
+                            </aura:if>
+                        </div>
+                    </article>
+                    
+                    <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium ">
+                            <div class="slds-form slds-form_compound slds-p-top_medium slds-m-bottom_large">
+                                <fieldset class="slds-form-element slds-size_1-of-1">
+                                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                                    <div class="slds-form-element__group">
+                                        <aura:iteration items="{!v.BillFieldsForGeneric}" var="locOccFields">
+                                            <div class="slds-form-element__row">          
+                                                <aura:iteration items="{!locOccFields}" var="locOccField">
+                                                    <div class="slds-form-element slds-size_1-of-2">
+                                                        {!$Label.c.CuAp_ContractToTransferTo}
+                                                        <c:GlAp_CustomLookup objectName="{!v.namespace + 'BillingContract__c'}"
+                                                                             field_API_text="Id, Name"
+                                                                             limit="10"
+                                                                             field_API_search="Name"
+                                                                             field_API_FilterText="{!v.namespace + 'AccountName__c'}"
+                                                                             field_API_FilterVal="{!v.accId}" 
+                                                                             lookupIcon="custom:custom2" 
+                                                                             placeholder="{!$Label.c.CuAp_SearchText}"
+                                                                             selItem="{!v.selectedContractId}"
+                                                                             />
+                                                    </div>
+                                                    <div class="slds-form-element slds-size_1-of-2">
+                                                        <c:GlAp_GenericField aura:id="{!locOccField.fieldLabel}" 
+                                                                             object="{!v.objBillTransfer}" 
+                                                                             objectName="{!locOccField.parentObject}" 
+                                                                             fieldType="{!locOccField.fieldType}" 
+                                                                             fieldName="{!locOccField.fieldName}" 
+                                                                             editMode="{!locOccField.isEditable}" 
+                                                                             isEditable="{!locOccField.isEditable}"
+                                                                             picklistValues="{!locOccField.pickListValues}" 
+                                                                             label="{!locOccField.fieldLabel}" 
+                                                                             required= "true"
+                                                                             />
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                </div>                
+                <footer class="slds-modal__footer">
+                    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                    <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                </footer>       
+            </div>
+        </section>
+        
+        <div class="slds-backdrop slds-backdrop--open"></div> 
+        
+        <aura:set attribute="else">
+            <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doActive}" />        	
+        </aura:set>
+        
+    </aura:if>
+</aura:component>

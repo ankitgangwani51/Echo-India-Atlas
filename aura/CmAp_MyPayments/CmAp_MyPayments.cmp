@@ -1,0 +1,57 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Mohit Tayal
+@date      		29 March 2018
+@description 	Component used in Community to display the payment details. 
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,forceCommunity:availableForAllPageTypes"
+                access="global" 
+                controller="CmAp_MyPaymentsCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    <aura:attribute access="public" type="boolean" name="showMakePayment" default="false" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="refreshMyPayments" event="c:CmAp_RefreshEvent" action="{!c.doInit}"/>
+   
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+        <!-- Component Header-->
+        <aura:if isTrue="{!v.showMakePayment}">
+            <div class="">
+                <c:CmAp_MakePayment showMakePayment="{!v.showMakePayment}"/>
+            </div>						
+            <aura:set attribute="else">
+                <!-- HEADING AREA -->
+                <div class="slds-media slds-no-space slds-grow">
+                    <div class="slds-media__figure">
+                        <span class="slds-avatar slds-avatar_large">
+                            <img src="{!$Resource.myPaymentsLogo}" title="{!$Label.c.CmAp_MyPaymentsHeader}" />  
+                        </span>
+                    </div>
+                    <div class="slds-media__body">
+                        <p class="slds-text-title--caps slds-line-height--reset">{!$Label.c.CmAp_MyPaymentsTitle}</p>
+                        <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="My Accounts">{!$Label.c.CmAp_MyPaymentsHeader}</h1>
+                    </div>
+                </div>
+                <div class="slds-modal__header">
+                    <div class="slds-float_right">
+                        <lightning:button variant="brand" label="{!$Label.c.CmAp_MakePaymentButon}" onclick="{!c.makePayment}" />
+                    </div>
+                </div>
+                <div class="slds-box--x-small slds-theme--inverse" onclick="{!c.selectChange}">
+                    {!$Label.c.CmAp_PaymentInformation}
+                </div>
+                <div class="slds-p-bottom_small"></div>
+                <!-- / HEADING AREA -->
+                <div class="slds-container_fluid"> 
+                    <!--div class="slds-p-top_medium slds-p-bottom_medium"></div-->
+                    <c:GlAp_GenericTable tableName="{!$Label.c.MyPaymentsTableName}" fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false" forceEditMode="false"/>
+                </div>
+            </aura:set>
+        </aura:if>
+    </div>
+</aura:component>

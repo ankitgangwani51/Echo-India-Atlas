@@ -1,0 +1,293 @@
+<!-- 
+/******************************************************************************
+@author          Accenture: Shivangi Gaur
+@date            18-09-2017
+@description     Lightning component for custom page for HH account/contact create and edit.
+*******************************************************************************/
+-->
+<aura:component implements="force:appHostable,forceCommunity:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction,flexipage:availableForAllPageTypes" 
+                access="global" 
+                controller="CuAp_HHCustomerPageCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!--Page specific attributes declaration start-->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:attribute access="public" type="List" name="contactFieldList"/>
+    <aura:attribute access="public" type="List" name="accountBillingList"/>
+    <aura:attribute access="public" type="List" name="accountShippingList"/>
+    <aura:attribute access="public" type="List" name="accountInformationList"/>
+    <aura:attribute access="public" type="List" name="accountConsiderationList"/>
+    <aura:attribute access="public" type="List" name="accountAddtionalInfoList"/>
+    <aura:attribute access="public" type="object" name="accountWrapper"/>    
+    
+    <aura:attribute name="manageFields" type="boolean" default="false" description="To open record type selection modal"/>
+    <aura:attribute name="communities" type="boolean" default="false" description="To identify the record is called from communities"/>
+    <aura:attribute name="HHWrapperAccount" type="Account" default="{'sObjectType':'Account'}" />
+    <aura:attribute name="HHWrapperContact" type="Contact" default="{'sObjectType':'Contact'}" />
+    <aura:attribute name="HHWrapperRT" type="RecordType" default="{'Name':'Household Account'}" />
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="preferredContactValues" type="String[]" />
+    <aura:attribute name="recordTypeName" type="String" />
+    <aura:attribute name="salutationValues" type="String[]" />
+    <aura:attribute name="isError" type="boolean" default="false"/>
+    <aura:attribute name="headerValue" type="String"/>
+    <aura:attribute name="isDuplicate" type="boolean" default="false"/>
+    <aura:attribute name="duplicateQuestion" type="String"/>
+    <aura:attribute name="duplicateActionMessage" type="String" default="Press Ok to continue and save the record."/>
+    <aura:attribute name="bypassDup" type="boolean" default="false"/>
+    <!--Page specific attributes declaration end-->
+    
+    <div>		
+        <aura:if isTrue="{!v.manageFields}">   
+            <section class="slds-modal slds-slide-up-open slds-modal_large" role="dialog" tabindex="-1" aria-labelledby="wizardHeading">
+                <div class="slds-modal__container modal_top_padding">
+                    
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                            <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                        xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                            <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                        </button>
+                        
+                        <!-- Page Header -->
+                        <h2 id="wizardHeading" class="slds-text-heading_medium slds-hyphenate">
+                            {!v.headerValue}
+                        </h2>
+                    </header>
+                    <div class="slds-modal__content slds-p-around--medium">
+                        <!--Display duplicate error section if on save duplicate error is received-->
+                        <div class="container">
+                            <aura:if isTrue="{!v.isDuplicate}">   
+                                
+                                <div class="slds-notify_container slds-is-relative slds-p-bottom_x-small">
+                                    <div class="slds-notify slds-notify_alert slds-theme_info" role="alert">
+                                        <div class="slds-notify__content slds-grid">
+                                            <div class="slds-col slds-align-middle slds-p-right_medium">
+                                                <span class="slds-assistive-text">info</span>
+                                                <h2 class="slds-text-heading_small ">{!v.duplicateQuestion}.<br/>{!v.duplicateActionMessage}<br/>
+                                                    <ul class="slds-text-align_left">
+                                                    </ul>
+                                                </h2>
+                                            </div>
+                                            <div class="slds-col slds-align-middle slds-p-right_medium">
+                                                <lightning:button variant="brand" label="Ok"  onclick="{!c.bypassDuplicates}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </aura:if>
+                        </div>
+                        
+                        <!-- Notification component to show error messages -->
+                        <c:GlAp_NotificationComponent aura:id="notification"/>      
+                        <div class="test-id__section slds-section slds-is-open full forcePageBlockSection forcePageBlockSectionEdit">
+                            <h3 class="slds-section__title slds-theme--shade primaryPaletteBorder test-id__section-header-container">
+                                <span class="test-id__section-header-title section-header-title slds-p-horizontal--small slds-truncate">
+                                    {!$Label.c.CuAp_AccountInformationSection}
+                                </span>
+                            </h3>
+                            <div class="test-id__section-content slds-section__content section__content" align="left">
+                                <div class="slds-form slds-is-editing" role="list">
+                                    <div class="slds-grid full ">
+                                        <div class="slds-has-flexi-truncate slds-p-horizontal_medium full  " role="listitem">
+                                            
+                                            <div class="slds-form-element__group  slds-p-bottom_large"> 
+                                                <aura:iteration items="{!v.contactFieldList}" var="contactFields">      
+                                                    <aura:iteration items="{!contactFields}" var="contactField">
+                                                        <div class="slds-form-element slds-size_1-of-1">
+                                                            <c:GlAp_GenericField object="{!v.HHWrapperContact}" 
+                                                                                 objectName="{!contactField.parentObject}"
+                                                                                 fieldType="{!contactField.fieldType}" 
+                                                                                 fieldName="{!contactField.fieldName}" 
+                                                                                 editMode="true" 
+                                                                                 isEditable="true" 
+                                                                                 picklistValues="{!contactField.pickListValues}"
+                                                                                 listView="true"
+                                                                                 label="{!contactField.fieldLabel}" 
+                                                                                 />
+                                                        </div>
+                                                    </aura:iteration>
+                                                </aura:iteration>
+                                            </div>  
+                                        </div>
+                                        <div class="slds-has-flexi-truncate slds-p-horizontal_medium full  " role="listitem">
+                                            <c:GlAp_GenericField aura:id="RecordTypeName" 
+                                                                 object="{!v.HHWrapperRT}" 
+                                                                 objectName="RecordType" 
+                                                                 fieldType="text"
+                                                                 fieldName="Name"
+                                                                 editMode="true"
+                                                                 isEditable="false"
+                                                                 picklistValues="" 
+                                                                 label="Account Record Type"
+                                                                 helpText="Select Household or Non Household record type."
+                                                                 />
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        
+                        <div class="test-id__section slds-section slds-is-open full forcePageBlockSection forcePageBlockSectionEdit" >
+                            <h3 class="slds-section__title slds-theme--shade primaryPaletteBorder test-id__section-header-container">
+                                <span class="test-id__section-header-title section-header-title slds-p-horizontal--small slds-truncate">
+                                    {!$Label.c.CuAp_AddressInformationSection}
+                                </span>
+                            </h3>
+                            <div class="test-id__section-content slds-section__content section__content" align="left">
+                                <div class="slds-form slds-is-editing" role="list">
+                                    <div class="slds-grid full forcePageBlockSectionRow">
+                                        <div class="slds-has-flexi-truncate slds-p-horizontal_medium full forcePageBlockItem forcePageBlockItemEdit" role="listitem">
+                                            <div class="slds-form-element slds-form-element_edit slds-hint-parent slds-p-vertical_xx-small">
+                                                <div class="slds-form-element__control">
+                                                    <fieldset>
+                                                        <legend class="label inputLabel uiLegend-top form-element__label uiLegend">
+                                                            <span>
+                                                                {!$Label.c.CuAp_BillingAddressLegend}
+                                                            </span>
+                                                        </legend>
+                                                        &nbsp; &nbsp;
+                                                        <div class="slds-form-element__group  slds-p-bottom_large"> 
+                                                            <aura:iteration items="{!v.accountBillingList}" var="accountBillingField">      
+                                                                <div class="slds-form-element slds-size_1-of-1">
+                                                                    <c:GlAp_GenericField object="{!v.HHWrapperAccount}" 
+                                                                                         objectName="{!accountBillingField.parentObject}"
+                                                                                         fieldType="{!accountBillingField.fieldType}" 
+                                                                                         fieldName="{!accountBillingField.fieldName}" 
+                                                                                         editMode="true" 
+                                                                                         isEditable="true" 
+                                                                                         picklistValues="{!accountBillingField.pickListValues}"
+                                                                                         listView="true"
+                                                                                         label="{!accountBillingField.fieldLabel}" 
+                                                                                         />
+                                                                </div>
+                                                            </aura:iteration>
+                                                        </div>
+                                                        
+                                                    </fieldset>
+                                                </div>
+                                            </div>										
+                                        </div>
+                                        <div class="slds-has-flexi-truncate slds-p-horizontal_medium full forcePageBlockItem forcePageBlockItemEdit" role="listitem">
+                                            <div class="slds-form-element slds-form-element_edit slds-hint-parent slds-p-vertical_xx-small">
+                                            </div>															 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="test-id__section slds-section slds-is-open full forcePageBlockSection forcePageBlockSectionEdit" >
+                            <h3 class="slds-section__title slds-theme--shade primaryPaletteBorder test-id__section-header-container">
+                                <span class="test-id__section-header-title section-header-title slds-p-horizontal--small slds-truncate">
+                                    {!$Label.c.CuAp_ContactInformationSection}
+                                </span>
+                            </h3>
+                            
+                            <div class="slds-form slds-form_compound slds-p-top_medium" align="left">
+                                <fieldset class="slds-form-element slds-size_1-of-1">
+                                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                                    <div class="slds-form-element__group slds-p-left_medium slds-p-right_medium">
+                                        <aura:iteration items="{!v.accountInformationList}" var="accountInformationFields">
+                                            <div class="slds-form-element__row">
+                                                <aura:iteration items="{!accountInformationFields}" var="accountInformationField">
+                                                    <div class="slds-form-element slds-size_1-of-2">
+                                                        <c:GlAp_GenericField aura:id="{!accountInformationField.fieldLabel}" 
+                                                                             object="{!v.HHWrapperAccount}" 
+                                                                             objectName="{!accountInformationField.parentObject}" 
+                                                                             fieldType="{!accountInformationField.fieldType}" 
+                                                                             fieldName="{!accountInformationField.fieldName}" 
+                                                                             editMode="true" 
+                                                                             isEditable="{!accountInformationField.isEditable}" 
+                                                                             picklistValues="{!accountInformationField.pickListValues}"
+                                                                             label="{!accountInformationField.fieldLabel}" />
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            
+                        </div>
+                        <div class="test-id__section slds-section slds-is-open full forcePageBlockSection forcePageBlockSectionEdit" >
+                            <h3 class="slds-section__title slds-theme--shade primaryPaletteBorder test-id__section-header-container">
+                                <span class="test-id__section-header-title section-header-title slds-p-horizontal--small slds-truncate">
+                                    {!$Label.c.CuAp_ConsiderationSection}
+                                </span>
+                            </h3>
+                            
+                            
+                            <div class="slds-form slds-form_compound slds-p-top_medium" align="left">
+                                <fieldset class="slds-form-element slds-size_1-of-1">
+                                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                                    <div class="slds-form-element__group slds-p-left_medium slds-p-right_medium">
+                                        <aura:iteration items="{!v.accountConsiderationList}" var="accountConsiderationFields">
+                                            <div class="slds-form-element__row">
+                                                <aura:iteration items="{!accountConsiderationFields}" var="accountConsiderationField">
+                                                    <div class="slds-form-element slds-size_1-of-2">
+                                                        <c:GlAp_GenericField aura:id="{!accountConsiderationField.fieldLabel}" 
+                                                                             object="{!v.HHWrapperAccount}" 
+                                                                             objectName="{!accountConsiderationField.parentObject}" 
+                                                                             fieldType="{!accountConsiderationField.fieldType}" 
+                                                                             fieldName="{!accountConsiderationField.fieldName}" 
+                                                                             editMode="true" 
+                                                                             isEditable="{!accountConsiderationField.isEditable}" 
+                                                                             picklistValues="{!accountConsiderationField.pickListValues}"
+                                                                             label="{!accountConsiderationField.fieldLabel}" />
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </fieldset>
+                            </div>	
+                        </div>
+                        
+                        <div class="test-id__section slds-section slds-is-open full forcePageBlockSection forcePageBlockSectionEdit" >
+                            <h3 class="slds-section__title slds-theme--shade primaryPaletteBorder test-id__section-header-container">
+                                <span class="test-id__section-header-title section-header-title slds-p-horizontal--small slds-truncate">
+                                    {!$Label.c.CuAp_AdditionalInformationSection}
+                                </span>
+                            </h3>
+                            <div class="slds-form slds-form_compound slds-p-top_medium" align="left">
+                                <fieldset class="slds-form-element slds-size_1-of-1">
+                                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                                    <div class="slds-form-element__group slds-p-left_medium slds-p-right_medium">
+                                        <aura:iteration items="{!v.accountAddtionalInfoList}" var="accountAddtionalInfoFields">
+                                            <div class="slds-form-element__row">
+                                                <aura:iteration items="{!accountAddtionalInfoFields}" var="accountAddtionalInfoField">
+                                                    <div class="slds-form-element slds-size_1-of-2">
+                                                        <c:GlAp_GenericField aura:id="{!accountAddtionalInfoField.fieldLabel}" 
+                                                                             object="{!v.HHWrapperAccount}" 
+                                                                             objectName="{!accountAddtionalInfoField.parentObject}" 
+                                                                             fieldType="{!accountAddtionalInfoField.fieldType}" 
+                                                                             fieldName="{!accountAddtionalInfoField.fieldName}" 
+                                                                             editMode="true" 
+                                                                             isEditable="{!accountAddtionalInfoField.isEditable}" 
+                                                                             picklistValues="{!accountAddtionalInfoField.pickListValues}"
+                                                                             label="{!accountAddtionalInfoField.fieldLabel}" />
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </fieldset>
+                            </div>	
+                        </div> 
+                    </div>
+                    
+                    <div class="slds-modal__footer">
+                        <button type="button" class="slds-button slds-button--neutral" onclick="{!c.closeModal}">{!$Label.c.GlUt_Cancel}</button>
+                        <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </aura:if>
+    </div>    
+</aura:component>

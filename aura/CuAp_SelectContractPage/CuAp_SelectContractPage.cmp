@@ -1,0 +1,79 @@
+<!-- 
+/******************************************************************************
+@author          Accenture: Shivangi Gaur
+@date            13-11-2017
+@description     WS7: Select Contract
+                 Wizard screen to select/ create contract.                                       
+@param           wizardprop.accountId
+@return          wizardprop.contractId
+*******************************************************************************/
+-->
+<aura:component access="global" 
+                controller="CuAp_SelectContractCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+	
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+	
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+
+	<!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<c:GlAp_Notifier aura:id="notifier"/>
+	<!-- END: REQUIRED BY FRAMEWORK -->
+    
+	<!-- Page specific attributes -->
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="accountId"/>
+    <aura:attribute access="private" type="String" name="moveInDate"/>
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    <aura:attribute access="private" type="Boolean" name="showContracts" default="false"/>
+    <aura:attribute access="private" type="String" name="selectedOption" default="{!$Label.c.CuAp_CreateContractOption}"/>
+	<aura:attribute access="private" type="String" name="rowId"/>
+    <aura:attribute access="private" type="Boolean" name="isRowSelected" default="false"/>
+	
+    <!--Page specific handlers -->
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <div class="slds-grid slds-grid--align-center slds-wrap slds-p-bottom_medium">
+                <fieldset class="slds-form-element">
+                    <div class="slds-form-element__control">
+
+                        <!-- Option to create new contract -->
+                        <span class="slds-radio">
+                            <input type="radio" id="newContract" name="options" value="on" onchange="{!c.hideContracts}" checked="{!!v.showContracts}"/>
+                            <label class="slds-radio__label" for="newContract">
+                                <span class="slds-radio_faux"></span>
+                                <span class="slds-form-element__label">{!$Label.c.CuAp_CreateContractOption}</span>
+                            </label>
+                        </span>
+
+                        <!-- Option to select an existing contract -->
+                        <span class="slds-radio">
+                            <input type="radio" id="existingContract" name="options" value="on" onchange="{!c.showContracts}" checked="{!v.showContracts}"/>
+                            <label class="slds-radio__label" for="existingContract">
+                                <span class="slds-radio_faux"></span>
+                                <span class="slds-form-element__label">{!$Label.c.CuAp_SelectExistingContractOption}</span>
+                            </label>
+                        </span>
+                    </div>
+                </fieldset>
+            </div>
+
+            <!-- Condition to show existing contracts table once second option is selected -->   
+            <aura:if isTrue="{!v.showContracts}">
+	            <div class="slds-container_fluid">
+                	<c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true"/>
+                </div>
+            </aura:if>
+        </div>
+    </aura:if>
+	
+</aura:component>

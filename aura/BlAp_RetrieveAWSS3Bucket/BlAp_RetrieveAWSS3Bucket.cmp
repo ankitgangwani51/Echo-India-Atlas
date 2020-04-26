@@ -1,0 +1,77 @@
+<!--
+/**********************************************************************************************
+@author         Echo: Sudhir Kumar
+@date           18 May 2018
+@description    BlAp_retrieveAWSS3Bucket diplays PDF Templates & XSLT Documents from AWS S3.
+***********************************************************************************************/
+-->
+
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" access="global"
+                extends="c:GlAp_LightningComponentBase"
+                controller="BlAp_RetrieveAWSS3BucketCtrl">
+	
+    <aura:attribute  name="pdfTemplateS3BucketFieldList"  type="List" access="private" />
+    <aura:attribute  name="pdfTemplateS3BucketObjectList" type="List" access="private" />
+    <aura:attribute  name="pdfTemplateNameList" type="List" access="public" default="[]" />
+    
+    <aura:attribute  name="xsltDocumentS3BucketFieldList" type="List" access="private" />
+    <aura:attribute  name="xsltDocumentS3BucketObjectList" type="List" access="private" />
+    <aura:attribute  name="xsltDocumentNameList" type="List" access="public" default="[]" />
+    
+    <aura:attribute  name="uploadXSLT" type="Boolean" default="false" access="public" />
+    <aura:attribute  name="isSetTab" type="Boolean" default="false" access="public" />
+    <aura:attribute  name="uploadPdf" type="Boolean" default="false" access="public" />
+    <aura:attribute  name="isShowPdfComponent" type="Boolean" default="false" access="public" />
+    <aura:attribute  name="isShowXSLTComponent" type="Boolean" default="false" access="public" />
+    <aura:attribute  name="selectedTabName" type="String" access="private" />
+    <aura:handler    name="change" value="{!v.isSetTab}" action="{!c.isSetTabChange}"/>
+
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowSelectEvent}"/>   
+    <aura:handler name="refreshEvent" event="c:BlAp_RefreshEvent" action="{!c.handleRefreshEvent}"/>  
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}" />
+    
+    <div class="slds-modal__content slds-p-around--medium">	
+        <!-- Notifications -->
+        <c:GlAp_NotificationComponent aura:id="notifier"/>
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    </div>
+    
+    <!-- Upload PDF Template -->
+    <aura:if isTrue="{!v.isShowPdfComponent}" >
+        <c:BlAp_UploadPdfTemplate isActive="{!v.isShowPdfComponent}" pdfTemplateList="{!v.pdfTemplateNameList}"   xsltDocumentList="{!v.xsltDocumentNameList}"/>
+    </aura:if>
+    
+    <!-- Upload XSLT Document -->
+    <aura:if isTrue="{!v.isShowXSLTComponent}">
+        <c:BlAp_UploadXsltDocument isActive="{!v.isShowXSLTComponent}" xsltDocumentList="{!v.xsltDocumentNameList}"  isSetTab ="{!v.isSetTab}"/>
+    </aura:if>
+    
+    <!-- View PDF Template/ XSLT Documents -->
+    <aura:if isTrue="{!not(and(v.uploadPdf,v.uploadXSLT))}">
+        <div class="slds-grid">
+            <div class="slds-tabs--scoped">
+                <ul class="slds-tabs--scoped__nav" role="tablist">
+                    <li aura:id="pdfTemplates" onclick="{!c.fetchPdfTemplates}" class="slds-tabs--scoped__item slds-text-title--caps slds-active customClassForTab" title="{!$Label.c.PDF_Templates}" role="presentation" ><a class="slds-tabs--scoped__link" href="javascript:void(0);"  role="tab" tabindex="0" aria-selected="false" aria-controls="tab-default-1" id="{!$Label.c.PDF_Templates}">{!$Label.c.PDF_Templates}</a></li>
+                    <li aura:id="xsltDocuments" onclick="{!c.fetchXsltDocuments}" class="slds-tabs--scoped__item slds-text-title--caps customClassForTab" title="{!$Label.c.XSLT_Documents}" role="presentation"><a class="slds-tabs--scoped__link" href="javascript:void(0);"  role="tab" tabindex="-1" aria-selected="true" aria-controls="tab-default-2" id="{!$Label.c.XSLT_Documents}">{!$Label.c.XSLT_Documents}</a></li>
+                </ul>
+                <div name="tabdataName" aura:id="pdfTemplatesDataId" id="tab-default-1" class="slds-tabs--scoped__content slds-show customClassForTabData" role="tabpanel" aria-labelledby="PDF_Templates">
+                    <div class="slds-p-around_medium slds-float_right">
+                        <lightning:button  variant="brand" label="{!$Label.c.GlUt_New}" title="New PDF Template" onclick="{!c.newPdfUploadRequest}" />
+                    </div>
+                    <div class="slds-container_fluid">
+                        <c:GlAp_GenericTable tableName="Pdf Template Table" fieldList="{!v.pdfTemplateS3BucketFieldList}" recordList="{!v.pdfTemplateS3BucketObjectList}" showSelect="false" forceEditMode="false"/>
+                    </div>
+                </div>
+                <div name="tabdataName" aura:id="xsltDocumentsDataId" id="tab-default-2" class="slds-tabs--scoped__content slds-hide customClassForTabData" role="tabpanel" aria-labelledby="XSLT_Documents">
+                    <div class="slds-p-around_medium slds-float_right">
+                        <lightning:button variant="brand" label="{!$Label.c.GlUt_New}" title="New XSLT Template" onclick="{!c.newXsltUploadRequest}" />
+                    </div>
+                    <div class="slds-p-top_large"/>
+                    <div class="slds-container_fluid">
+                        <c:GlAp_GenericTable tableName="XSLT Document Table" fieldList="{!v.xsltDocumentS3BucketFieldList}" recordList="{!v.xsltDocumentS3BucketObjectList}" showSelect="false" forceEditMode="false"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

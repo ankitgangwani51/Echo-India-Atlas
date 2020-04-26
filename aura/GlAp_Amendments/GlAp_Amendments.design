@@ -1,0 +1,20 @@
+<design:component label="GlAp_Amendments">
+    <design:attribute name="objectName" label="Object API Name" description="The related object API name"/>
+    <design:attribute name="parentField" label="Parent Field" description="The API name of the field on the object 
+    		(corresponds to the id which is passed in as the record id so that related records can be retrieved)"/>	
+    <design:attribute name="detailListFields" label="Detail List Fieldset" description="The name of the related list detail fieldset"/>
+    <design:attribute name="activeFieldName" label="Parent 'Active' Field Name" description="The API name of a field on the parent object that indicates 
+    																				that the parent record is active and related records can be added 
+    																				(should be boolean/checkbox).
+																					If left blank, all records will be considered active "/>
+    <design:attribute name="newRecordFields" label="New Record Fieldset" description="The name of the new record fieldset"/>
+    <design:attribute name="selfLookupField" label="Amended By Field" description="The API name of the amended by field"/>
+    <design:attribute name="amendAllAfter" label="Amend All After" description="Checked if the amendment is for all records 
+    																		after the record selected"/>
+    <!-- Changes for AT-3317 starts Here -->
+    <design:attribute name="deleteOption" label="Delete Record Option" description="Provision to show delete button while amendments"/>
+    <!-- Changes for AT-3317 Ends Here -->
+    <!-- Changes for AT-3398 starts Here -->
+    <design:attribute name="showNew" label="Show New Button" description="Provision to Show/Hide new button on Amendments" default="true"/>
+    <!-- Changes for AT-3398 Ends Here -->
+</design:component>

@@ -1,0 +1,111 @@
+<!-- 
+/******************************************************************************
+@author			Accenture: Ashish Tiwari
+@date      		04-Sep-2017
+@description 	WS2: Select location
+    Wizard screen to select the Move In Date/Move Out Date as part of the Move In Wizard
+ 
+    wizardprop			
+@param			location (Location__c) - Id
+@return			location (Location__c) - NumberOfOccupants
+    locationOccupantToMoveIn (LocationOccupant__c)
+    locationOccupantsToMoveOut (List<LocationOccupant__c>)
+    moveInDate (Date)
+    
+@revision(s)	16 Jan 2018, P Dixon - cleanup, fix NumberOfOccupants not being written
+@revision(s)	22 Oct 2018, Tarun Gupta - Added event to handle occupancy type changes for AU Move In
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                controller="CuAp_MoveInDatePageCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!--Page specific attributes -->
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="locationId" default="" />
+    <aura:attribute access="private" type="List" name="fieldList" />
+    <aura:attribute access="private" type="List" name="recordList" /> 
+    <aura:attribute access="private" type="Boolean" name="occupantsFound" default="false" />
+    <!--<aura:attribute access="private" type="Location__c" name="locationDetails" default="{sobjectType: 'Location__c'}"/>-->
+    <aura:attribute access="private" name="locationDetails" type="object"/>
+    <aura:attribute access="private" name="selectedMoveIn" type="object"/>
+    <!--<aura:attribute access="private" type="LocationOccupant__c" name="selectedMoveIn" default="{sobjectType: 'LocationOccupant__c'}"/>-->
+    <aura:attribute access="private" type="String[]" name="locationsRef" />
+    <aura:attribute access="private" type="String[]" name="occupancyType"/>
+    <aura:attribute access="private" type="Date" name="latestOccMoveInDate"/> <!--AT-2150, Move out date of previous occupier must be after move in date of the previous occupier--> 
+    <aura:attribute access="private" type="Date" name="lastOccMoveOutDate"/> <!-- MT 02-08-2018 AT - 2336 Move in date should be greater than the previous occupier move out date -->
+    
+    <aura:attribute access="private" type="List" name="locationOccupantFields"/>
+    <aura:attribute access="private" type="Boolean" name="isHHAccount"/>
+    
+    <aura:registerEvent name="passValueEvent" type="c:PyAp_PassValueEvent" /> <!-- AT-4037 -->
+    
+    <aura:if isTrue="{!v.isActive}">
+        
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <div class="slds-tile__detail slds-p-bottom_small">
+                <dl class="slds-dl_inline slds-p-bottom_x-small">
+                    <!-- <dt class="slds-dl_inline__label slds-text-heading_small">{!$Label.c.CuAp_LocationRef}</dt>
+                    <dd class="slds-dl_inline__detail">{!v.locationsRef[0]}</dd> AT-3174 -->
+                    <dt class="slds-dl_inline__label slds-text-heading_small">{!$Label.c.CuAp_LocationAddress}</dt>
+                    <dd class="slds-dl_inline__detail">{!v.locationsRef[0]}</dd>
+                    <!-- <dd class="slds-dl_inline__detail">{!v.locationsRef[1]}</dd> AT-3174 //AT-3174 Used 1st element of Array instead of 2nd as Location Ref field was removed -->
+                </dl>
+            </div>
+            
+            <aura:if isTrue="{!v.occupantsFound}">
+                <div class="slds-p-bottom_medium">
+                    <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_CurrentLocationOccupants}</legend>
+                </div>
+                <div class="slds-container_fluid">
+                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/> 
+                </div>
+            </aura:if>
+            
+            <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element slds-size_1-of-1">
+                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                    <div class="slds-form-element__group">
+                        <aura:iteration items="{!v.locationOccupantFields}" var="locOccFields">
+                            <div class="slds-form-element__row">          
+                                <aura:iteration items="{!locOccFields}" var="locOccField">
+                                    <div class="slds-form-element slds-size_1-of-2">
+                                        
+                                        <c:GlAp_GenericField aura:id="{!locOccField.fieldLabel}" 
+                                                             object="{!(locOccField.parentObject == v.namespace + 'LocationOccupant__c' 
+                                                             			?  v.selectedMoveIn 
+                                                             			: v.locationDetails)}" 
+                                                             objectName="{!locOccField.parentObject}" 
+                                                             fieldType="{!locOccField.fieldType}" 
+                                                             fieldName="{!locOccField.fieldName}" 
+                                                             editMode="{!locOccField.isEditable}" 
+                                                             isEditable="{!locOccField.isEditable}"
+                                                             picklistValues="{!locOccField.pickListValues}" 
+                                                             label="{!locOccField.fieldLabel}" 
+                                                             />
+                                    </div>
+                                </aura:iteration>
+                            </div>
+                        </aura:iteration>
+                    </div>
+                </fieldset>
+            </div>
+            
+            
+        </div>
+    </aura:if>
+</aura:component>

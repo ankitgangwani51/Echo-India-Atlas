@@ -1,0 +1,54 @@
+<!-- 
+/******************************************************************************
+@author          Accenture: Shivangi Gaur
+@date            12-09-2017
+@description     Lightning component for custom account record type selection page.
+@Revisions		 AT-3981 ,Tarun, Security review changes , modified to remove inline style and <h2> tags
+*******************************************************************************/
+-->
+<aura:component controller="CuAp_HHAccountOverrideComponentCtrlr" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:actionOverride" access="global">
+
+	<!--Page specific attributes declaration start-->
+	<aura:handler name="init" value="{!this}" action="{!c.fetchListOfRecordTypes}"/>
+	<aura:attribute name="lstOfRecordType" type="String[]" default="Household Account" description="Displays list of account record types"/>
+	<aura:attribute name="isOpen" type="boolean" default="true" description="To open record type selection modal"/>
+	<!--Page specific attributes declaration end-->
+	
+	<aura:if isTrue="{!v.isOpen}">   
+		<div role="dialog" tabindex="-1" aria-labelledby="header43" class="slds-modal slds-fade-in-open">
+			<div class="slds-modal__container">
+				<div class="slds-modal__header">
+					<button class="slds-button slds-modal__close slds-button--icon-inverse" title="Close" onclick="{!c.closeModal}" description="Button/icon to close the modal">
+						{!$Label.c.CuAp_ModalCloseIcon}<span class="slds-assistive-text">{!$Label.c.CuAp_CancelButton}</span>
+					</button>
+                    <div class="slds-text-heading--medium">{!$Label.c.CuAp_NewAccount}</div> 
+				</div>			
+				<div class="slds-modal__content slds-p-around--medium">
+					<div class="slds-grid slds-wrap slds-grid_pull-padded-medium">					
+						<div class="slds-size--1-of-3 slds-col slds-p-horizontal_medium slds-form-element__label slds-m-left_xx-large" >
+                            <span class="slds-form-element__label slds-text-body_small">{!$Label.c.CuAp_RecordTypeSelectionLabel}</span>
+						
+						</div>
+						<div class="slds-size--1-of-2 slds-col slds-p-horizontal_medium ">
+							<div class="slds-form-element__control">
+							<!--Display list of record types for account-->
+								<aura:iteration items="{!v.lstOfRecordType}" var="account">
+									<label class="slds-radio">
+										<input type="radio" aura:id = "tokenRadioAuraId{!account.Name}" value="{!account.Name}" id="{!account.Name}" name="recordTypeRadio" checked="{!account.IsActive}"/>						
+										<span class="slds-radio--faux"></span>
+										<span class="slds-form-element__label slds-m-right_medium slds-p-left_large">{!account.Name}</span>
+									</label><br/>
+								</aura:iteration>
+							</div>
+						</div>
+					</div>			
+				</div>
+				<div class="slds-modal__footer">
+					<lightning:button class="slds-button slds-button--neutral" onclick="{!c.closeModal}">{!$Label.c.CuAp_CancelButton}</lightning:button>
+					<lightning:button class="slds-button slds-button--brand" onclick="{!c.createRecord}">{!$Label.c.CuAp_NextButton}</lightning:button>
+				</div>
+			</div>
+		</div>
+		<div class="slds-backdrop slds-backdrop--open"></div>
+	</aura:if>
+</aura:component>

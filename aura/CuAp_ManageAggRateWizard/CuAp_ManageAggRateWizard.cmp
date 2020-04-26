@@ -1,0 +1,43 @@
+<!--
+/******************************************************************************
+@author              Accenture: Vivek Chauhan
+@date                15/11/2017
+@description         This component is wizardcontroller for Agreed rate navigation.                                  
+@param               none
+@return              none
+@Revisions	   AT-3987,Tarun , modified class name as per security review changes
+*******************************************************************************/
+-->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="CuAp_ManageAggRateWizardCtrlr"
+                extends="c:GlAp_WizardTemplate">
+    
+    <!-- set Wizard variables -->
+    <aura:set attribute="title" value="{!$Label.c.CuAp_AgreedRateWizardHeader}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.CuAp_AgreedRateButton}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+	<aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->
+
+	<!-- event handlers -->
+	<!-- have to be here as we can't override an inherited helper method from the parent -->
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    
+	<aura:attribute name="isMultiContract" type="boolean"/>
+	<aura:attribute name="activeContractList" type="List"/>    
+    
+    <!-- Wizard pages -->
+    <!-- WS1 - Select Device to Remove -->            
+    <c:CuAp_SelectContract aura:id="selectContractPage" isActive="{!v.stepName == $Label.c.CuAp_AgreedRatePathPage1}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS2 - Enter Final Reading -->
+    <c:CuAp_AgreedRatePage aura:id="AgreedRatePage" isActive="{!v.stepName == $Label.c.CuAp_AgreedRatePathPage2}" wizardprop="{!v.wizardprop}"/>
+    
+    
+    <!-- Navigation -->
+	<div class="slds-container_fluid">
+	    <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+	</div> 
+    
+</aura:component>

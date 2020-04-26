@@ -1,0 +1,16 @@
+<aura:component >
+    <aura:attribute access="public" name="oObject" type="sObject" />
+  	<!--Register the component level event-->
+   	<aura:registerEvent name="oSelectedObjectEvent" type="c:GlAp_SelectedLookupRecordEvent"/>
+   	  
+    <li role="presentation">
+        <span class="slds-lookup__item-action slds-media slds-media--center" id="lookup-option-350" role="option">
+         <div class="slds-media__body">
+          <div class="slds-input-has-icon slds-input-has-icon--right">
+            <c:GlAp_Svg class="slds-input__icon" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/standard-sprite/svg/symbols.svg#account'}" />                   
+            <div class="slds-lookup__result-text"><a onclick="{!c.selectObject}">{!v.oObject.Name}</a></div>
+          </div>
+        </div>    
+        </span>
+    </li>
+</aura:component>

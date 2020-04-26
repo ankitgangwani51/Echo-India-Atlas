@@ -1,0 +1,7 @@
+<design:component label="GlAp_RelatedRecordList">
+    <design:attribute name="objectName" label="Object API Name" description="The related object API name"/>
+    <design:attribute name="parentField" label="Parent Field" description="The API name of the field on the object 
+    		(corresponds to the id which is passed in as the record id so that related records can be retrieved)"/>	
+    <design:attribute name="detailListFields" label="Detail List Fieldset" description="The name of the related list detail fieldset"/>
+    <design:attribute name="filter" label="Filter" description="filter used to restrict the records displayed"/>
+</design:component>

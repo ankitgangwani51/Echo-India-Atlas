@@ -1,0 +1,18 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" 
+		access="global" >
+		
+    <aura:attribute access="public" name="locationId" type="Id"/>
+    <aura:attribute access="public" name="startStep" type="boolean" default="true" />
+    <aura:attribute access="public" name="endStep" type="boolean" default="false" />
+    
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}"/>
+    
+    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+        <div class="slds-container_fluid">
+        Supply Service Work In Progress.........
+        </div>
+        <div class="slds-container_fluid">
+            <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+        </div>
+    </div>
+</aura:component>

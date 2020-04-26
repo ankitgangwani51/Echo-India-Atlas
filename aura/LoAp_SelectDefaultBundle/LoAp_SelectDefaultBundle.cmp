@@ -1,0 +1,57 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Mohit Tayal
+@date      		02-Feb-2018
+@description 	This is the 7th screen in Device Management and displays the bundles 
+                available on the supply point. User can sele t the bundle to update the
+                default available bundle on the supply point.
+@param			wizardprop - need it from the previous screen to fetch the wizard type
+							 and to set the variables to be returned to next screen
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+                controller="LoAp_SelectDefaultBundleCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component Variables -->
+    <aura:attribute access="private" type="List" name="bundleFldList"/>
+    <aura:attribute access="private" type="List" name="bundleRecordsMap"/>
+    <aura:attribute access="private" type="Map" name="availableBundleRecordsMap"/>
+    <aura:attribute access="private" type="Map" name="availableServiceRecordsMap"/>    <!-- VS   AT-2644 -->
+    <aura:attribute access="private" type="Map" name="availableBundleFinalRecordMap" default="{}"/>
+    <!-- MT - AT-2217 29-03-2018 to hold the different table names--> 
+    <aura:attribute access="private" type="Map" name="tableList" default="{}"/>
+    
+    <!-- Page Specific Methods -->
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+    
+    <aura:if isTrue="{!v.isActive}">
+    <!-- Spinner Component -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+    
+	    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+	        <!-- Component Header-->
+	        <div class="slds-modal__header">
+	            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.LoAp_SelectDefaultBundleHeader}</legend>
+	        </div>
+	        <div class="slds-container_fluid">
+	            <aura:iteration items="{!v.bundleRecordsMap}" var="bundleRecord" indexVar="count">
+	                <div class="slds-p-top_medium slds-p-bottom_medium"></div>
+	            	<c:GlAp_GenericTable tableName="{!$Label.c.LoAp_SelectDefaultBundleTableName + count}" fieldList="{!v.bundleFldList}" recordList="{!bundleRecord.value}" showSelect="true" forceEditMode="false"/>
+	            </aura:iteration>
+	        </div>      
+	    </div>
+    </aura:if>
+</aura:component>

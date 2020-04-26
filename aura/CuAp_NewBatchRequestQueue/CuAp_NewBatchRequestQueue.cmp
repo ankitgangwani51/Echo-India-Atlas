@@ -1,0 +1,80 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		29 Jun 2018
+@description 	New Batch Request Queue component
+				Note - This is a framework to allow batch class dependent variations using a modal to select/enter additional parameters
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+		controller="CuAp_NewBatchRequestQueueCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+    <aura:attribute access="public" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="public" type="Id" name="batchClass" description="batch class name - used to create the correct batch request variant"/>
+    
+    <aura:attribute access="private" type="Boolean" name="isActive" default="false"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleNavigationEvent}" description="handler for wizard button events"/>
+    
+	<!-- event used to signal to the parent component that a new record was added -->
+    <aura:registerEvent name="wizEvent" type="c:GlAp_WizardEvent"/>
+
+	<!-- Markup -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+	
+	<!-- New Request Button -->
+	<div class="slds-col slds-no-flex slds-grid slds-align-middle">
+		<div class="slds-grid">
+			<lightning:button variant="neutral" label="{!$Label.c.LoAp_BookExportRequestNewReqBtn}" name="new_Request" onclick="{!c.newRequest}" />
+		</div>
+	</div>
+
+	<aura:if isTrue="{!v.isActive}">
+		
+		<section class="slds-modal slds-slide-up-open slds-modal_medium" 
+				role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+			<div class="slds-modal__container modal_top_padding">
+	        
+				<header class="slds-modal__header">
+					<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.close}">
+				        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+				        		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+						<span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+					</button>
+					<h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">
+						<!-- Heading here -->
+					</h2>
+				</header>
+				
+				<div aura:id="detail" class="slds-modal__content slds-p-around--medium">
+
+					<!-- Notifications -->
+					<c:GlAp_NotificationComponent aura:id="notification"/>
+	
+					<div class="slds-box slds-theme--default slds-container">
+			
+						<!-- Form Section -->
+						<div class="slds-section slds-is-open" aura:id="formSect">
+	
+							<!-- Content -->
+							<div class="slds-section__content">
+								<!-- Content here -->
+	                       	</div>
+	                    </div>
+	
+						<!-- Navigation -->
+						<div class="slds-container_fluid">
+						    <c:GlAp_WizardButtons startStep="true" cancelStep="true" endStep="true"/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		
+		<div class="slds-backdrop slds-backdrop--open"></div>
+	</aura:if>
+
+</aura:component>

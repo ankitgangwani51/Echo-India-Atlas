@@ -1,0 +1,83 @@
+<!-- 
+/******************************************************************************
+@author			Accenture: Ashish Tiwari
+@date      		04-Sep-2017
+@description 	WS2: Select location
+    Wizard screen to select the Move In Date/Move Out Date as part of the Move In Wizard
+ 
+    wizardprop			
+@param			location (Location__c) - Id
+@return			location (Location__c) - NumberOfOccupants
+    locationOccupantToMoveIn (LocationOccupant__c)
+    locationOccupantsToMoveOut (List<LocationOccupant__c>)
+    moveInDate (Date)
+    
+@revision(s)	16 Jan 2018, P Dixon - cleanup, fix NumberOfOccupants not being written
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                controller="CuAp_MoveAmendmentDetailsPageCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!--Page specific attributes -->    
+    <aura:attribute access="private" type="object"  name="locationOccDetails" />
+    <aura:attribute access="private" type="List"    name="locationOccupantFields"/>
+    <aura:attribute access="public"  type="object" 	name="resultContainer"/> 
+    <aura:attribute access="private" type="Boolean" name="editOrNot" default="true"/>
+    <aura:attribute access="private" type="Date"    name="prevOccStartDate"/> 
+    <aura:attribute access="private" type="Date"    name="nextOccEndDate"/>  
+	<aura:attribute access="public"  type="object" 	name="previousOccupier"/>     
+    <aura:attribute access="public"  type="object" 	name="nextOccupier"/>  
+    <aura:attribute access="private" type="Boolean" name="auAmendOrNormalAmend" default="false"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            
+            <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element slds-size_1-of-1">
+                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                    <div class="slds-form-element__group">
+                        <aura:iteration items="{!v.locationOccupantFields}" var="locOccFields">
+                            <div class="slds-form-element__row">          
+                                <aura:iteration items="{!locOccFields}" var="locOccField">
+                                    <div class="slds-form-element slds-size_1-of-2">
+                                        
+                                        <c:GlAp_GenericField aura:id="{!locOccField.fieldLabel}" 
+                                                             object="{!v.locationOccDetails}" 
+                                                             objectName="{!locOccField.parentObject}" 
+                                                             fieldType="{!locOccField.fieldType}"
+                                                             listView="{!locOccField.showLabel}"
+                                                             showLabel="{!locOccField.showLabel}"
+                                                             fieldName="{!locOccField.fieldName}" 
+                                                             editMode="{!locOccField.isEditable}" 
+                                                             isEditable="{!locOccField.fieldName == v.namespace + 'EndDate__c' 
+                                                                     				? v.editOrNot 
+                                                                     				: locOccField.isEditable}"
+                                                             picklistValues="{!locOccField.pickListValues}" 
+                                                             label="{!locOccField.fieldLabel}" 
+                                                             />
+                                    </div>
+                                </aura:iteration>
+                            </div>
+                        </aura:iteration>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

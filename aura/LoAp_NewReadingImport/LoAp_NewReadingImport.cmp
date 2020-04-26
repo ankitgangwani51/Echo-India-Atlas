@@ -1,0 +1,102 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Neha R
+@date      		15 May 2018
+@description 	New Reading Import Request component
+@param			
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:lightningQuickAction"
+                access="global"                
+                extends="c:GlAp_LightningComponentBase"
+                controller="LoAp_NewReadingImportCtrlr">    
+    
+    <!-- Component variables -->
+    <aura:attribute access="public" name="isActive" 			type="Boolean" 	default='false' />  
+    <aura:attribute access="public" name="isUserNotification" 	type="Boolean" 	default='false'/>
+    <aura:attribute access="public" name="importJobName" 		type="String" 	default="" />
+    <aura:attribute access="public" name="fileName" 			type="String" 	default=""/>
+    <aura:attribute access="public" name="userNotify" 			type="String" 	default="" />
+    <aura:attribute access="public" name="userNotifyList" 		type="String[]" />   
+    <aura:attribute access="public" name="showNewReadingImport" type="Boolean"/>
+    <aura:attribute access="public" name="fileDetails" 			type="String" 	default=""/>	<!-- AT-3039 -->
+      
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>    
+    
+    <aura:if isTrue="{!v.isActive}">
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+        		role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding"> 
+                
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                        		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>  
+                    <div class="slds-text-heading_medium slds-hyphenate">{!$Label.c.LoAp_SelectImportFile}</div>
+                </header>
+                
+                <div class="slds-modal__content slds-p-around--medium">	
+					<!-- Notifications -->
+					<c:GlAp_NotificationComponent aura:id="notification"/>
+					<c:GlAp_SpinnerComponent aura:id="spinner"/>
+                    <form class="slds-form slds-form_compound slds-p-top_medium"> 
+                        <div class="slds-form-element slds-p-left_x-small">                                                        
+                            <c:GlAp_InputField type='text'
+                                               value='{!v.importJobName}' 
+                                               label='{!$Label.c.LoAp_ImportJobNameLabel}'/>
+                            
+                        </div>
+                        <div class="slds-form-element slds-p-left_x-small">
+                            <c:GlAp_InputField type='checkbox'
+                                               value='{!v.isUserNotification}'
+                                               label='{!$Label.c.LoAp_NotifyUserLabel}'/>
+                        </div>                         
+                        <aura:if isTrue="{!v.isUserNotification}">
+                            <div class="slds-form-element slds-p-left_x-small">
+                                <lightning:select value='{!v.userNotify}' label='{!$Label.c.LoAp_UserToNotify}'>
+                                    <option value="">{!$Label.c.CuAp_FilterNone}</option>
+                                    <aura:iteration items='{!v.userNotifyList}' var='userNotifyList'>
+                                    	<option value='{!userNotifyList.Id}' text='{!userNotifyList.Name}'></option>
+                                    </aura:iteration>
+                                </lightning:select> 
+                            </div>
+                        </aura:if>
+                        <div class="slds-form-element slds-p-left_x-small"> 
+                            &nbsp; 
+                        </div>
+                        <div class="slds-form-element slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                            <div class="slds-grid slds-p-left_x-small">
+                                   {!$Label.c.LoAp_SelectFile}
+                            </div>
+                            <div class="slds-grid slds-p-left_x-small">
+                                <div class="slds-col">
+                                    <c:GlAp_InputField type="text"
+                                               		   value="{!v.fileName}" />
+                                </div>
+                                <div class="slds-col">                                   
+                                    <div class="upload-btn-wrapper">
+                                        <button class=" btn slds-button slds-button--neutral">{!$Label.c.LoAp_SelectFile}</button>                                        
+                                        <input type="file" accept=".csv" class="file" aura:id="file" onchange="{!c.handleFilesChange}"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-grid">
+                                &nbsp;
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <footer class="slds-modal__footer">
+				    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+					<button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+				</footer>       
+            </div>
+        </section>
+
+		<div class="slds-backdrop slds-backdrop--open"></div> 
+		
+	</aura:if>
+</aura:component>

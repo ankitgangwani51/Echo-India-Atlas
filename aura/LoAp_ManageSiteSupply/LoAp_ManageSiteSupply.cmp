@@ -1,0 +1,174 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		11 March 2019
+@description 	Component to implement the Manage Site Supply
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes"
+                access="global"
+                extends="c:GlAp_LightningComponentBase"
+                controller="LoAp_ManageSiteSupplyCtrlr">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>    
+    <!-- END: REQUIRED BY FRAMEWORK -->  
+    
+    <aura:attribute access="private" 	type="List" 	name="fieldList"/>
+    <aura:attribute access="private" 	type="List" 	name="recordList"/>
+    <aura:attribute access="private" 	type="Date" 	name="effectiveStartDate"/>
+    <aura:attribute access="public" 	type="Boolean" 	name="PercentageWarningPopup" 		default="false"/> 
+    <aura:attribute access="public" 	type="Boolean" 	name="percentageWarningAccepted" 	default="false"/>
+    <aura:attribute access="private" 	type="List"		name="removedSiteSupplyList"/>
+    <aura:attribute access="private" 	type="Boolean"	name="isStartDate" 					default="false"/>
+    
+    <aura:attribute access="public"  type="String" 	name="customLookUpSP" 		description="Supply point custom lookup"/>
+    
+    <aura:registerEvent name="refreshEvent" type="c:CmAp_RefreshEvent"/>
+    <aura:handler name="selectedValueEvent" event="c:GlAp_CustomLookUpEvent" action="{!c.handleCustomLookUpEvent}"/>
+    
+    <aura:if isTrue="{!v.isActive}">        
+        <c:GlAp_Notifier aura:id="notifier"/>
+        
+        <aura:if isTrue="{!v.isStartDate}">
+            <div class="slds-grid slds-wrap slds-p-top_medium slds-p-bottom_medium">
+                <div class="slds-size_1-of-3 slds-p-horizontal_medium">
+                    <lightning:input required="true" type="date" name="effectiveStartDate" label="Effective Start Date" value="{!v.effectiveStartDate}" />
+                </div>
+            </div>
+        </aura:if>
+        
+        <fieldset class="slds-form-element slds-size_1-of-1">
+            <legend class="slds-form-element__label slds-text-title_caps"></legend>
+            <div class="slds-container_fluid">
+                <table class="slds-table slds-table--bordered" style="table-layout: fixed; width:100%;">
+                    <thead>
+                        <tr class="slds-text-title--caps" >
+                            <th scope="col" class="column1" style= "width:5%;">
+                                <div class="slds-truncate" title="Name">{!$Label.c.GlAp_SN}</div>
+                            </th>
+                            <th scope="col" class="column1" >
+                                <div class="slds-truncate" title="Name"> {!$Label.c.GlAp_SupplyPoint}</div>
+                            </th>
+                            <th scope="col" class="column2" >
+                                <div class="slds-truncate" title="Address">{!$Label.c.GlAp_LocationAddress}</div>
+                            </th>
+                            <th scope="col" class="column3" >
+                                <div class="slds-truncate" title="StartDate">{!$Label.c.GlAp_StartDate}</div>
+                            </th>
+                            <!--<th scope="col" class="column4" >
+                                <div class="slds-truncate" title="StartDate">{!$Label.c.GlAp_EndDate}</div> 
+                            </th>-->
+                            <th scope="col" class="column5" >
+                                <div class="slds-truncate" title="PercentSplit">{!$Label.c.GlAp_PercentageSplit}</div>
+                            </th>
+                            <th scope="col" class="column6" style= "width:5%;">
+                                <div class="slds-truncate" title=""></div>
+                            </th>
+                        </tr>
+                    </thead>                    
+                    <tbody>
+                        <aura:iteration items="{!v.recordList}" var="record" indexVar="index">                            
+                            <tr class="slds-text-title--caps" >                               
+                                <td class="slds-hint-parent" id ="{!index}" > 
+                                    {!index +1} 
+                                </td>
+                                <td data-label="Name" style="slds-cell-wrap" > 
+                                    <aura:if isTrue="{!record.recordType != $Label.c.LoAp_SiteSupplyNewRecord}"> 
+                                        <c:GlAp_OutputField label="" value="{!record.objSupplyPoint.Name}" type="text"/>	
+                                        
+                                        <aura:set attribute="else">
+                                            <c:GlAp_CustomLookup objectName="{!v.namespace + 'SupplyPoint__c'}"
+                                                                 field_API_text="{!v.customLookUpSP}" 
+                                                                 limit="10"
+                                                                 field_API_search="Name"
+                                                                 field_API_FilterText=""
+                                                                 field_API_FilterVal=""
+                                                                 lookupIcon="standard:account"  
+                                                                 selItem="{!record.objSupplyPoint}" 
+                                                                 itemFieldValues="{!record.supplyPointFieldValues}"           
+                                                                 placeholder="{!$Label.c.CuAp_SearchText}"
+                                                                 /> 
+                                        </aura:set>
+                                    </aura:if>
+                                </td>                                
+                                <td data-label="Address" style="slds-cell-wrap" >
+                                    <c:GlAp_OutputField label="" value="{!record.strLocationName}" type="text"/>				 
+                                </td>
+                                <td data-label="startDate" style="slds-cell-wrap" >
+                                    <c:GlAp_OutputField label="" value="{!record.startDate}" type="text"/>
+                                    <!--<c:GlAp_InputField value="{!record.startDate}" type="date" label=""/>-->
+                                </td> 
+                                <!--EndDate-->
+                                <!--<td data-label="EndDate" style="slds-cell-wrap" >
+                                </td> -->
+                                <td data-label="PercentSplit" style="slds-cell-wrap" >
+                                    <c:GlAp_InputField type='percent' value='{!record.PercentageSplit}' label=''/>
+                                </td>  
+                                <td data-label="" style="slds-cell-wrap" >
+                                    <button aura:id="{!index +1} " class="slds-button" onclick="{!c.removeRow}" >
+                                        <lightning:icon variant="error" iconName="utility:delete" class="slds-icon slds-icon_small" size="small" alternativeText="icon"/>
+                                    </button>
+                                </td>
+                            </tr> 
+                        </aura:iteration>                        
+                    </tbody>
+                </table>
+            </div>
+            <div class="slds-container_fluid  slds-p-around_medium">
+                <button type="button" 
+                        class="slds-button slds-button--neutral slds-float_right slds-m-bottom_small" 
+                        onclick="{!c.splitPercentage}">
+                    {!$Label.c.LoAp_SplitEvenly}
+                </button>
+                
+                <button type="button" 
+                        class="slds-button slds-button--neutral slds-float_right slds-m-bottom_small" 
+                        onclick="{!c.addMoreRows}">
+                    {!$Label.c.CuAp_AddMoreButton}
+                </button>
+            </div>
+        </fieldset>
+    </aura:if>
+    <aura:if isTrue="{!v.PercentageWarningPopup}">
+        <div>                       
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" 
+                     class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="modal-container slds-modal__container" style="width:30%;">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancelQuestion}">
+                                <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                            xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                            </button>   
+                            <section>
+                                <lightning:icon iconName="action:record"/>
+                                <label>
+                                    <div class="slds-text-body_regular">{!$Label.c.LoAp_PercSplitWarning}</div>
+                                </label>
+                            </section>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">                            
+                            <div class="slds-text-heading_medium">{!$Label.c.GlAp_SaveAlert}</div>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancelQuestion}">{!$Label.c.LoAp_No}</button>
+                            <button type="button" class="slds-button slds-button--brand" onclick="{!c.doAcceptQuestion}">{!$Label.c.LoAp_Yes}</button>
+                        </footer>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+            <div class="slds-modal-backdrop slds-modal-backdrop_open"></div> 
+        </div>
+    </aura:if>
+    
+	
+</aura:component>

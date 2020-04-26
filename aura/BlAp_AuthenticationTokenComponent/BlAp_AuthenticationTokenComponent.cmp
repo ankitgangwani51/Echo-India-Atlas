@@ -1,0 +1,42 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		03 Oct 2017
+@description 	Component to enter an Authentication Token for Heroku webservices, 
+				into a protected custom setting
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes" 
+		extensible="true" access="global" 
+		controller="BlAp_AuthenticationTokenComponentCtrlr">
+
+	<!-- component attributes -->
+    <aura:attribute name="error" type="String" access="private" default="" description="An error message"/>
+    <aura:attribute name="valid" type="Boolean" access="private" default="false" description="token is valid"/>
+
+	<div class="containerComponent">
+		<div class="slds-card slds-card_boundary">
+			<div class="slds-card__header slds-grid">
+				<span class="slds-text-heading_small">{!$Label.c.BlAp_BillingAuthenticationTokenHeading}</span>
+			</div>
+			<div class="slds-card__body slds-card__body_inner">
+
+				<!-- Notifications -->
+				<c:GlAp_NotificationComponent aura:id="notification"/>
+
+				<lightning:layout >
+					<lightning:layoutItem size="12" smallDeviceSize="8" mediumDeviceSize="6" largeDeviceSize="4" padding="around-small">
+						<lightning:input aura:id="token" name="token" onchange="{!c.validate}"
+								label="{!$Label.c.BlAp_AuthenticationTokenPasteInstruction}" />
+					</lightning:layoutItem>
+				</lightning:layout>
+				<lightning:layout >
+					<lightning:layoutItem padding="around-small">
+						<lightning:button variant="brand" label="Submit" disabled="{!!v.valid}" onclick="{!c.handleUpdateToken}" />
+					</lightning:layoutItem>
+				</lightning:layout>
+			</div>
+		</div>
+	</div>
+
+</aura:component>

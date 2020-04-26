@@ -1,0 +1,4 @@
+"City__c,PostalCode__c,State__c,Street__c,LocationType__c,Country__c,Processed__c,BuildDate__c,SupplyPointUsageType__c,VoidProfile__c,LocationSubType__c,ServiceType1__c,ServiceType2__c,DivisionService1__c,DivisionService2__c,WholesalerService1__c,WholesalerService2__c,SpecialInstructions__c,Service1AvailableBundle__c,Service2AvailableBundle__c,Geolocation__latitude__s,Geolocation__longitude__s"
+"City1, SK8 9PK,State1,Street1,Household,India,FALSE,1905-07-08,,HH Void Management Profile,Flat,,,,,,,Test Instructions 1,Water Measured Bundle,Measured Sewerage Bundle - Standard,37.775,-125.25"
+"City2, SK8 10PK,State2,Street2,Household,India,FALSE,1905-07-08,,HH Void Management Profile,Flat,,,,,,,Test Instructions 2,Water Measured Bundle,Measured Sewerage Bundle - Standard,45.55,-160.45"
+"City3, SK8 10PK,State3,Street3,Household,India,FALSE,1905-07-08,,HH Void Management Profile,Flat,,,,,,,Test Instructions 2,NOT AVAILABLE,NOT AVAILABLE,45.55,-160.45"

@@ -1,0 +1,113 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      	    03 Jan 2018
+@description 	Payment Plan Instalment Section
+*******************************************************************************/
+-->
+<aura:component access="global" 
+                controller="CuAp_SetupInstalmentsCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="private" name="fieldList" type="List" />
+    <aura:attribute access="public" name="recordList" type="List" />
+    <aura:attribute access="private" name="deleteRecordList" type="String[]"  />
+    <aura:attribute access="private" name="questionMessage" type="Boolean" default="false"/>
+    <aura:attribute access="private" name="firstinstamt" type="Integer" default="100" />
+    <aura:attribute access="public" type="Boolean" name="budgetPlan" default="false" /> <!--AT-2981-->
+    <aura:attribute access="public" type="Boolean" name="specialPlan" default="false" /> <!--AT-2981-->
+    <aura:attribute access="private" name="remainingInstAmt" type="Integer"/>
+    
+    
+    
+    <aura:attribute access="public" name="totalInstalmentSum" type="Decimal" />
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>     
+    
+    <div class="slds-container_fluid">
+        <div class="slds-form-element slds-p-horizontal_medium slds-form-element__label"> 
+            <div class="slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                
+                <!-- Notification Component to show Toast (Error/Info) -->
+                <c:GlAp_NotificationComponent aura:id="notification"/> 
+                <c:GlAp_Notifier aura:id="notifier"/>
+                
+                <div class="slds-form slds-form_compound slds-p-top_medium slds-p-horizontal_small">
+                    <div class="slds-bold"><h2><b>{!$Label.c.CuAp_PPSetInstAmount}</b></h2></div>
+                    <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                    
+                    <div class="slds-grid slds-wrap"> 
+                        <div class="slds-size_1-of-4">
+                            <c:GlAp_InputField type="currency" label="First Instalment Amount" required="true" value="{!v.firstinstamt}"/>
+                        </div>
+                        
+                        <aura:if isTrue="{!or(v.budgetPlan,v.specialPlan)}">
+                            <div class="slds-size_1-of-4 slds-p-left_xx-large">
+                                <c:GlAp_InputField type="currency" label="Remaining Instalment Amount" required="false" value="{!v.remainingInstAmt}"/>
+                            </div>
+                        </aura:if>
+                        
+                        <div class="slds-size_2-of-4 slds-p-top_medium slds-p-left_xx-large slds-p-top_small">
+            
+                                <lightning:button variant="brand" label="{!$Label.c.CuAp_SpreadRemainingLabel}" onclick="{!c.doSpreadRemaining}" />
+                                <lightning:button variant="brand" label="{!$Label.c.CuAp_DeleteSelectedLabel}" onclick="{!c.doDeleteSelected}" />
+
+                        </div>  
+                    </div>
+                    
+                    <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                    
+                    <div class="slds-border_top slds-border_bottom slds-border_right slds-border_left">                       
+                        
+                        <div class="slds-container_fluid slds-p-horizontal_small slds-p-around_small">
+                            <div style="height:200px;">
+                                <div class="slds-scrollable_y" style="height:100%;">
+                                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" forceEditMode="true"/> 
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    
+                    
+                    <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <aura:if isTrue="{!v.questionMessage}">
+        <div>
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="modal-container slds-modal__container" style="width:30%;">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancelQuestion}">
+                                <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                            xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                            </button>
+                            <section>
+                                <lightning:icon iconName="action:delete"/>
+                                <label>
+                                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate slds-required"><b>{!$Label.c.CuAp_PPDeleteInstHeader}</b></h2>
+                                </label>
+                            </section>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">                            
+                            
+                            <b><h2>{!$Label.c.CuAp_PPDeleteConfirmation}</h2></b>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancelQuestion}">{!$Label.c.GlAp_CancelButton}</button>
+                            <button type="button" class="slds-button slds-button--brand" onclick="{!c.doDeleteQuestion}">{!$Label.c.CuAp_PPDeleteLabel}</button>
+                        </footer>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-modal-backdrop slds-modal-backdrop_open"></div>
+        </div>
+    </aura:if>
+    
+</aura:component>

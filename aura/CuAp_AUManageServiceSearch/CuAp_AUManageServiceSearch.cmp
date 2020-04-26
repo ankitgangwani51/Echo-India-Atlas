@@ -1,0 +1,78 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Sudhir Kumar
+@date      		03 Apr 2019
+@description 	CLB-28: Component to Search Service based on Contract - CuAp_AUManageServicesSearch.cmp
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId"
+                access="global"
+                extends="c:GlAp_LightningComponentBase"> 
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>    
+    <!-- END: REQUIRED BY FRAMEWORK -->  
+    
+    <aura:handler name="change" value="{!v.recordBy}" action="{!c.setServiceTableBlank}"/>
+    <aura:handler name="change" value="{!v.selectedContractId}" action="{!c.setServiceTableBlank1}"/>
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    
+    <!-- Local Variables --> 
+    <aura:attribute access="private" 	type="Id"  		name="contractId"/>
+    <aura:attribute access="public" 	type="List"		name="oldRecordList"/>
+    <aura:attribute access="public" 	type="List"		name="oldFieldList"/>
+    <aura:attribute access="public" 	type="Id"  		name="recordId" description="Contract Record Id"/>
+    <aura:attribute access="private" 	type="string"	name="selectedContractId"/>
+    <aura:attribute access="private" 	type="String" 	name="recordBy" default="Contract"/>
+    <aura:attribute access="private" 	type="String[]" name="options"/>
+    <aura:attribute access="private" 	type="Boolean" 	name="showSelectButton" default="true"/>
+    <!-- Local Variables --> 
+    
+    <aura:if isTrue="{!v.isActive}">        
+        <c:GlAp_Notifier aura:id="notifier"/>        
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium">
+            <fieldset class="slds-form-element slds-size_1-of-1">
+                <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                <div class="slds-form-element__group">
+                    <div class="slds-form-element__row">
+                        <div class="slds-form-element slds-size_1-of-3">
+                            <c:GlAp_InputField value="{!v.recordBy}" 
+                                               type="select" 
+                                               label="Records By"
+                                               picklistValues="{!v.options}"/>
+                        </div>
+                        <div class="slds-form-element slds-size_1-of-3">
+                            <aura:if isTrue="{!v.recordBy == 'Contract'}">                            
+                                {!$Label.c.CuAp_ContractNoLabel}
+                                <c:GlAp_CustomLookup objectName="{!v.namespace + 'BillingContract__c'}"
+                                                     field_API_text="Id, Name"
+                                                     limit="3"
+                                                     field_API_search="Name"     
+                                                     lookupIcon="standard:contract" 
+                                                     placeholder="{!$Label.c.CuAp_SearchText}"
+                                                     selItem="{!v.selectedContractId}"
+                                                     />  
+                            </aura:if>
+                        </div>
+                        <div class="slds-form-element slds-size_1-of-3"> 
+                            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                            <lightning:button variant="brand" label="Search" name="Search" disabled="false" onclick="{!c.getAllServices}"/>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        <c:GlAp_AUServiceInformation aura:id="getServiceInformation" oldRecordList="{!v.oldRecordList}" oldFieldList="{!v.oldFieldList}" showSelectAll="{!v.showSelectButton}"/>
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+    </aura:if>
+</aura:component>

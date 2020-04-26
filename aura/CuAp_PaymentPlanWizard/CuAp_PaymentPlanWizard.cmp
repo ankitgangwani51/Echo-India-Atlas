@@ -1,0 +1,56 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		15-Jan-2018
+@description 	Component to implement the Payment Plan Set up using the Wizard framework
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="PyAp_PaymentPlanWizardCmpCtrlr"
+                extends="c:GlAp_WizardTemplate">
+    
+    <!-- set Wizard variables -->
+    <aura:set attribute="title" value="{!$Label.c.CuAp_PaymentPlanWizardHeader}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.CuAp_PaymentPlanButton}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+    <aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->
+    
+    <aura:attribute access="private" type="Boolean" name="isCredit" default="false" />
+    <aura:attribute access="private" type="Boolean" name="skipScreens" default="false" />
+    <aura:attribute access="private" type="string" name="selectedPaymentMethod"/>
+    <aura:attribute access="private" type="Map" name="status" description="Wizard status map"/>
+    
+    <!-- event handlers -->
+    <!-- have to be here as we can't override an inherited helper method from the parent -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    <aura:handler name="passValueEvent" event="c:PyAp_PassValueEvent" action="{!c.handlePickListChangeEvent}"/>
+    <!-- Wizard pages -->
+    
+    <!-- WS1 - To check if there is any credit on Contract --> 
+    <c:CuAp_BalanceInCreditPage aura:id="selectCreditPage" isActive="{!v.stepName == $Label.c.CuAp_PaymentPlanPage2}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS2 - Refund\Transfer Credit -->            
+    <c:PyAp_RefundTransferCreditPage aura:id="selectRefundTransferPage" isActive="{!v.stepName == $Label.c.CuAp_PaymentPlanPage3}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!-- WS1 - Set Up Payment Plan -->            
+    <c:CuAp_SetupPaymentPlanPage aura:id="selectPaymentPlanPage" isActive="{!v.stepName == $Label.c.CuAp_PaymentPlanPage1}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!-- WS3/WS2 - Refund\Transfer Credit -->     
+    <c:PyAp_BankAccountDetailPage aura:id="selectBankAccountDetailPage" isActive="{!v.stepName == $Label.c.CuAp_PaymentPlanPage4}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!-- Navigation -->
+    <aura:if isTrue="{!v.skipScreens == false}">
+        <aura:if isTrue="{!v.selectedPaymentMethod == $Label.c.PyAp_DirectDebit}">
+            <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+            <aura:set attribute="else">                
+                <c:GlAp_WizardButtons startStep="true" endStep="true"/>
+            </aura:set>   
+        </aura:if>
+        <aura:set attribute="else">                
+            <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+        </aura:set>
+    </aura:if>
+    
+</aura:component>

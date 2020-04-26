@@ -1,0 +1,95 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Vivek Sethi
+@date      		25-Oct-2018
+@description 	Add Readings Lightning Component on Information Statement 
+                Component used to link selected Readings to the information statement.   
+@param			recordId - Information Statement Id
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:lightningQuickAction" 
+                controller="LoAp_InfoStatementAddReadingsCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    <!-- Component Variables -->
+    <aura:attribute access="public" type="String" name="buttonName" default="{!$Label.c.LoAp_InfoStatementLinkReading}"  description="The button name to start "/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <aura:attribute access="private" type="String" name="readingId"   description="Reading Id "/>
+    <aura:attribute access="private" type="String" name="deviceId"  description="Device Id "/> 
+    <aura:attribute access="private" type="Object" name="devicesfieldList" description="Devicesfields "/> 
+    <aura:attribute access="private" type="Object" name="devicesrecordList"  description="Devices Records"/>
+    <aura:attribute access="private" type="Object" name="readingsFldList"  description="Reading fields "/> 
+    <aura:attribute access="private" type="Object" name="readingsRecordList"  description="Reading Records "/> 
+    <aura:attribute access="private" type="Boolean" name="isActive" default="false"  description="The button name to start "/>
+    
+    <!-- Page Specific Methods -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}" />  
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+   
+    <!-- Passing is active variable on button click of "Debt Transfer" from location page -->
+    <aura:if isTrue="{!v.isActive}"> 
+        <section class="slds-modal slds-slide-up-open slds-modal_medium" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container "> 
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="{!$Label.c.GlUt_Close}" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>  
+                    <div class="slds-text-heading_medium">{!$Label.c.LoAp_InfoStatementLinkReading}</div>
+                </header>
+                <!-- Spinner Component -->
+                <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                    
+                    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+                        <!-- Component Header-->
+                        <div class="slds-modal__header">
+                         	<c:GlAp_NotificationComponent aura:id="notification"/>
+                            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.LoAp_InfoStatementSelectDevice}</legend>
+                        </div>
+                        <!-- Device -->
+                        <div class="slds-container_fluid">
+                            <c:GlAp_GenericTable tableName="{!$Label.c.LoAp_InfoStatementSelectDevice}" fieldList="{!v.devicesfieldList}" recordList="{!v.devicesrecordList}" showSelect="false" forceEditMode="false"/>
+                        </div>
+                        <!-- Readings -->
+                        <div class="slds-modal__header">
+                            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.LoAp_InfoStatementSelectReading}</legend>
+                        </div>
+                        <div class="slds-container_fluid">
+                            <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+                                <div class="slds-card__body slds-scrollable_y medium_height">
+                                    <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                                        <c:GlAp_GenericTable tableName="{!$Label.c.LoAp_InfoStatementSelectReading}" 
+                                                 fieldList="{!v.readingsFldList}" 
+                                                 recordList="{!v.readingsRecordList}" 
+                                                 showSelect="true" 
+                                                 forceEditMode="false"/>                         
+                                    </div>
+                                    <aura:if isTrue="{!v.readingsRecordList.length == 0}">
+                                        <div class="slds-align_absolute-center">
+                                            {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                                        </div>
+                                    </aura:if>
+                                </div>
+                            </article>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                    <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                </footer>     
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop--open"></div> 
+        <!-- Else section to show button only, On click of this button showingn modal box -->
+        <aura:set attribute="else">
+            <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}"  onclick="{!c.doActive}" />        	
+        </aura:set>
+    </aura:if>
+
+</aura:component>

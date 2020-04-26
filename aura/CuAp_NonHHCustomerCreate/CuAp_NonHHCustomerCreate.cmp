@@ -1,0 +1,29 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,lightning:actionOverride" access="global">
+	<aura:attribute name="recordTypeId" type="Id" />
+    <aura:attribute name="headerValue" type="String"/>
+    <!-- Events -->
+  <aura:registerEvent name="saveSuccess" type="force:recordSaveSuccess"></aura:registerEvent>
+  <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+  <aura:handler name="onSaveSuccess" event="force:recordSaveSuccess" action="{!c.onSaveSuccess}"></aura:handler>
+  <div class="slds-container--fluid">
+        <div aria-hidden="false" aura:id="editPanel" id="editPanel" role="dialog" class="slds-modal slds-fade-in-open">
+            <div class="slds-modal__container" style="margin-top: 2cm;width: 70%;max-width: 840px;min-width: 480px;height: 90%;">
+                <div class="slds-modal__header">
+                    <button class="slds-button slds-modal__close slds-button--icon-inverse" title="Close" onclick="{!c.closeModal}" description="Button/icon to close the modal">
+                        {!$Label.c.CuAp_ModalCloseIcon}<span class="slds-assistive-text">{!$Label.c.CuAp_CancelButton}</span>
+                    </button>
+                </div>
+                <div class="slds-modal__content slds-p-around--medium">
+                    <div class="slds-grid slds-wrap slds-grid_pull-padded-medium">
+                        <force:recordEdit aura:id="editRecord" />                
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <lightning:button class="slds-button slds-button--neutral" onclick="{!c.closeModal}">{!$Label.c.CuAp_CancelButton}</lightning:button>  
+                	<lightning:button class="slds-button slds-button--brand" onclick="{!c.saveRecord}">{!$Label.c.CuAp_SaveButton}</lightning:button>       
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</aura:component>

@@ -1,0 +1,81 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Luke Emberton
+@date      		XX XXX 2017
+@description 	Part of Lightning Component Framework
+Revision(s)		13 Jun 2018, P Dixon - added change handler for value as values can be passed after the component initialises
+*******************************************************************************/
+ -->
+<aura:component controller="GlAp_ReferenceFieldCtrlr">
+	
+	<aura:attribute access="public" type="Boolean" name="editMode" default="true" />
+    <aura:attribute access="public" type="Object" name="value"/>
+    <aura:attribute access="public" type="String" name="fieldName"/>
+    <aura:attribute access="public" type="String" name="objectName"/>
+     <aura:attribute access="public" type="Boolean" name="required" default="false" />
+    
+    <aura:attribute access="private" type="String" name="objectType"/>
+    <aura:attribute access="private" type="String" name="urlString"/>
+    <aura:attribute access="private" type="String" name="urlLabel"/>
+   	<aura:attribute access="private" type="sObject" name="selectedRecord" default="{}" description="the selected record"/>
+   	<aura:attribute access="private" type="sObject[]" name="listOfSearchRecords" description="the list of search records returned from apex controller"/>
+   	<aura:attribute access="private" type="String" name="SearchKeyWord"/>
+   	<aura:attribute access="private" type="String" name="Message" default="Search Result.."/>
+    
+   	<!--declare events handlers-->  
+   	<aura:handler name="oSelectedObjectEvent" event="c:GlAp_SelectedLookupRecordEvent" action="{!c.handleComponentEvent}"/>
+   	<aura:handler event="aura:waiting" action="{!c.showSpinner}"/>
+   	<aura:handler event="aura:doneWaiting" action="{!c.hideSpinner}"/>
+   
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.value}" action="{!c.populateReferenceName}"/>		<!-- required in case value gets set after initialisation -->
+	 
+	<aura:if isTrue="{!v.editMode}">
+ 		<div aura:id="searchRes" class="slds-form-element slds-lookup slds-is-close" data-select="single">
+		
+			<!--This part is for display search bar for lookup-->  
+			<div class="slds-form-element__control">
+				<div class="slds-input-has-icon slds-input-has-icon--right">
+					<c:GlAp_Svg class="slds-input__icon slds-show" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#search'}" />
+               
+					<!-- This markup is for when an record is selected -->
+					<div aura:id="lookup-pill" class="slds-pill-container slds-hide">
+						<span class="slds-pill">
+							<span class="slds-pill__label">
+								{!v.selectedRecord.Name}  
+							</span>
+							<button class="slds-button slds-button--icon slds-pill__remove" onclick="{!c.clear}">
+								<c:GlAp_Svg class="slds-button__icon" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+								<span class="slds-assistive-text">Remove</span>
+							</button>
+						</span>
+					</div>
+               
+					<div aura:id="lookupField" class="slds-show">
+						<ui:inputText updateOn="keyup" keyup="{!c.keyPressController}" class="slds-lookup__search-input slds-input " value="{!v.SearchKeyWord}" placeholder="search.."/>
+					</div>   
+				</div>
+			</div>
+         
+			<!--This part is for Display typehead lookup result List-->  
+			<div class="slds-lookup__menu slds" id="lookup-348">
+				<div class="slds-lookup__item--label slds-text-body--small">
+					{!v.Message}
+				</div>
+				<center><ui:spinner aura:id="spinner"/></center>
+				<ul class="slds-lookup__list" role="listbox">
+					<aura:iteration items="{!v.listOfSearchRecords}" var="singleRec">
+						<c:GlAp_CustomLookupResult oObject="{!singleRec}" />
+					</aura:iteration>
+				</ul>
+			</div>
+		</div>
+	   
+		<aura:set attribute="else">
+			<div class="slds-border--bottom">
+				<ui:outputURL aura:id="url" value="{!v.urlString}" label="{!v.urlLabel}"/>
+			</div>    
+		</aura:set>        
+	</aura:if>
+	
+</aura:component>

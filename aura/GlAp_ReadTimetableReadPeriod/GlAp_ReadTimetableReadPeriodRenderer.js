@@ -1,0 +1,4 @@
+({
+	rerender: function(component, helper) {},
+      
+})

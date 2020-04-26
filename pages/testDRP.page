@@ -1,0 +1,8 @@
+<apex:page standardController="DebtRecoveryProcess__c">
+    <script>
+        var oldVal = getOldValue("CurrentStage__c");
+        var newVal= $(this).val();
+        if(oldVal.val() == newVal.val())
+            alert('Updating current stage without checking evaluate checkbox will not create any actions.');
+    </script>
+</apex:page>

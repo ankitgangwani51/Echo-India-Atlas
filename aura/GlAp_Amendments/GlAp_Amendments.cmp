@@ -1,0 +1,65 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		22 Feb 2018
+@description 	Amendment tracking component
+@revision		Echo: Ankit Gangwani, 18 Dec 2018
+				AT-3534 - Modified the placement of the LC to display,
+				Before = Readings -> Services -> Bill Items
+				After = Services -> Readings -> Bill Items
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+		extends="c:GlAp_LightningComponentBase">
+	
+	<!-- Attributes -->
+    <aura:attribute access="global" type="Id" name="recordId" description="parent record Id"/>   
+    <aura:attribute access="global" type="String" name="sObjectName" description="parent record object type"/>
+    <aura:attribute access="global" type="String" name="objectName" description="related object API name"/>
+    <aura:attribute access="global" type="String" name="activeFieldName" description="the name of a field that indicates that the record is active 
+    																				and related records can be added (should be boolean/checkbox)"/>
+    <aura:attribute access="global" type="String" name="parentField" description="API name of the field on the object 
+    																	(corresponds to the id which is passed in as the record id so that related records can be retrieved)"/>
+    <aura:attribute access="global" type="String" name="detailListFields" description="name of the detail list fieldset"/>
+    <aura:attribute access="global" type="String" name="newRecordFields" description="name of the new record fieldset"/>
+    <aura:attribute access="global" type="String" name="selfLookupField" description="The API name of the amended by field"/>
+    <aura:attribute access="global" type="Boolean" name="amendAllAfter" description="true if the amendment should be for all records 
+    																		after the record selected"/>
+    <aura:attribute access="private" type="Object" name="selectedRecord" description="this is the selected record"/>
+    <aura:attribute access="private" type="Boolean" name="recordIsActive" default="true" description="disables the new readings button if false"/>
+    <!-- Changes for AT-3317 starts Here -->
+    <aura:attribute access="global" type="Boolean" name="deleteOption" description="true for delete button visible on amendment screen else false"/>
+    <!-- Changes for AT-3317 Ends Here -->
+    <!-- Changes for AT-3398 starts Here -->
+    <aura:attribute access="global" type="Boolean" name="showNew" description="true for New button visible on amendment screen else false" default="true"/>
+    <!-- Changes for AT-3398 Ends Here -->
+    <!-- Changes for AT-3852 starts Here -->
+     <aura:attribute access="global" type="String" name="screenIdentifier" description="Identifier Main screen "/>
+    <!-- Changes for AT-3852 Ends Here -->
+    <!-- Event handlers -->
+    <aura:handler name="change" value="{!v.selectedRecord}" action="{!c.selectedRecordHandler}"/>
+
+	<div class="slds-container_fluid">
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>        
+               
+        <!-- Related Records -->
+        <c:GlAp_RelatedRecordList aura:id="relatedList" recordId="{!v.recordId}" sObjectName="{!v.sObjectName}" selectedRecord="{!v.selectedRecord}" 
+                                  objectName="{!v.namespace + v.objectName}" detailListFields="{!v.namespace + v.detailListFields}" parentField="{!v.namespace + v.parentField}" 
+                                  filter="{!v.selfLookupField + ' = null'}" showNew="{!v.showNew}" enableNew="{!v.recordIsActive &amp;&amp; v.recordId != null}" 
+                                  newRecordFields="{!v.namespace + v.newRecordFields}" selfLookupField="{!v.namespace + v.selfLookupField}" amendAllAfter="{!v.amendAllAfter}" 
+                                  deleteOption="{!v.deleteOption}"/>	<!-- Changes for AT-3317 AND AT-3398 starts/Ends Here -->							
+        
+        <!-- Services Billed AT-3852-->	
+        <aura:if isTrue="{!v.screenIdentifier == $Label.c.LoAp_LocationDeviceScreen}">       
+            <c:LoAp_ServicesBilledRecordList aura:id="servicesBilledList" recordId="{!v.selectedRecord.Id}" objectName="{!v.namespace + 'Service__c'}" 
+                                             parentField="{!v.namespace + v.objectName}" />          
+        </aura:if>     
+        <!-- Bill Item Amendments -->		<!-- fieldSet name is set by custom label, parentLookup field from parent name -->
+        <c:GlAp_RelatedRecordList aura:id="billItemAmendmentList" recordId="{!v.selectedRecord.Id}" 
+                                  objectName="{!v.namespace + 'BillItemAmendment__c'}" 
+                                  detailListFields="{!v.namespace + $Label.c.CuAp_BillItemAmendmentFieldsetName}" 
+                                  parentField="{!v.namespace + v.objectName}"/>
+    </div>
+
+</aura:component>

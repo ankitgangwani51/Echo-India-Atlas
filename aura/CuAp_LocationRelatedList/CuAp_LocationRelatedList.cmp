@@ -1,0 +1,45 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Pratyush Kumar
+@date      		14 December 2017
+@description 	Component to show all related locations on a contract page
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" 
+		access="global"
+		controller="CuAp_LocationRelatedListCtrlr"
+		extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="public" name="recordId" type="Id" />
+    <aura:attribute name="fieldList" type="List" access="private"/>
+    <aura:attribute name="recordList" type="List" access="private"/>
+    <aura:attribute access="private" type="Map" name="object"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <div class="container forceRelatedListSingleContainer">
+		<article class="slds-card slds-card_boundary forceRelatedListCardDesktop" aria-describedby="header">
+			<div class="slds-card__header">
+				<header class="slds-grid slds-grid_align-spread">
+					<div class="slds-media slds-media--center">
+				
+						<!-- Title with Icon -->
+						<c:GlAp_RecordListTitleWithIcon objectName="{!v.namespace + 'Location__c'}" 
+														object="{!v.object}" numberOfRecords="{!v.recordList.length}"/>
+					</div>
+				</header>
+			</div>
+
+			<div class="slds-card__body slds-scrollable_y medium_height">
+				<div class="useHeaderBarFix forceRelatedListPreviewGrid">
+	            	<c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/>                             
+				</div>
+				<aura:if isTrue="{!v.recordList.length == 0}">
+					<div class="slds-align_absolute-center">
+						{!$Label.c.GlAp_NoItemsToDisplayMsg}
+					</div>
+				</aura:if>
+			</div>
+        </article>
+    </div>
+</aura:component>

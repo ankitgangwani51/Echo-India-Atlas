@@ -1,0 +1,14 @@
+<aura:component implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName"
+		access="global"> 
+    
+    <aura:attribute access="global" type="String" name="badgeLabel" description="badge Label"/>
+	<aura:attribute access="global" type="String" name="badgeColorCode" description="badge Background Color Code"/>
+    <aura:attribute access="global" type="String" name="badgeTextColor" description="badge Foreground Color Code"/> 
+       
+    <div class="containerComponent"> 
+        <div class="slds-badge slds-text-body_regular badge_min_width" 
+        		style="{!'background-color:' + v.badgeColorCode + '; color:' + v.badgeTextColor}">
+			{!v.badgeLabel}
+		</div>
+    </div>
+</aura:component>

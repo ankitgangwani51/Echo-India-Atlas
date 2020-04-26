@@ -1,0 +1,6 @@
+<design:component label="GLAp_GenericFormComponentPageWrapper">
+	<design:attribute name="headerLabel" label="headerLabel" description="Enter Text for the Header" />
+	<design:attribute name="fieldSet" label="fieldSet" description="Enter the Field Set name to control the fields to display" />
+	<design:attribute name="objectType" label="objectType" description="The sObject Type where the fields are taken from" />
+    <design:attribute name="readOnly" label="readOnly" description="Paramter to define if complete section needs to be readonly or not" />
+</design:component>

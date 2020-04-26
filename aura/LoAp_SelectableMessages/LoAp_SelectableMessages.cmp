@@ -1,0 +1,69 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Sudhir Kumar
+@date      		23 Oct 2018
+@description 	AT-3514 I want to add encumbrance details to an Information Statement AT-4134
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasSObjectName,force:hasRecordId,force:lightningQuickAction"
+                access="global"                
+                extends="c:GlAp_LightningComponentBase"
+                controller="GlUt_SelectableMessagesCtrlr">    
+    
+    <!-- Component variables -->
+    <aura:attribute access="public" name="isActive" type="Boolean" default="false"/>  
+	<aura:attribute access="public" name="sObjectName" type="String" />         
+    <aura:attribute access="public" type="String" name="buttonName" default="Selectable Message"  description="The button name to start the Wizard"/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/> 
+    <aura:attribute access="public" type="Id" name="recordId" description="Information Statement record ID"/> 
+    <aura:attribute access="private" type="List" name="recordList" />
+    <aura:attribute access="private" type="List" name="fieldList" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>    
+    
+    <aura:if isTrue="{!v.isActive}">
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+        		role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding"> 
+                
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                        		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>                    
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.LoAp_SelectableMessages}</h2>
+                </header>
+                
+                <div class="slds-modal__content slds-p-around--medium">	
+					<!-- Notifications -->
+					<c:GlAp_NotificationComponent aura:id="notification"/>
+					<c:GlAp_SpinnerComponent aura:id="spinner"/>
+                    <form class="slds-form slds-form_compound slds-p-top_medium"> 
+                        <div class="slds-form-element slds-p-left_x-small">                                                        
+                            <h2 class="slds-p-left_x-small">{!$Label.c.LoAp_SelectableMessages}</h2>                            
+                        </div>
+                        <div class="slds-form-element slds-p-left_x-small">                                                        
+                            &nbsp;                      
+                        </div>
+                        <div class="slds-form-element slds-p-left_x-small">
+                            <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" />
+                        </div>  
+                    </form>
+                </div>                
+                <footer class="slds-modal__footer">
+				    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+					<button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+				</footer>       
+            </div>
+        </section>
+
+		<div class="slds-backdrop slds-backdrop--open"></div> 
+        
+        <aura:set attribute="else">
+            <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doActive}" />        	
+    	</aura:set>
+        
+	</aura:if>
+</aura:component>

@@ -1,0 +1,52 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		11 March 2019
+@description 	Component to implement the Site Supply Operation Screen
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes"
+                access="global"
+                extends="c:GlAp_LightningComponentBase" > 
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->  
+    
+    <aura:attribute name="options" type="List" default="[ {'label': 'Add/Amend Site Supply', 'value': 'isAmend'},
+                                                        {'label': 'End Site Supply', 'value': 'isEnd'}]"/>
+    
+    <aura:attribute name="value" type="String" default="isAmend"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="containerComponent">
+            <div class="slds-card slds-card_boundary">             
+                <div>&nbsp;</div>
+                <div class="slds-grid slds-wrap">
+                    <div class="slds-size--1-of-2 slds-large-size--1-of-2">
+                        <div class="slds-grid slds-grid_align-end slds-p-right_medium">{!$Label.c.BlAp_ChooseOperation} &nbsp;&nbsp;</div>                            
+                    </div>                    
+                    <div class="slds-size--1-of-2 slds-large-size--1-of-2 slds-p-bottom_medium">
+                        <div class="slds-grid_align-center">
+                            <fieldset class="slds-form-element">  
+                                <div class="slds-form-element__control">   
+                                    <lightning:radioGroup aura:id="mygroup" name="options" options="{!v.options }" value="{!v.value }"/>     
+                                </div>
+                                <div class="slds-form-element">&nbsp;</div>
+                                <div class="slds-form-element">&nbsp;</div>
+                            </fieldset>
+                        </div>
+                    </div> 
+                </div>
+            </div>            
+        </div>
+    </aura:if>
+</aura:component>

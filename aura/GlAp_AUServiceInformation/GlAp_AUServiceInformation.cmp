@@ -1,0 +1,46 @@
+<!-- 
+/******************************************************************************
+@author         Echo: Sudhir Kumar
+@date           03 Apr 2019
+@description 	CLB-28: AU Generic component to fetch the service related information while doing service transfer from
+                One contract to another - GlAp_AUServiceInformation.cmp
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                controller="GlAp_AUServiceInformationCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- Component variables -->
+    <aura:attribute name="fieldList"  			 type="List" 	 access="private"      description="latest values of field List"/>
+    <aura:attribute name="recordList" 			 type="List" 	 access="public"       description="latest values of record List"/>
+    <aura:attribute name="resultContainer" 	     type="object" 	 access="private"      description="Wrapper container for field and record List"/>
+    <aura:attribute name="objectName"            type="string"   access="public"       default="{!v.namespace + 'BillingContract__c'}"/>
+    <aura:attribute name="object"                type="Map"      access="private"      description="map of the object properties"/>
+    <aura:attribute name="selectionType"         type="string" 	 access="public"       description="search Type i.e. Contract or Supply Point Specific"/>
+    <aura:attribute name="servicesRemove" 	     type="List"     access="public"       description="selected records in case of remove scenario"/>
+    <aura:attribute name="isChecked"             type="boolean"  access="public"       description="True/False for Select All checkbox"/>
+    <aura:attribute name="showSelectAll"         type="boolean"  access="public"       description="show or not Select All checkbox"/>
+    <aura:attribute name="oldRecordList" 		 type="List" 	 access="public"       description="old values of record List"/>
+    <aura:attribute name="oldFieldList" 		 type="List" 	 access="public"       description="old values of field List"/>
+    <!-- Row Event methods -->
+    <aura:handler name="rowEvent" 		event="c:GlAp_GenericListRowSelectEvent" 	action="{!c.handleRowSelectEvent}"/>
+    <!-- Aura Methods -->
+    <aura:method name="getServiceRelatedInfo" description="Get Service Related Info" action="{!c.getServiceRelatedInfo}">
+        <aura:attribute type="String" name="contractId"  />
+    </aura:method>
+    <div class="slds-form slds-form_compound slds-p-top_medium"/>	
+    <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+        <div class="slds-card__body slds-scrollable_y medium_height">
+            <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                <c:GlAp_GenericTable aura:id="selectServices" tableName="Services" fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" 
+                                     showSelectButton="{!v.showSelectAll}" isChecked="{!v.isChecked}"/>                        
+            </div>
+            <aura:if isTrue="{!v.recordList.length == 0}">
+                <div class="slds-align_absolute-center">
+                    {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                </div>
+            </aura:if>
+        </div>
+    </article>
+</aura:component>

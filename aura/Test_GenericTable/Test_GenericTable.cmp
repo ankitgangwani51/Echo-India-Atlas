@@ -1,0 +1,84 @@
+<aura:component >
+    <aura:attribute name="fieldList" type="List" access="public"/>
+    <aura:attribute name="recordList" type="List" access="public"/>
+    <aura:attribute name="tempRecordList" type="List" access="public"/>
+    <aura:attribute name="forceEditMode" type="boolean" access="public" default="false"/>
+    <aura:attribute name="showSelect"  type="boolean" default="true"/>
+    <aura:attribute name="selectHeader" type="string" default="Select"/> 
+    <aura:attribute name="tableName"  type="string" default="DefaultTable"/>
+    <aura:attribute name="showSelectButton"  type="boolean" default="false"/>
+    <aura:attribute name="isChecked"  type="boolean" default="false" access="public"/>
+    
+    <!-- Pagination -->
+    <aura:attribute name="paginationList" type="List"/>
+    <aura:attribute name="pageSize" type="Integer" default="5"/>
+    <aura:attribute name="totalSize" type="Integer"/>
+    <aura:attribute name="start" type="Integer" />
+    <aura:attribute name="end" type="Integer"/>
+    <aura:attribute name="counter" type="Integer"/>
+    <aura:handler name="change" value="{!v.recordList}" action="{!c.handleRecordsList}"/>
+    <aura:attribute name="spinner"  type="boolean" default="false" access="public"/>
+    <aura:attribute name="pages" type="Integer" />
+    <aura:attribute name="page" type="Integer" default="1"/>
+    
+    
+    <aura:attribute name="first"  type="string" default=""/>
+    <aura:attribute name="last"  type="string" default=""/>
+    <aura:attribute name="next"  type="string" default=""/>
+    <aura:attribute name="previous"  type="string" default=""/>
+    
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    
+    <table class="slds-table slds-table--bordered" style="table-layout: fixed; width:100%;">
+        <thead>
+            <tr class="slds-text-title--caps" >
+                <aura:if isTrue="{!v.showSelect}"> 
+                    <!-- When showSelectButton is true then Select All Button will be displayed instead of Select Text-->
+                    <!-- This button is used to check and uncheck all the table records -->
+                    <!-- Ankit Gangwani, 19 July 2018 -->
+                    <aura:if isTrue="{!and(v.showSelectButton,v.recordList.length > 0)}">
+                        <td role="gridcell" tabindex="0" class="slds-text-align_right" style="width: 3.75rem;">
+                            <div class="slds-checkbox_add-button" onclick="{!c.doEdit}">
+                                <ui:inputCheckbox class="slds-assistive-text" aura:id="selectAll" value="{!v.isChecked}"/>
+                                <label for="selectAll" class="slds-checkbox_faux">
+                                    <span class="slds-assistive-text"></span>
+                                </label>
+                            </div>
+                        </td>
+                        <aura:set attribute="else">
+                            <th scope="col" style="width: 4.5rem;">
+                                <div class="slds-truncate slds-cell-wrap" title="{!v.selectHeader}" ><b>{!v.selectHeader}</b></div>
+                            </th>
+                        </aura:set>
+                    </aura:if>
+                </aura:if>
+                <aura:iteration items="{!v.fieldList}" var="fldItem" indexVar="Idx" >
+                    <th scope="col" class="{!'column' + Idx}" >
+		                <aura:if isTrue="{!!fldItem.buttonField}">
+                        	<div class="slds-truncate slds-cell-wrap" title="{!fldItem.fieldLabel}" ><b>{!fldItem.fieldLabel}</b></div>
+                        </aura:if>
+                    </th>
+                </aura:iteration>
+            </tr>
+        </thead>  
+        <tbody>
+            <aura:iteration items="{!v.paginationList}" var="record" >
+                <c:GlAp_GenericListRow aura:id="GenericRowItem" fieldList="{!v.fieldList}" record="{!record}" showSelect="{!v.showSelect}" forceEditMode="{!v.forceEditMode}" tableName="{!v.tableName}" />
+            </aura:iteration>            
+        </tbody>
+    </table>
+    <div class="slds-grid">        
+        <p class="slds-col slds-text-align_right">Total Records: {!v.recordList.length} | Page {!v.page} of {!v.pages}</p>
+    </div>
+    
+    <div class="slds-container_fluid slds-p-top_medium" align="right">
+        <lightning:button label="{!v.first}" variant="brand" disabled="{!v.start == 0}"  onclick="{!c.handleFirst}" />
+        <lightning:button label="{!v.previous}" variant="brand" disabled="{!v.start == 0}"  onclick="{!c.handlePrevious}" />
+        <lightning:button label="{!v.next}" variant="brand" disabled="{!v.end+1 >= v.totalSize}" onclick="{!c.handleNext}" />
+        <lightning:button label="{!v.last}" variant="brand" disabled="{!v.end+1 >= v.totalSize}"  onclick="{!c.handleLast}" />
+        
+    </div>
+    
+    <div class="slds-p-top_medium"/>
+</aura:component>

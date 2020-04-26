@@ -1,0 +1,66 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Neha R
+@date      		20 Feb 2018
+@description 	Component to display Customer Highlights
+*******************************************************************************/
+-->
+<aura:component implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName"
+				access="global"        
+        		controller="GlUt_CustomerHighlights"> 
+    
+    <!-- Wrapper Class object to get value from controller -->
+    <!--<aura:attribute access="private" type="GlUt_CustomerHighlights.WrapperClass" name="resultValue"/>-->
+    <aura:attribute access="private" type="object" name="resultValue"/>
+     
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    
+    <aura:handler action="{!c.doInit}" event="force:refreshView"/>
+    
+    <aura:if isTrue="{!v.resultValue.isActive}"> 
+        <div class="containerComponent">
+            <div class="slds-card slds-card_boundary ">
+                
+                <div class="slds-card__body slds-card__body_inner">			
+                    <div class="slds-p-bottom_medium"></div> 
+                    
+                    <!-- Actions -->
+                    <div class="slds-grid slds-wrap">	
+                        
+                        <!-- Customer Suppressed -->                       
+                        <aura:if isTrue="{!v.resultValue.isSuppressed}">
+                        	<c:GlAp_GenericBadge badgeLabel="{!v.resultValue.suppressedLabel}" badgeColorCode="{!v.resultValue.suppressedColorCode}" badgeTextColor="{!v.resultValue.suppressedTextColorCode}" />  
+                        </aura:if>
+                        <!-- Pending Bill AT-3377 -->                       
+                        <aura:if isTrue="{!v.resultValue.isBillPending}"> 
+                            <c:GlAp_GenericBadge badgeLabel="{!$Label.c.GlAp_PendingBill}" badgeColorCode="{!$Label.c.GlAp_PendingBillColorCode	}" badgeTextColor="{!$Label.c.GlAp_PendingBillTextColorCode}"/> 
+                        </aura:if>
+                        
+                        <!-- Void Location -->                       
+                        <aura:if isTrue="{!v.resultValue.isVoid}"> 
+                            <c:GlAp_GenericBadge badgeLabel="{!$Label.c.GlAp_VoidLabel}" badgeColorCode="{!$Label.c.GlAp_VoidColorCode}" badgeTextColor="{!$Label.c.GlAp_VoidTextColorCode}"/> 
+                        </aura:if>
+                        <!-- Open Case -->                        
+                        <aura:if isTrue="{!v.resultValue.isOpenCase}">
+                            <c:GlAp_GenericBadge badgeLabel="{!$Label.c.GlAp_OpenCaseLabel}"  badgeColorCode="{!$Label.c.GlAp_OpenCaseColorCode}" badgeTextColor="{!$Label.c.GlAp_OpenCaseTextColorCode}" />
+                        </aura:if>
+                     
+                        <!-- Current Debt Recovery Stage -->                        
+                        <aura:if isTrue="{!v.resultValue.isDRStage}">
+                            <c:GlAp_GenericBadge badgeLabel="{!v.resultValue.dRStageLabel}" badgeColorCode="{!$Label.c.GlAp_DRStageColorCode}" badgeTextColor="{!$Label.c.GlAp_DRStageTextColorCode}" />
+                        </aura:if>
+                        
+                        <!-- Social Tariff -->                        
+                        <aura:if isTrue="{!v.resultValue.isSocialTariff}">  
+                            <c:GlAp_GenericBadge badgeLabel="{!$Label.c.GlAp_SocialTariffLabel}"  badgeColorCode="{!$Label.c.GlAp_SocialTariffColorCode}" badgeTextColor="{!$Label.c.GlAp_SocialTariffTextColorCode}" /> 
+                        </aura:if>     
+                        <!-- Held Bill -->   
+                        <aura:if isTrue="{!v.resultValue.isHeldBill}">  
+                            <c:GlAp_GenericBadge badgeLabel="{!$Label.c.GlAp_HeldBill}"  badgeColorCode="{!$Label.c.GlAp_HeldBillColorCode}" badgeTextColor="{!$Label.c.GlAp_HeldBillTextColorCode}" /> 
+                        </aura:if>   
+                    </div>			
+                </div>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

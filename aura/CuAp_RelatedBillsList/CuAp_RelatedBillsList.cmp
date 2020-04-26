@@ -1,0 +1,60 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		02 Jul 2018
+@description 	Bills Related List component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="CuAp_RelatedBillsListCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+	<!-- Attributes -->
+    <aura:attribute access="public" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="public" type="String" name="detailListFields" default="RelatedListDetails" description="name of the detail list fieldset"/>
+
+    <aura:attribute access="private" type="Map" name="object" description="map of the object properties"/>
+    <aura:attribute access="private" type="List" name="records"/>
+    <aura:attribute access="private" type="List" name="fields"/>
+    <aura:attribute access="private" type="Id" name="selectedBillId"/>
+
+    <!-- Event handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/>
+    
+	<div class="slds-container_fluid">
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+		<!-- TO-DO - include 'View PDF' component with button hidden here and use aura:id to call method from helper -->
+		<!--c.BlAp_GeneratePDFComponent recordId="{!v.selectedBillId}" showButton="false"/-->
+		
+		<!-- Related Records -->
+		<article class="slds-card slds-card_boundary">
+			<div class="slds-card__header">
+                <header class="slds-grid slds-grid_align-spread">
+                    <div class="slds-media slds-media--center">
+                        
+                        <!-- Title with Icon -->
+                        <c:GlAp_RecordListTitleWithIcon objectName="{!v.namespace + 'Bill__c'}" object="{!v.object}" numberOfRecords="{!v.records.length}"/>
+                    </div>
+                </header>
+			</div>
+
+			<!-- Notifications -->
+			<c:GlAp_NotificationComponent aura:id="notification"/>
+
+			<div class="slds-card__body slds-scrollable_y medium_height">
+				<div class="useHeaderBarFix forceRelatedListPreviewGrid">
+					<c:GlAp_GenericTable tableName="{!v.object.labelPlural + 'Table'}" fieldList="{!v.fields}" recordList="{!v.records}" showSelect="false"/>
+				</div>
+				<aura:if isTrue="{!v.records.length == 0}">
+					<div class="slds-align_absolute-center">
+						{!$Label.c.GlAp_NoItemsToDisplayMsg}
+					</div>
+				</aura:if>
+			</div>
+		</article>
+	</div>
+	
+</aura:component>

@@ -1,0 +1,83 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Mohit Tayal
+@date      		24 July 2018
+@description 	Component to change bundle from effective date associated with particular supply point.
+@Revisions	 	
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes" 
+                access="global" 
+                controller="LoAp_ChangeBundleCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleNavigationEvent}" description="handler for navigation button events"/>
+    
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    
+    <aura:attribute name="recordId" type="String" access="public"/>
+    <aura:attribute name="supplyPointId" type="String" access="public"/>
+    <aura:attribute name="objectName" type="String" access="public"/>
+    <aura:attribute name="isActive" type="Boolean" access="public"/>
+    <aura:attribute name="inputFields" type="List" access="private"/>
+    <aura:attribute name="availableBundleRecord" type="Object" access="private"/>
+    <aura:registerEvent name="refresh" type="c:CmAp_RefreshEvent"/>
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <aura:if isTrue="{!v.isActive}">
+        <section class="slds-modal slds-slide-up-open slds-modal_medium" role="dialog" tabindex="-1" aria-labelledby="wizardHeading">
+            <div class="slds-modal__container modal_top_padding">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    
+                    <!-- Page Header -->
+                    <h2 id="wizardHeading" class="slds-text-heading_medium slds-hyphenate">
+                        {!$Label.c.LoAp_ChangeBundleHeader}
+                    </h2>
+                </header>
+                
+                <c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" recordId="{!v.recordId}" sObjectName="{!v.objectName}" showButton="false" 
+                                               calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <c:GlAp_NotificationComponent aura:id="notification"/>
+                    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+                        <div class="slds-container_fluid">            
+                            <div class="slds-form slds-form_compound slds-p-top_medium">
+                                <fieldset class="slds-form-element slds-size_1-of-1">
+                                    <div class="slds-form-element__group">                      
+                                        <aura:iteration items="{!v.inputFields}" var="inputFields">
+                                            <div class="slds-form-element__row">          
+                                                <aura:iteration items="{!inputFields}" var="inputField">
+                                                    <div class="slds-form-element slds-size_1-of-2">                                   
+                                                        <c:GlAp_GenericField aura:id="{!inputField.fieldLabel}" 
+                                                                             object="{!v.availableBundleRecord}" 
+                                                                             objectName="{!inputField.parentObject}" 
+                                                                             fieldType="{!inputField.fieldType}" 
+                                                                             fieldName="{!inputField.fieldName}"
+                                                                             listView="{!inputField.showLabel}"
+                                                                             showLabel="{!inputField.showLabel}"
+                                                                             editMode="{!inputField.isEditable}" 
+                                                                             isEditable="{!inputField.isEditable}"
+                                                                             picklistValues="{!inputField.pickListValues}" 
+                                                                             label="{!inputField.fieldLabel}" 
+                                                                             />
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>                        
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div></div>
+                    <c:GlAp_WizardButtons startStep="true" cancelStep="true" endStep="true"/>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop--open"></div>
+    </aura:if>
+</aura:component>

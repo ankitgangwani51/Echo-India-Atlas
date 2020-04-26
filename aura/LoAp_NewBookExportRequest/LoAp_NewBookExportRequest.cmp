@@ -1,0 +1,93 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		08 May 2018
+@description 	New Book Export Lightning Component
+@param			
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                controller="LoAp_NewBookExportRequestCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="private" type="Boolean" name="isActive" default="false"/>
+
+    <!-- Row Event methods -->
+    <aura:handler name="rowEvent" 		event="c:GlAp_GenericListRowSelectEvent" 	action="{!c.handleRowSelectEvent}"/>
+    <aura:handler name="rowClickEvent"	event="c:GlAp_GenericListRowClickEvent" 	action="{!c.handleRowClickEvent}"/> 
+    
+    <!-- Component variables -->
+    <aura:attribute name="periodId"       type="List" 	    access="public"/>
+    <aura:attribute name="timetableID"    type="List" 	    access="public"/>
+    <aura:attribute name="showSelectBook" type="boolean" 	access="public"      default="false"/>
+    <aura:attribute name="selectedBooks"  type="List"       access="public"/>
+    <aura:attribute name="screenName"     type="string"     access="public"      default="BookExport"/>
+    <aura:attribute name="objectName"     type="string"     access="public"  />
+    
+    <aura:attribute name="mapOfPicklistLabelWithValues"  type="Map" 	    access="public"	/>
+    
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleNavigationEvent}" description="handler for navigation button events"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    
+	<!-- Markup -->
+	
+	<!-- New Request Button -->
+	<div class="slds-col slds-no-flex slds-grid slds-align-middle">
+		<div class="slds-grid">
+			<lightning:button variant="brand" label="{!$Label.c.LoAp_BookExportRequestNewReqBtn}" name="new_Request" onclick="{!c.newRequest}" />
+		</div>
+	</div>
+
+	<!-- New Request Modal -->
+	<aura:if isTrue="{!v.isActive}">
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>
+		
+		<section class="slds-modal slds-slide-up-open slds-modal_medium" 
+				role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+			<div class="slds-modal__container modal_top_padding">
+	        
+				<header class="slds-modal__header">
+					<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.close}">
+				        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+				        		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+						<span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+					</button>
+					<h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">
+						{!$Label.c.LoAp_RequestDataExport}
+					</h2>
+				</header>
+				
+				<div aura:id="detail" class="slds-modal__content slds-p-around--medium">
+					
+					<!-- Notifications -->
+					<c:GlAp_NotificationComponent aura:id="notification"/>
+	
+					<div class="slds-box slds-theme--default slds-container">
+			
+						<!-- Form Section -->
+						<div aura:id="formSect" class="slds-section slds-is-open">
+	
+							<!-- Content -->
+							<div class="slds-section__content">
+	
+		                        <c:GlAp_ReadTimetableReadPeriod />  
+		                        <c:GlAp_SelectBook aura:id="selectbook" periodId="{!v.periodId}" isActive="{!v.showSelectBook}" 
+		                                           mapOfPicklistLabelWithValues="{!v.mapOfPicklistLabelWithValues}" screenName="{!v.screenName}"/>
+	                       	</div>
+						</div>
+	
+						<!-- Navigation -->
+						<div class="slds-container_fluid">
+						    <c:GlAp_WizardButtons startStep="true" cancelStep="true" endStep="true"/>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		
+		<div class="slds-backdrop slds-backdrop--open"></div>
+	</aura:if>
+
+</aura:component>

@@ -1,0 +1,112 @@
+<!-- 
+/******************************************************************************
+@author    	 :	Echo: Swati Mathur
+@Input       :  wizObj.discountType
+@Output		 :  wizObj.discount			
+@date      	 :	09 Jan 2018
+@description : 	Wizard screen to apply discount to the service items
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                controller="CuAp_AddDiscountPageCtrlr"
+                extends="c:GlAp_LightningComponentBase" >
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>    
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->
+    <aura:attribute access="private" name="discountType" type="object"/>
+    <aura:attribute access="private" name="discount" type="object"/>
+    <aura:attribute access="private" name="discountTypeOld" type="object"/>
+    <aura:attribute name="DiscountRecordList" type="List" access="private"/>
+    <aura:attribute access="private" name="dummyContract" type="object"/>
+    <aura:attribute access="private" 	type="string"  	name="selectedConcession"/>
+    <aura:attribute access="private" 	type="string[]"  	name="concessions"/>
+    <aura:attribute access="private" type="List" name="discountFieldsForGeneric"/>
+    <aura:attribute access="private" name="discType" type="Boolean"/>
+    <aura:attribute access="private" name="discTypeBillToBill" type="Boolean"/>
+    <aura:attribute access="private" name="editOrNot" type="Boolean" default="false"/>
+    
+    <aura:handler name="change" value="{!v.dummyContract}" action="{!c.handleCheckboxValueChange}" />
+    <aura:handler name="inputFieldEvent" event="c:GlAp_GenericInputEvent" action="{!c.handleInputChangeEvent}"/>
+    <aura:attribute access="public" name="displayObject" type="object"/>
+    
+    <aura:if isTrue="{!v.isActive}">        
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        <c:GlAp_Notifier aura:id="notifier"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">            
+            <b>{!$Label.c.CuAp_DiscountDetailsLabel}</b> 
+            
+            <div class="slds-container_fluid">
+                <div class="slds-form slds-form_compound slds-p-top_medium">    
+                    <aura:if isTrue="{!v.concessions.length > 0}">
+                        <div class="slds-form-element__group">
+                            <div class="slds-form-element__row">
+                                <div class="slds-form-element slds-size_1-of-2">
+                                    Concession
+                                    <c:GlAp_CustomLookup objectName="{!v.namespace + 'Concession__c'}"
+                                                         field_API_text="Id, Name"
+                                                         limit="3"
+                                                         field_API_search="Name"  
+                                                         lookupIcon="standard:contract" 
+                                                         placeholder="{!$Label.c.CuAp_SearchText}"
+                                                         selItem="{!v.selectedConcession}"
+                                                         field_API_Field_Concatenate="Type__c"
+                                                         field_API_FilterText="Id"
+                                                         field_API_FilterIds="{!v.concessions}"/>
+                                </div>
+                            </div>
+                        </div>
+                    </aura:if>
+                    <fieldset class="slds-form-element slds-size_1-of-1">                        
+                        <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                        <div class="slds-form-element__group">
+                            <aura:iteration items="{!v.discountFieldsForGeneric}" var="locOccFields">
+                                <div class="slds-form-element__row">          
+                                    <aura:iteration items="{!locOccFields}" var="locOccField">
+                                        <div class="slds-form-element slds-size_1-of-2">
+                                            
+                                            <c:GlAp_GenericField aura:id="{!locOccField.fieldLabel}" 
+                                                                 object="{!(locOccField.parentObject == v.namespace +'DiscountType__c' 
+                                                                         ?  v.discountType 
+                                                                         : locOccField.parentObject == v.namespace + 'BillingContract__c' 
+                                                                         ?  v.dummyContract 
+                                                                         : v.discount)}" 
+                                                                 objectName="{!locOccField.parentObject}" 
+                                                                 fieldType="{!locOccField.fieldType}" 
+                                                                 fieldName="{!locOccField.fieldName}" 
+                                                                 listView="{!locOccField.showLabel}"
+                                                                 showLabel="{!locOccField.showLabel}"
+                                                                 editMode="{!locOccField.editMode}"
+                                                                 changeEvent="{!locOccField.changeEvent}"
+                                                                 isEditable="{!v.discTypeBillToBill ? (locOccField.fieldName == v.namespace + 'OverriddenDailyDiscountAmount__c'
+                                                                             ? v.editOrNot
+                                                                             : locOccField.isEditable)
+                                                                             : (v.discType ? (locOccField.fieldName == v.namespace + 'OverriddenDiscountPercentage__c' 
+                                                                             ? v.editOrNot 
+                                                                             : locOccField.isEditable)
+                                                                             : (locOccField.fieldName == v.namespace + 'OverriddenDiscountAmount__c' 
+                                                                             ? v.editOrNot 
+                                                                             : locOccField.isEditable))}" 
+                                                                 picklistValues="{!locOccField.pickListValues}" 
+                                                                 label="{!locOccField.fieldLabel}" 
+                                                                 />
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </aura:iteration>                             
+                        </div>                        
+                    </fieldset> 
+                </div>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

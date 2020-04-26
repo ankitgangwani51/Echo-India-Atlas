@@ -1,0 +1,243 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Mohit Tayal
+@date      		17 April 2018
+@description 	Component to display the account details of logged in account 
+				This is used for community
+@Revision	 	AT-3969, Tarun - Modified as per security review
+*******************************************************************************/
+-->
+<aura:component access="global" implements="force:appHostable,forceCommunity:availableForAllPageTypes"
+                controller="CmAp_MyAccountCtrlr" extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute name="accountFieldsList" type="List" access="private" />
+    <aura:attribute name="accountRecordList" type="List" access="private" />
+    <aura:attribute name="accountRecord" type="Object" access="private" />
+    
+    <aura:attribute name="accountAddressFieldsList" type="List" access="private" />
+    <aura:attribute name="accountAddressRecordList" type="List" access="private" />
+    <aura:attribute name="accountAddressRecord" type="Object" access="private" />
+    
+    <aura:attribute name="accountContactFieldsList" type="List" access="private" />
+    <aura:attribute name="accountContactRecordList" type="List" access="private" />
+    <aura:attribute name="accountContactRecord" type="Object" access="private" />
+    
+    <aura:attribute name="accountSicFieldsList" type="List" access="private" />
+    <aura:attribute name="accountSicRecordList" type="List" access="private" />
+    <aura:attribute name="accountSicRecord" type="Object" access="private" />
+    
+    <aura:attribute name="accountConsiderationFieldsList" type="List" access="private" />
+    <aura:attribute name="accountConsiderationRecordList" type="List" access="private" />
+    <aura:attribute name="accountConsiderationRecord" type="Object" access="private" />
+    
+    <aura:attribute name="accountAdditionalFieldsList" type="List" access="private" />
+    <aura:attribute name="accountAdditionalRecordList" type="List" access="private" />
+    <aura:attribute name="accountAdditionalRecord" type="Object" access="private" />
+    
+    <aura:attribute name="accountId" type="Id" access="private" />
+    <aura:attribute name="recordType" type="String" access="private" />
+    <aura:attribute name="iconName" type="String" access="private" />
+    <aura:attribute access="public" type="boolean" name="showEditPage" default="false" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <c:GlAp_SpinnerComponent aura:id="spinner" />
+    
+    <div class="slds-grid  slds-grid_vertical slds-modal__content slds-p-around_medium">
+        <!-- HEADING AREA -->
+        <div class="slds-media slds-no-space slds-grow">
+            <div class="slds-media__figure">
+                <span class="slds-avatar slds-avatar_large">
+                    <img src="{!$Resource.myAccountsLogo}" title="{!$Label.c.CmAp_MyAccountsHeader}" />  
+                </span>
+            </div>
+            <div class="slds-media__body">
+                <p class="slds-text-title--caps slds-line-height--reset">{!$Label.c.CmAp_MyAccountTitle}</p>
+                <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="My Accounts">{!$Label.c.CmAp_MyAccountsHeader}</h1>
+            </div>
+        </div>
+        <div class="slds-modal__header">
+            <div class="slds-float_right">
+                <lightning:button variant="brand" label="Edit" onclick="{!c.editMode}" />
+            </div>
+        </div>
+        <!-- / HEADING AREA -->
+        <aura:if isTrue="{!v.showEditPage}">
+            {!v.body}						
+            <aura:set attribute="else">
+                <div class="slds-container_fluid"> 
+                    <div class="slds-form slds-form_compound slds-p-top_large">
+                        <div class="slds-box--x-small slds-theme--inverse">
+                            {!$Label.c.CmAp_MyAccountInfo}
+                        </div>
+                        <div class="slds-form-element__group">
+                            <aura:iteration items="{!v.accountFieldsList}" var="accountFields">
+                                <div class="slds-form-element__row">
+                                    <aura:iteration items="{!accountFields}" var="accountField">
+                                        <div class="slds-form-element slds-size_1-of-2">   <div class="slds-m-top--small"> </div>                                            
+                                            <c:GlAp_GenericField aura:id="{!accountField.fieldLabel}" 
+                                                                 object="{!v.accountRecord}" 
+                                                                 objectName="{!accountField.parentObject}" 
+                                                                 fieldType="{!accountField.fieldType}" 
+                                                                 fieldName="{!accountField.fieldName}"
+                                                                 listView="{!accountField.showLabel}"
+                                                                 showLabel="{!accountField.showLabel}"
+                                                                 editMode="{!accountField.isEditable}" 
+                                                                 isEditable="{!accountField.isEditable}"
+                                                                 picklistValues="" 
+                                                                 value="{!accountField.value}"
+                                                                 label="{!accountField.fieldLabel}" 
+                                                                 />
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </aura:iteration>
+                        </div>
+                        <div class="slds-box--x-small slds-theme--inverse" onclick="{!c.selectedAddress}">
+                            <lightning:icon aura:id="addressInfoIcon" iconName="utility:chevrondown" size="x-small" alternativeText="Indicates approval"/>
+                            {!$Label.c.CmAp_MyAccountAddressInfo} 
+                        </div>
+                        <div aura:id="addressInfo" class="slds-form-element__group">
+                            <aura:iteration items="{!v.accountAddressFieldsList}" var="accountFields">
+                                <div class="slds-form-element__row">
+                                    <aura:iteration items="{!accountFields}" var="accountField">
+                                        <div class="slds-form-element slds-size_1-of-2">   <div class="slds-m-top--small"> </div>                                            
+                                            <c:GlAp_GenericField aura:id="{!accountField.fieldLabel}" 
+                                                                 object="{!v.accountAddressRecord}" 
+                                                                 objectName="{!accountField.parentObject}" 
+                                                                 fieldType="{!accountField.fieldType}" 
+                                                                 fieldName="{!accountField.fieldName}"
+                                                                 listView="{!accountField.showLabel}"
+                                                                 showLabel="{!accountField.showLabel}"
+                                                                 editMode="{!accountField.isEditable}" 
+                                                                 isEditable="{!accountField.isEditable}"
+                                                                 picklistValues="" 
+                                                                 value="{!accountField.value}"
+                                                                 label="{!accountField.fieldLabel}" 
+                                                                 />
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </aura:iteration>
+                        </div>
+                        <aura:if isTrue="{!v.recordType == $Label.c.AccAp_AccountRecordTypeHouseholdAccount}">
+                            <div class="slds-p-top_medium"></div>
+                            <div class="slds-box--x-small slds-theme--inverse" onclick="{!c.selectedContact}">
+                                <lightning:icon aura:id="contactInfoIcon" iconName="utility:chevrondown" size="x-small" alternativeText="Indicates approval"/>
+                                {!$Label.c.CmAp_MyAccountContactInfo}
+                            </div>
+                            <div aura:id="contactInfo" class="slds-form-element__group">
+                                <aura:iteration items="{!v.accountContactFieldsList}" var="accountFields">
+                                    <div class="slds-form-element__row">
+                                        <aura:iteration items="{!accountFields}" var="accountField">
+                                            <div class="slds-form-element slds-size_1-of-2">   <div class="slds-m-top--small"> </div>                                            
+                                                <c:GlAp_GenericField aura:id="{!accountField.fieldLabel}" 
+                                                                     object="{!v.accountContactRecord}" 
+                                                                     objectName="{!accountField.parentObject}" 
+                                                                     fieldType="{!accountField.fieldType}" 
+                                                                     fieldName="{!accountField.fieldName}"
+                                                                     listView="{!accountField.showLabel}"
+                                                                     showLabel="{!accountField.showLabel}"
+                                                                     editMode="{!accountField.isEditable}" 
+                                                                     isEditable="{!accountField.isEditable}"
+                                                                     picklistValues="" 
+                                                                     value="{!accountField.value}"
+                                                                     label="{!accountField.fieldLabel}" 
+                                                                     />
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </aura:iteration>
+                            </div>
+                            <aura:set attribute="else">
+                                <div class="slds-p-top_medium"></div>
+                                <div class="slds-box--x-small slds-theme--inverse" onclick="{!c.selectedSic}">
+                                    <lightning:icon aura:id="sicInfoIcon" iconName="utility:chevrondown" size="x-small" alternativeText="Indicates approval"/>
+                                    {!$Label.c.CmAp_MyAccountSicInfo} 
+                                </div>
+                                <div aura:id="sicInfo" class="slds-form-element__group">
+                                    <aura:iteration items="{!v.accountSicFieldsList}" var="accountFields">
+                                        <div class="slds-form-element__row">
+                                            <aura:iteration items="{!accountFields}" var="accountField">
+                                                <div class="slds-form-element slds-size_1-of-2">   <div class="slds-m-top--small"> </div>                                            
+                                                    <c:GlAp_GenericField aura:id="{!accountField.fieldLabel}" 
+                                                                         object="{!v.accountSicRecord}" 
+                                                                         objectName="{!accountField.parentObject}" 
+                                                                         fieldType="{!accountField.fieldType}" 
+                                                                         fieldName="{!accountField.fieldName}"
+                                                                         listView="{!accountField.showLabel}"
+                                                                         showLabel="{!accountField.showLabel}"
+                                                                         editMode="{!accountField.isEditable}" 
+                                                                         isEditable="{!accountField.isEditable}"
+                                                                         picklistValues="" 
+                                                                         value="{!accountField.value}"
+                                                                         label="{!accountField.fieldLabel}" 
+                                                                         />
+                                                </div>
+                                            </aura:iteration>
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </aura:set>
+                        </aura:if> 
+                        <div class="slds-p-top_medium"></div>
+                        <div class="slds-box--x-small slds-theme--inverse" onclick="{!c.selectedConsideration}">
+                            <lightning:icon aura:id="ConsiderationIcon" iconName="utility:chevrondown" size="x-small" alternativeText="Indicates approval"/>
+                            {!$Label.c.CmAp_MyAccountConsiderations}
+                        </div>
+                        <div aura:id="consideration" class="slds-form-element__group">
+                            <aura:iteration items="{!v.accountConsiderationFieldsList}" var="accountFields">
+                                <div class="slds-form-element__row">
+                                    <aura:iteration items="{!accountFields}" var="accountField">
+                                        <div class="slds-form-element slds-size_1-of-2">   <div class="slds-m-top--small"> </div>                                            
+                                            <c:GlAp_GenericField aura:id="{!accountField.fieldLabel}" 
+                                                                 object="{!v.accountConsiderationRecord}" 
+                                                                 objectName="{!accountField.parentObject}" 
+                                                                 fieldType="{!accountField.fieldType}" 
+                                                                 fieldName="{!accountField.fieldName}"
+                                                                 listView="{!accountField.showLabel}"
+                                                                 showLabel="{!accountField.showLabel}"
+                                                                 editMode="{!accountField.isEditable}" 
+                                                                 isEditable="{!accountField.isEditable}"
+                                                                 picklistValues="" 
+                                                                 value="{!accountField.value}"
+                                                                 label="{!accountField.fieldLabel}" 
+                                                                 />
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </aura:iteration>
+                        </div>
+                        <div class="slds-p-top_medium"></div>
+                        <div class="slds-box--x-small slds-theme--inverse" onclick="{!c.selectedAdditional}">
+                            <lightning:icon aura:id="additionalInfoIcon" iconName="utility:chevrondown" size="x-small"/>
+                            {!$Label.c.CmAp_MyAccountAdditionalInfo}
+                        </div>
+                        <div aura:id="additionalInfo" class="slds-form-element__group">
+                            <aura:iteration items="{!v.accountAdditionalFieldsList}" var="accountFields">
+                                <div class="slds-form-element__row">
+                                    <aura:iteration items="{!accountFields}" var="accountField">
+                                        <div class="slds-form-element slds-size_1-of-2">   <div class="slds-m-top--small"> </div>                                            
+                                            <c:GlAp_GenericField aura:id="{!accountField.fieldLabel}" 
+                                                                 object="{!v.accountAdditionalRecord}" 
+                                                                 objectName="{!accountField.parentObject}" 
+                                                                 fieldType="{!accountField.fieldType}" 
+                                                                 fieldName="{!accountField.fieldName}"
+                                                                 listView="{!accountField.showLabel}"
+                                                                 showLabel="{!accountField.showLabel}"
+                                                                 editMode="{!accountField.isEditable}" 
+                                                                 isEditable="{!accountField.isEditable}"
+                                                                 picklistValues="" 
+                                                                 value="{!accountField.value}"
+                                                                 label="{!accountField.fieldLabel}" 
+                                                                 />
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </aura:iteration>
+                        </div>
+                    </div>
+                </div>
+            </aura:set>
+        </aura:if>       
+    </div>
+</aura:component>

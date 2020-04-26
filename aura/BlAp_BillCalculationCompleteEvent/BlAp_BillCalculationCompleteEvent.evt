@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="A newly calculated bill was received" >
+    <aura:attribute type="String" name="billId" required="false" description="the bill Id" />
+</aura:event>

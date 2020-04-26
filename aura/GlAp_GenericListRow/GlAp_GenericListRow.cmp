@@ -1,0 +1,74 @@
+<aura:component >
+    <aura:attribute name="fieldList" type="List" access="public"/>
+    <aura:attribute name="record" type="Object" access="public"/>
+    <aura:attribute name="forceEditMode" type="boolean" access="public" default="false"/>
+    <aura:attribute name="editMode" type="boolean" access="private" />
+    <aura:attribute name="showSelect"  type="boolean" default="true"/>
+    <aura:attribute name="tableName"  type="string" default="DefaultTable"/>
+    
+    <aura:attribute access="private" type="String" name="highlighted" default=""/>
+    
+    <aura:registerEvent name="rowEvent" type="c:GlAp_GenericListRowSelectEvent"/>
+    <aura:registerEvent name="rowClickEvent" type="c:GlAp_GenericListRowClickEvent"/>
+    <aura:registerEvent name="rowButtonEvent" type="c:GlAp_GenericListRowButtonEvent"/>
+    
+    <aura:method name="HighlightRowSelected" action="{!c.highlightRowSelect}" description="HighlighRowSelected"> 
+        <aura:attribute name="RowId" type="String" default=""/> 
+    </aura:method>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <tr aura:id="GenericRow" class="{!v.record.isSelected ? 'slds-hint-parent slds-is-selected' : 'slds-hint-parent'}">
+        <aura:if isTrue="{!v.showSelect}">  
+            <td role="gridcell" tabindex="0" class="slds-text-align_right" style="width: 3.75rem;">
+                    <div class="slds-checkbox_add-button">
+                        <input type="checkbox" class="slds-assistive-text" id="{!v.record.checkboxId}" tabindex="{!v.record.uniqueId}" value="on" checked="{!v.record.isSelected}" onclick="{!c.doEdit}"/>
+                        <label for="{!v.record.checkboxId}" class="slds-checkbox_faux">
+                            <span class="slds-assistive-text">Select item 1</span>
+                        </label>
+                    </div>
+                </td>
+            </aura:if>
+            <aura:iteration items="{!v.fieldList}" var="fldItem" >
+                <td data-label="{!fldItem.fieldName}" style="slds-cell-wrap width: 10rem;">
+                    <aura:if isTrue="{!fldItem.buttonField}">
+                        
+                        <!-- Button -->
+                        <div>
+                            <aura:if isTrue="{!!empty(v.record.buttonAttributes)}">
+                                <aura:iteration items="{!v.record.buttonAttributes}" indexVar="name" var="button">
+                                    <aura:if isTrue="{!button.name == fldItem.fieldName &amp;&amp; button.status != 'INACTIVE'}">
+                                        <button id="{!fldItem.fieldName}" type="button" class="slds-button slds-button--neutral" 
+                                                disabled="{!button.status == 'DISABLED'}" onclick="{!c.doButtonFieldPress}">
+                                            {!button.label}
+                                        </button>
+                                    </aura:if>
+                                </aura:iteration>
+                                
+                                <!-- supports legacy code without button attributes set -->
+                                <aura:set attribute="else">
+                                    <button id="{!fldItem.fieldName}" type="button" class="slds-button slds-button--neutral" 
+                                            onclick="{!c.doButtonFieldPress}">
+                                        {!fldItem.fieldLabel}
+                                    </button>
+                                </aura:set>
+                            </aura:if>
+                        </div>
+                        
+                        <!-- Field -->
+                        <aura:set attribute="else">
+                            <c:GlAp_GenericField aura:id="{!fldItem.label}" 
+                                                 object="{!v.record}" 
+                                                 objectName="{!fldItem.parentObject}" 
+                                                 fieldType="{!fldItem.fieldType}" 
+                                                 fieldName="{!fldItem.fieldName}"
+                                                 isEditable="{!fldItem.isEditable}" 
+                                                 editMode="{!v.editMode}"
+                                                 picklistValues="{!fldItem.pickListValues}" 
+                                                 listView="true"
+                                                 transformField="{!fldItem.transformField}"  />
+                        </aura:set>
+                    </aura:if>
+                </td>
+            </aura:iteration>
+        </tr>
+</aura:component>

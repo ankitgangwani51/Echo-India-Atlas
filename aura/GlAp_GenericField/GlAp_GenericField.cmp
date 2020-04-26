@@ -1,0 +1,137 @@
+<aura:component controller="GlAp_GenericFieldCtrlr">
+    <aura:attribute access="public" name="object" type="Object" />
+    <aura:attribute access="public" name="objectName" type="String" />
+    <aura:attribute access="public" name="fieldName" type="String" />
+    <aura:attribute access="public" name="fieldType" type="String" />
+    <aura:attribute access="public" name="editMode" type="boolean" default="true" />
+    <aura:attribute access="public" name="isEditable" type="boolean" default="true" />
+    <aura:attribute access="public" name="picklistValues" type="Object" />
+    <aura:attribute access="public" name="listView" type="boolean" default="false" />
+    <aura:attribute access="public" name="showLabel" type="boolean" default="false" />
+    <aura:attribute access="public" name="required" type="boolean" default="false" />
+    <aura:attribute access="public" name="currencyCode" type="string" default="{!$Label.c.GlAp_CurrencyCode}"/>
+    <aura:attribute access="public" name="helpText" type="string"/>  
+    <aura:attribute access="public" name="label" type="string" />  
+    <aura:attribute access="public" name="recordId" type="Id" />
+    <aura:attribute access="public" name="transformField" type="boolean" default="false" />    
+    <aura:attribute access="public" name="changeEvent" type="boolean" default="false" />
+    <aura:attribute access="public" name="disableInputField" type="boolean" default="false" />
+    
+    <aura:attribute access="public" name="value" type="String"/>
+    <aura:attribute access="private" name="urlString" type="string"/>
+    <aura:attribute access="private" name="urlLabel" type="string"/>
+    <aura:attribute access="private" name="readOnly" type="boolean" default="false"/>
+    
+    <!-- Fired if 'changeEvent' attribute is true -->
+    <aura:registerEvent name="inputFieldEvent" type="c:GlAp_GenericInputEvent" />
+    <aura:registerEvent name="editModeEvent" type="c:GlAp_SwitchToEditEvent"/>
+	    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.value}" action="{!c.doUpdateValue}"/>
+    
+    <!-- Handles updates to v.object made in parent component -->
+    <aura:handler name="change" value="{!v.object}" action="{!c.doObjectUpdated}" />
+    
+	<!-- is the field editable and are we in edit mode -->    
+    <aura:if isTrue="{!v.editMode &amp;&amp; v.isEditable &amp;&amp; !v.transformField &amp;&amp; !v.readOnly}">     
+        <c:GlAp_InputField value="{!v.value}" type="{!v.fieldType}" label="{!v.label}" picklistValues="{!v.picklistValues}" 
+                           object="{!v.object}" fieldName="{!v.fieldName}" objectName="{!v.objectName}" 
+                           required="{!v.required}" helpText="{!v.helpText}" disableField="{!v.disableInputField}"/>
+        
+        
+        <!--  If we are not in an editable scenario then display and output field -->
+        <aura:set attribute="else">
+            
+            <!-- For a list view slightly different formatting / styling is required for the output field -->
+            <aura:if isTrue="{!v.listView}">
+                <aura:if isTrue="{!v.showLabel}">
+                    <label class="slds-form-element__label" for="{!v.fieldName}">{!v.label}
+                        <aura:if isTrue="{!v.helpText != null &amp;&amp; v.helpText != '' }">
+                            <span class="slds-form-element" style="padding-left:4px ">
+                                <span class="slds-form-element__icon slds-align-middle" onmouseover="{!c.display}" onmouseout="{!c.displayOut}">
+                                    <button class="slds-button slds-button slds-button--icon" aria-describedby="help"  >
+                                        <lightning:icon iconName="utility:info" size="xx-small" alternativeText="Help"/>         
+                                    </button>
+                                </span>
+                                
+                                <div class="slds-hide slds-popover slds-popover--tooltip slds-nubbin--left " role="tooltip" 
+                                     id="help" style="position:absolute;top:-12px;left:35px;height:inherit;width:235px" 
+                                     aura:id="tooltip1">
+                                    <div class="slds-popover__body">{!v.helpText}</div>
+                                </div>
+                            </span> 	
+                        </aura:if>                         
+                    </label>
+                    <div class="slds-truncate slds-cell-wrap" style="word-wrap:break-word">
+                        <c:GlAp_OutputField currencyCode="{!v.currencyCode}" value="{!v.value}" type="{!v.fieldType}" 
+                                            urlString="{!v.urlString}" urlLabel="{!v.urlLabel}" 
+                                            customUrlLabel="{!v.object.customUrlLabel}"/>
+                    </div>
+                    
+                    <aura:set attribute="else">
+                        <span class="slds-truncate slds-cell-wrap" title="{!v.value}" >   
+                            <c:GlAp_OutputField currencyCode="{!v.currencyCode}" value="{!v.value}" type="{!v.fieldType}" 
+                                                urlString="{!v.urlString}" urlLabel="{!v.urlLabel}" 
+                                                customUrlLabel="{!v.object.customUrlLabel}"/>
+                        </span>
+                    </aura:set>
+                </aura:if>
+                
+                <!-- For a form entry field then put formatting around the field name  -->
+                <aura:set attribute="else">
+                    <label class="slds-form-element__label" for="{!v.fieldName}">{!v.label}
+                        <aura:if isTrue="{!v.helpText != null &amp;&amp; v.helpText != '' }">
+                            <span class="slds-form-element" style="padding-left:4px ">
+                                <span class="slds-form-element__icon slds-align-middle" onmouseover="{!c.display}" 
+                                      onmouseout="{!c.displayOut}">
+                                    <button class="slds-button slds-button slds-button--icon" aria-describedby="help"  >
+                                        <lightning:icon iconName="utility:info" size="xx-small" alternativeText="Help"/>         
+                                    </button>
+                                </span>
+                                
+                                <div class="slds-hide slds-popover slds-popover--tooltip slds-nubbin--left " role="tooltip" 
+                                     id="help" style="position:absolute;top:-12px;left:35px;height:inherit;width:235px" 
+                                     aura:id="tooltip1">
+                                    <div class="slds-popover__body">{!v.helpText}</div>
+                                </div>
+                            </span> 	
+                        </aura:if>                         
+                    </label>
+                    <aura:if isTrue="{!v.isEditable}">
+                        
+                        <div class="slds-border--bottom" style="word-wrap:break-word">
+                            <c:GlAp_OutputField currencyCode="{!v.currencyCode}" label="{!v.label}" fieldName="{!v.fieldName}" 
+                                                value="{!v.value}" type="{!v.fieldType}" urlString="{!v.urlString}" 
+                                                urlLabel="{!v.urlLabel}" customUrlLabel="{!v.object.customUrlLabel}"/>
+                            &nbsp;							
+                            <div class="slds-icon_container gearformat">
+                                <button class="slds-button slds-button--icon slds-cell-edit__button slds-m-left--x-small" 
+                                        onclick="{!c.doEdit}">
+                                    <c:GlAp_Svg class="slds-button__icon slds-button__icon--hint slds-button__icon--edit" 
+                                                aria-hidden="true" xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#edit'}" />
+                                </button>
+                            </div>					
+                        </div>
+                        <aura:set attribute="else">
+                            <aura:if isTrue="{!v.editMode}">
+                                <div>
+                                    <c:GlAp_OutputField currencyCode="{!v.currencyCode}" label="{!v.label}" fieldName="{!v.fieldName}" 
+                                                        value="{!v.value}" type="{!v.fieldType}" urlString="{!v.urlString}" 
+                                                        urlLabel="{!v.urlLabel}" customUrlLabel="{!v.object.customUrlLabel}"/>				
+                                </div>
+                                <aura:set attribute="else">
+                                    <div class="slds-border--bottom" style="word-wrap:break-word">
+                                        
+                                        <c:GlAp_OutputField currencyCode="{!v.currencyCode}" label="{!v.label}" fieldName="{!v.fieldName}" 
+                                                            value="{!v.value}" type="{!v.fieldType}" urlString="{!v.urlString}" 
+                                                            urlLabel="{!v.urlLabel}" customUrlLabel="{!v.object.customUrlLabel}"/>				
+                                    </div>
+                                </aura:set>
+                            </aura:if>
+                        </aura:set>
+                    </aura:if>
+                </aura:set>
+            </aura:if> 
+        </aura:set>        
+    </aura:if>
+</aura:component>

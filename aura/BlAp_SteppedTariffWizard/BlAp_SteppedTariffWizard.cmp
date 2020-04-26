@@ -1,0 +1,48 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		16 July 2018
+@description 	Component to implement the Stepped Tariff process using the Wizard framework
+@Revision	 	AT-3951, Tarun - Modified as per security review
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="BlAp_SteppedTariffWizardCtrlr"
+                extends="c:GlAp_WizardTemplate">
+    
+    <!-- set Wizard variables -->
+    <aura:set attribute="title" value="{!$Label.c.BlAp_SteppedTariffProcess}" />
+    <aura:set attribute="buttonName" value="{!$Label.c.BlAp_ManageStepTariff}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+    <aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->    
+    
+    <!-- event handlers -->
+    <!-- have to be here as we can't override an inherited helper method from the parent -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    
+    <!-- local variables -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <!-- Wizard pages -->
+    <!-- WS1 - Select Stepped Tariff Operation --> 
+    <c:BlAp_SteppedTariffOperation aura:id="steppedTariffOperation" isActive="{!v.stepName == $Label.c.BlAp_SteppedTariffPage1}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!-- WS2 - Select Stepped Tariff Renewals -->
+    <c:BlAp_SteppedTariffRenewal aura:id="steppedTariffRenewal" isActive="{!v.stepName == $Label.c.BlAp_SteppedTariffPage2}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS3 - Stepped Tariff Location to Include -->
+    <c:BlAp_SteppedTariffLocations aura:id="steppedTariffLocation" isActive="{!v.stepName == $Label.c.BlAp_SteppedTariffPage3}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS4 - Stepped Tariff Amendment -->
+    <c:BlAp_SteppedTariffAmendment aura:id="steppedTariffAmendment" isActive="{!v.stepName == $Label.c.BlAp_SteppedTariffPage4}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS5 - Stepped Tariff Location to Include -->
+    <c:BlAp_SteppedTariffLocations aura:id="steppedTariffLocationAmendment" isActive="{!v.stepName == $Label.c.BlAp_SteppedTariffPage5}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- Navigation -->
+    <div class="slds-container_fluid">
+        <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+    </div> 
+</aura:component>

@@ -1,0 +1,383 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Sudhir Kumar
+@date      		21 June 2018
+@description 	Goodwill Payment component: AT-2798
+@revesion       Security Review - 14-09-2018
+*******************************************************************************/
+ -->
+
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName"
+				controller="PyAp_GoodwillPaymentCtrl"
+				extends="c:GlAp_LightningComponentBase"
+				access="global">
+	 
+    <!-- Component variables --> 
+   <!--Security Review - 14-09-2018-->
+    <aura:attribute access="private" type="List" name="goodwillPaymentFieldList" />
+    <aura:attribute access="private" type="List" name="payChequeFieldList"/> 
+    <aura:attribute access="private" type="List" name="payBankInfoFieldList"/> 
+    <aura:attribute access="private" type="List" name="chequeInfoFieldList"/>
+	<aura:attribute access="private" type="List" name="goodwillTypeOptions"  
+									 default="[ {'label': 'Refund to Customer', 'value': 'refundToCustomer'},
+                                                {'label': 'Payment to Contract', 'value': 'paymentToContract'} ]"/>
+	<aura:attribute access="private" type="List" name="refundTypeOptions"  
+									 default="[ {'label': 'Bank Account', 'value': 'bankAccount'},
+                                                {'label': 'Cheque', 'value': 'cheque'} ]"/>
+    <aura:attribute access="private" type="List" name="optionsList"  default="[
+                                                                             {'label': 'New', 'value': 'New'},
+                                                                             {'label': 'Existing', 'value': 'Existing'}
+                                                                             ]"/>			
+	<aura:attribute access="private" type="boolean" name="isRefundToCustomer" default="false" description="true if this refund is selected"/>
+    <aura:attribute access="private" type="boolean" name="isPaymentToContract" default="false" description="true if this payment is selected"/>
+    <aura:attribute access="private" type="boolean" name="isRefundToBankAccount" default="false" description="true if this transfer is selected"/>
+    <aura:attribute access="private" type="boolean" name="isRefundToCheque" default="false" description="true if this transfer is selected"/>
+    <aura:attribute access="public"  type="boolean" name="showGoodwillComponent" default="false" description="To show Goodwill Component" />
+    <aura:attribute access="public"  type="String" name="buttonName" default="Goodwill Payment"  description="The button name to start the Wizard"/>
+    <aura:attribute access="public"  type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public"  type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <aura:attribute access="private" type="object" name="objPayment" />
+    <aura:attribute access="global"  type="String" name="recordId" />
+    <aura:attribute access="private" type="object" name="accountFieldObj" description="Payment Account Field Prop" />
+    <aura:attribute access="private" type="object" name="accountObj" description="Payment Account Object" />
+    <aura:attribute access="private" type="string"  name="selectedContractId" default=""/>
+    <aura:attribute access="private" type="string"  name="selectedBankAccountDetailId" default="" />
+    <aura:attribute access="private" type="Boolean" name="isShowExisting" default="false" />
+    <aura:attribute access="private" type="Boolean" name="isShowNew"  default="false"/>
+        
+    <aura:attribute access="private" type="Boolean" name="validateButtonEnabled"  default="false"/>
+    <aura:attribute access="private" name="bankBranchFound" type="boolean" default="false" />
+    <aura:attribute access="private" type="List" name="bankBranchFields"/>
+    <aura:attribute access="private" name="bankBranchRec" type="object" />
+    <aura:attribute access="private" name="radioValue" type="String"/> 
+    
+    <!--Init handler-->
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    
+    <!--Displays Goodwill Component when it is active-->
+    
+    <aura:if isTrue="{!v.showGoodwillComponent}">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+        <div class="slds-modal__container">
+            <header class="slds-modal__header">
+                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                    <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                    <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                </button> 
+                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.PyAp_GoodwillPayment}</h2>
+            </header>
+            
+            <!-- Notifications and Spinner Component-->
+            
+            <div class="slds-modal__content slds-p-around--medium">	
+                <c:GlAp_NotificationComponent aura:id="notifier"/>
+                <c:GlAp_SpinnerComponent aura:id="spinner"/>
+            </div>
+            
+            <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">
+                <div class="slds-container_fluid slds-p-top_medium">    
+                    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">        
+                        <div class="slds-container_fluid">
+                            <div class="slds-form slds-form_compound slds-p-top_medium">
+                                <fieldset class="slds-form-element slds-size_1-of-1">
+                                    
+                                    <!--Related Account Name-->    
+                                    
+                                    <div class="slds-form-element slds-size_1-of-2">
+                                        <c:GlAp_GenericField aura:id="{!v.accountFieldObj.fieldLabel}" 
+                                                             object="{!v.accountObj}" 
+                                                             objectName="{!v.accountFieldObj.parentObject}" 
+                                                             fieldType="{!v.accountFieldObj.fieldType}" 
+                                                             fieldName="{!v.accountFieldObj.fieldName}" 
+                                                             editMode="false" 
+                                                             isEditable="false"
+                                                             picklistValues="" 
+                                                             showLabel="true"
+                                                             listView="true"
+                                                             label="{!v.accountFieldObj.fieldLabel}" 
+                                                             required="true"
+                                                             />
+                                    </div>
+                                    <div class="slds-container_fluid slds-p-top_medium" />  
+                                    
+                                    <!--Goodwill Payment field Section-->
+                                    
+                                    <div class="slds-form-element__group slds-p-left_medium slds-p-bottom_large"> 
+                                        <aura:iteration items="{!v.goodwillPaymentFieldList}" var="goodwillPaymentFields">      
+                                            <div class="slds-form-element__row">
+                                                <aura:iteration items="{!goodwillPaymentFields}" var="goodwillPaymentField">
+                                                    <div class="slds-form-element slds-size_1-of-2">
+                                                        <c:GlAp_GenericField object="{!v.objPayment}" 
+                                                                             objectName="{!goodwillPaymentField.parentObject}" 
+                                                                             fieldType="{!goodwillPaymentField.fieldType}" 
+                                                                             fieldName="{!goodwillPaymentField.fieldName}" 
+                                                                             editMode="true" 
+                                                                             isEditable="{!goodwillPaymentField.isEditable}" 
+                                                                             picklistValues="{!goodwillPaymentField.pickListValues}" 
+                                                                             showLabel="true"
+                                                                             listView="true"
+                                                                             label="{!goodwillPaymentField.fieldLabel}" 
+                                                                             required="true"
+                                                                             />
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                    
+                                    <!--Radio Button for selection-->
+                                    
+                                    <fieldset class="slds-form-element">
+                                        <legend class="slds-form-element__legend slds-form-element__label">{!$Label.c.PyAp_ProcessAs}</legend>
+                                        <div class="slds-form-element__control">
+                                            <div class="slds-radio_button-group">
+                                                <aura:iteration items="{!v.goodwillTypeOptions}" var="option">
+                                                    <span class="slds-button slds-radio_button">
+                                                        <input type="radio" name="processAsRadio" id="{!option.value}" value="{!option.value}" onclick="{!c.handleChange}" />
+                                                        <!--lightning:input type="radio" name="processAsRadio" id="{!option.value}" value="{!option.value}" onchange="{!c.handleChange}" /-->
+                                                        <label class="slds-radio_button__label" for="{!option.value}">
+                                                            <span class="slds-radio_faux"  >{!option.label}</span>
+                                                        </label>
+                                                    </span>
+                                                </aura:iteration>
+                                                
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Refund to Customer Section-->
+                    
+                    <aura:if isTrue="{!v.isRefundToCustomer}">
+                        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+                            <div class="slds-container_fluid">
+                                <div class="slds-form slds-form_compound slds-p-top_medium">
+                                    <fieldset class="slds-form-element">
+                                        <legend class="slds-form-element__legend slds-form-element__label">{!$Label.c.PyAp_RefundType}</legend>
+                                        <div class="slds-form-element__control">
+                                            <div class="slds-radio_button-group">
+                                                <aura:iteration items="{!v.refundTypeOptions}" var="option">
+                                                    <span class="slds-button slds-radio_button">
+                                                        <input type="radio" name="refundTypeRadio" id="{!option.value}" value="{!option.value}" onclick="{!c.onRefundTypeSelection}" />
+                                                        <label class="slds-radio_button__label" for="{!option.value}">
+                                                            <span class="slds-radio_faux"  >{!option.label}</span>
+                                                        </label>
+                                                    </span>
+                                                </aura:iteration>
+                                                
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                    </aura:if> 
+                    <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                        
+                        <!--Refund Type: "Bank Account" checkbox section-->
+                        
+                        <div class="slds-col--padded slds-size--1-of-1">
+                            <div class="slds-form-element__group ">
+                                <div class="slds-form-element__row">
+                                    <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                                </div>
+                            </div> 
+                            
+                            <!--Bank Account fields section-->
+                            
+                            <aura:if isTrue="{!v.isRefundToBankAccount}"> 
+                                
+                                <!-- Select New or Existing Bank Details -->
+                                
+                                <fieldset class="slds-form-element slds-p-bottom_large">
+                                    <legend class="slds-form-element__legend slds-form-element__label slds-p-left_medium">{!$Label.c.GlUt_SelectOperation}</legend>
+                                    <div class="slds-form-element__control slds-p-left_medium">
+                                        <div class="slds-radio_button-group">
+                                            <aura:iteration items="{!v.optionsList}" var="option">
+                                                <span class="slds-button slds-radio_button">
+                                                    <input type="radio" name="processAsInnerRadio" id="{!option.value}" 
+                                                           value="{!option.value}" onclick="{!c.innerSectionHandleChange}" />
+                                                    <label class="slds-radio_button__label" for="{!option.value}">
+                                                        <span class="slds-radio_faux"  >{!option.label}</span>
+                                                    </label>
+                                                </span>
+                                            </aura:iteration>
+                                            
+                                        </div>
+                                    </div>
+                                </fieldset> 
+                                
+                                <!-- When New Bank Detail is selected -->
+                                
+                                <aura:if isTrue="{!v.isShowNew}">
+                                    <div class="slds-form-element__group slds-p-left_medium slds-p-bottom_large">    
+                                        <aura:iteration items="{!v.payBankInfoFieldList}" var="payBankFields">      
+                                            <aura:iteration items="{!payBankFields}" var="payBankField">
+                                                <div class="slds-form-element slds-size_1-of-1">
+                                                    <c:GlAp_GenericField object="{!v.objPayment}" 
+                                                                         objectName="{!payBankField.parentObject}" 
+                                                                         fieldType="text" 
+                                                                         fieldName="{!payBankField.fieldName}" 
+                                                                         editMode="{!v.isRefundToBankAccount}" 
+                                                                         isEditable="{!payBankField.isEditable}" 
+                                                                         picklistValues="" 
+                                                                         showLabel="true"
+                                                                         listView="true"
+                                                                         label="{!payBankField.fieldLabel}" 
+                                                                         required="false"
+                                                                         />
+                                                </div>
+                                            </aura:iteration>
+                                        </aura:iteration>
+                                        
+                                        <aura:if isTrue="{!v.validateButtonEnabled}">
+                                            <div class="slds-p-top_medium">
+                                                <button type="button" class="slds-button slds-button--brand" onclick="{!c.validateSortCode}">{!$Label.c.PyAp_SelectValidate}</button>
+                                            </div>
+                                        </aura:if>
+                                        <aura:if isTrue="{!v.bankBranchFound}"> 
+                                            <div class="slds-container_fluid">
+                                                <div class="slds-m-top_x-large"> </div>
+                                                <b>{!$Label.c.PyAp_BranchDetailsLabel}</b>  
+                                                <div class="slds-form slds-form_compound slds-p-top_medium">
+                                                    <fieldset class="slds-form-element">                    
+                                                        <div class="slds-form-element__group">
+                                                            <aura:iteration items="{!v.bankBranchFields}" var="bankBranchFields">
+                                                                <div class="slds-form-element__row">          
+                                                                    <aura:iteration items="{!bankBranchFields}" var="bankBranchField">
+                                                                        <div class="slds-form-element slds-size_1-of-2">                                   
+                                                                            <c:GlAp_GenericField aura:id="{!bankBranchField.fieldLabel}" 
+                                                                                                 object="{!v.bankBranchRec}" 
+                                                                                                 objectName="{!bankBranchField.parentObject}" 
+                                                                                                 fieldType="{!bankBranchField.fieldType}" 
+                                                                                                 fieldName="{!bankBranchField.fieldName}"
+                                                                                                 listView="{!bankBranchField.showLabel}"
+                                                                                                 showLabel="{!bankBranchField.showLabel}"
+                                                                                                 editMode="{!bankBranchField.isEditable}" 
+                                                                                                 isEditable="{!bankBranchField.isEditable}"
+                                                                                                 picklistValues="" 
+                                                                                                 label="{!bankBranchField.fieldLabel}" 
+                                                                                                 />
+                                                                        </div>
+                                                                    </aura:iteration>
+                                                                </div>
+                                                            </aura:iteration>
+                                                        </div>                       
+                                                    </fieldset>
+                                                </div>                      
+                                            </div>
+                                        </aura:if>
+                                        
+                                        
+                                    </div>
+                                </aura:if>
+                                
+                                <!-- When Existing Bank Detail is selected -->
+                                
+                                <aura:if isTrue="{!v.isShowExisting}">
+                                    <!--Lookup field to Bank Account Details-->
+                                    <div class="slds-form-element__group slds-p-left_medium slds-p-bottom_large">    
+                                        {!$Label.c.PyAp_BankAccountDetail}
+                                        <c:GlAp_CustomLookup objectName="{!v.namespace + 'BankAccountDetails__c'}"
+                                                             field_API_text="Id, Name"
+                                                             limit="10"
+                                                             field_API_search="Name"
+                                                             field_API_FilterText="{!v.namespace + 'Account__c'}"
+                                                             field_API_FilterVal="{!v.recordId}"
+                                                             lookupIcon="standard:account" 
+                                                             placeholder="{!$Label.c.CuAp_SearchText}"
+                                                             selItem="{!v.selectedBankAccountDetailId}"
+                                                             />
+                                    </div>
+                                </aura:if>
+                            </aura:if>
+                        </div>
+                        
+                        <!--Refund Type: "Cheque" checkbox section-->
+                        
+                        <div class="slds-col--padded slds-size--1-of-1">
+                            <div class="slds-form-element__group ">
+                                <div class="slds-form-element__row">
+                                    <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                                </div>
+                            </div>
+                            <!--Cheque fields section-->
+                            
+                            <aura:if isTrue="{!v.isRefundToCheque}"> 
+                                <div class="slds-form-element__group slds-p-left_medium slds-p-bottom_large"> 
+                                    <aura:iteration items="{!v.payChequeFieldList}" var="payChequeFields">      
+                                        <aura:iteration items="{!payChequeFields}" var="payChequeField">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <c:GlAp_GenericField object="{!v.objPayment}" 
+                                                                     objectName="{!payChequeField.parentObject}"
+                                                                     fieldType="TextArea" 
+                                                                     fieldName="{!payChequeField.fieldName}" 
+                                                                     editMode="{!v.isRefundToCheque}" 
+                                                                     isEditable="{!payChequeField.isEditable}" 
+                                                                     picklistValues=""
+                                                                     showLabel="true"
+                                                                     listView="true"
+                                                                     label="{!payChequeField.fieldLabel}" 
+                                                                     required="true"
+                                                                     />
+                                            </div>
+                                        </aura:iteration>
+                                    </aura:iteration>
+                                </div> 
+                            </aura:if>
+                        </div>
+                    </div>
+                    
+                    
+                    <!-- Payment to Contract Section-->
+                    
+                    <aura:if isTrue="{!v.isPaymentToContract}">
+                        <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                            <div class="slds-form slds-form_compound">                   
+                                <div class="slds-grid slds-gutters">
+                                    <div class="slds-col slds-p-bottom_medium slds-p-left_medium slds-m-left_medium">
+                                        <div class="slds-form-element__group ">
+                                            <div class="slds-form-element__row">
+                                                <div class="slds-form slds-form_compound slds-p-top_medium "/> 
+                                            </div>
+                                        </div>
+                                        {!$Label.c.PyAp_ContractPayment}
+                                        <c:GlAp_CustomLookup objectName="{!v.namespace + 'BillingContract__c'}"
+                                                             field_API_text="Id, Name"
+                                                             limit="10"
+                                                             field_API_search="Name"
+                                                             field_API_FilterText="{!v.namespace + 'AccountName__c'}"
+                                                             field_API_FilterVal="{!v.recordId}"
+                                                             lookupIcon="standard:contract" 
+                                                             placeholder="{!$Label.c.CuAp_SearchText}"
+                                                             selItem="{!v.selectedContractId}"
+                                                             />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </aura:if>	
+                </div>
+            </div>
+            <!--Component footer Buttons-->
+            <footer class="slds-modal__footer">
+                <button class="slds-button slds-button_neutral" onclick="{!c.doCancel}">{!$Label.c.GlUt_Cancel}</button>
+                <button class="slds-button slds-button_brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+            </footer>
+        </div>
+    </section>
+    <div class="slds-backdrop slds-backdrop_open"></div>
+        
+        <!--Displays button when component is inactive-->
+        
+        <aura:set attribute="else">
+            <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doOpenGoodwillComponent}" />
+        </aura:set>
+    </aura:if>
+    
+</aura:component>

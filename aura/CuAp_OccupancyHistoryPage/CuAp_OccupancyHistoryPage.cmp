@@ -1,0 +1,48 @@
+<!-- 
+/******************************************************************************
+@author			ECHO: Mohit Tayal
+@date      		02-Aug-2018
+@description 	Lightning Component for Occupancy History
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName"
+                controller="CuAp_OccupancyHistoryPageCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="c.handleRowClickEvent"/>
+    <aura:attribute name="loccationListFieldProps" type="list" access="private"/>
+    <aura:attribute name="loccationListRecords" type="list" access="private"/>
+    <aura:attribute name="occupantsListFieldProps" type="list" access="private"/>
+    <aura:attribute name="occupantsListRecords" type="list" access="private"/>
+    
+    <div class="slds-container_fluid">
+        <c:GlAp_NotificationComponent aura:id="notifier" />
+        <c:GlAp_SpinnerComponent aura:id="spinner" />
+        
+        <div class="slds-grid slds-grid_vertical">
+            <div class="slds-grid slds-col">
+                <!-- Title -->
+                <h1><b> {!$Label.c.CuAp_OccupancyHistoryPageLocations} </b></h1>
+            </div>
+            <div class="slds-m-top_small slds-card__body slds-scrollable_y medium_height">
+                <c:GlAp_GenericTable aura:id="Location_List" tableName="Location_List" fieldList="{!v.loccationListFieldProps}" recordList="{!v.loccationListRecords}" showSelect="false"/> 
+                <aura:if isTrue="{!v.loccationListRecords.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+                <div class="slds-m-top_small"> </div>
+                <h1><b> {!$Label.c.CuAp_OccupancyHistoryPageOccpants} </b></h1>
+                <div class="slds-m-top_small"> </div>
+                <c:GlAp_GenericTable aura:id="Occupancy_List" tableName="Occupancy_List" fieldList="{!v.occupantsListFieldProps}" recordList="{!v.occupantsListRecords}" showSelect="false"/> 
+                <aura:if isTrue="{!v.occupantsListRecords.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+            </div>
+        </div>
+    </div>
+</aura:component>

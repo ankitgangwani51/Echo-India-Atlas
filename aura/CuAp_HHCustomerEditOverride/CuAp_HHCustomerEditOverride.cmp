@@ -1,0 +1,35 @@
+<!-- 
+/******************************************************************************
+@author          Accenture: Shivangi Gaur
+@date            18-09-2017
+@description     Lightning component for overriding Edit button for contact and account.
+@Revision        AT-1269
+@Revision        AT-3985, Tarun, modified class name as per security reviews
+*******************************************************************************/
+-->
+<aura:component controller="CuAp_HHCustomerEditOverrideCtrlr" implements="forceCommunity:availableForAllPageTypes,force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,lightning:actionOverride" access="global">
+
+<!--Page specific attributes declaration start-->
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:attribute name="recordId" type="Id" />
+    <aura:attribute name="recordType" type="String" />
+<!--Page specific attributes declaration end-->
+   
+    <aura:if isTrue="{!v.recordType == $Label.c.AccAp_AccountRecordTypeHouseholdAccount}">
+        <c:CuAp_HHCustomerPage manageFields= "true" recordId = "{!v.recordId}" headerValue = "{!$Label.c.CuAp_HHAccountEdit}"/>        
+        <aura:set attribute="else">            
+            <aura:if isTrue="{!v.recordType == $Label.c.CuAp_ContactRecordTypeHouseholdContact}">
+                <c:CuAp_HHCustomerPage manageFields= "true" recordId = "{!v.recordId}" headerValue = "{!$Label.c.CuAp_HHContactEdit}"/>  
+                <aura:set attribute="else">                    
+                    <aura:if isTrue="{!v.recordType == 'Other Contact'}">
+                        <c:CuAp_NonHHCustomerEdit recordId = "{!v.recordId}" headerValue = "Edit Contact"/>
+                        <aura:set attribute="else">
+                            <c:CuAp_NonHHCustomerEdit recordId = "{!v.recordId}" headerValue = "Edit Account"/>
+                        </aura:set>
+                    </aura:if>
+                </aura:set>
+            </aura:if>	
+        </aura:set>
+    </aura:if>    
+
+</aura:component>

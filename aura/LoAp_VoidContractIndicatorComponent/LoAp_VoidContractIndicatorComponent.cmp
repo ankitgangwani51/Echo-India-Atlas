@@ -1,0 +1,25 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Pratyush Kumar
+@date      		12 December 2017
+@description 	Component to show void status of related contracts on location page
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId"
+                access="global"
+                controller="LoAp_VoidContractIndicatorComponentCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+
+    <aura:attribute access="public" type="String" name="recordId" description="the Id of the location record"/>
+    <aura:attribute access="private" type="String" name="voidStatus" default="NO" description="the void status of the contract"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+	<div class="{!v.voidStatus == 'NO' ? 'containerComponent emptyContainer' : 'containerComponent'}">
+		<aura:if isTrue="{!v.voidStatus == 'YES'}">   
+			<div class="slds-notify slds-notify--alert slds-theme--error backgroundColorBlue" role="alert">
+				<h2>{!$Label.c.LoAp_VoidContractIndicatorStatus}</h2>
+			</div>
+		</aura:if>
+    </div>
+</aura:component>

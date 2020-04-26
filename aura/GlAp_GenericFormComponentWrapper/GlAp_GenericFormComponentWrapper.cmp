@@ -1,0 +1,9 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" access="global" >	
+    <aura:attribute name="recordId" type="Id" access="global" />
+    <aura:attribute name="headerLabel" type="String" access="global" />
+    <aura:attribute name="fieldSet" type="String" access="global" />
+    <aura:attribute name="objectType" type="String" default="Account" access="global" />
+    <aura:attribute name="readOnly" type="Boolean" access="global" default="false"/>
+    
+    <c:GlAp_GenericFormComponent readOnly="{!v.readOnly}" recordId="{!v.recordId}" fieldSet="{!v.fieldSet}" headerLabel="{!v.headerLabel}" objectType="{!v.objectType}" />
+</aura:component>

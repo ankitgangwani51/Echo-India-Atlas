@@ -1,0 +1,222 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		25 Dec 2017
+@description 	Component to Transfer/Return the payment. 
+*******************************************************************************/
+-->
+<aura:component implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId"
+                controller="PyAp_PaymentAmendmentsPageCtrlr"
+                access="global" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- Component variables --> 
+    <aura:attribute access="public"  type="String"   name="buttonStyle"            default="brand" description="The start button css style"/> 
+    <aura:attribute access="public"  type="boolean"  name="isShowTransfer"         default="false" description="true if this is the active page"/>
+    <aura:attribute access="public"  type="boolean"  name="isActive"               default="false" description="true if this is the active page"/>
+    <aura:attribute access="private" type="string"   name="paymentTransferReason"/>
+    <aura:attribute access="private" type="string[]" name="paymentTransferVal"/>
+    <aura:attribute access="private" type="Account"  name="existingPaymentAccount" default="{ sobjectType: 'Account'}"/>
+    <aura:attribute access="private" type="List"     name="paymentFields"/>
+    <aura:attribute access="public"  type="object"   name="paymentObject" />
+    <aura:attribute access="public"  type="object"   name="selectedContractId" />
+    <aura:attribute access="private" type="Boolean"  name="isPaymentExist"        default="false"/>
+    <aura:attribute access="private" type="List"     name="options"  />
+    <aura:attribute access="private" type="String"   name="radioValue"  />
+    <aura:attribute access="private" type="String"   name="originalPaymentRecordType" /> 
+    <aura:attribute access="public"  type="object"   name="resultContainer"/> 
+    <aura:attribute access="private" type="Boolean"  name="isDoNotPrint"          default="false"/>   <!-- AT-4897 -->
+    
+    <aura:attribute access="public"  type="boolean"  name="isTransferToSuspense"         default="false" description="true if transfer to Suspense is clicked"/>
+    
+    <lightning:button variant="{!v.buttonStyle}" label="{!$Label.c.PyAp_PaymentAmendmentButton}" onclick="{!c.doPageActive}" />
+    
+    <!-- Component handler -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="change" value="{!v.existingPaymentAccount}" action="{!c.handleSelectedAccountValueChange}" />
+    
+    <aura:if isTrue="{!v.isActive}">
+        <aura:if isTrue="{!v.isPaymentExist}">
+            <div >
+                <div role="dialog" tabindex="-1" aria-labelledby="header99" class="slds-modal slds-fade-in-open ">
+                    <div class="slds-modal__container" align="center">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                                <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                            xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                            </button>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">
+                                <div class="slds-box slds-theme--error">
+                                    <p>
+                                        <b>{!$Label.c.PyAp_AmendmentError}</b>
+                                    </p>
+                                </div>
+                            </h2>
+                        </header>
+                        <div class="slds-modal__footer">
+                            <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slds-backdrop slds-backdrop--open"></div> 
+            <aura:set attribute="else">
+                <div >
+                    <div role="dialog" tabindex="-1" aria-labelledby="header99" class="slds-modal slds-fade-in-open ">
+                        <div class="slds-modal__container" align="center">
+                            <header class="slds-modal__header">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                                    <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                                xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                    <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                                </button>
+                                <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.PyAp_PaymentAmendmentHeader}</h2>
+                            </header>
+                            
+                            <div class="slds-modal__content slds-p-around--medium">   
+                                <c:GlAp_NotificationComponent aura:id="notification"/> 
+                                <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                                <div class="slds-grid slds-wrap slds-grid_pull-padded-medium">                                
+                                    <div class="slds-container_fluid">
+                                        <div class="slds-form slds-form_compound slds-p-top_medium">
+                                            <fieldset class="slds-form-element">                      
+                                                <div class="slds-form-element__group">
+                                                    <div class="slds-form-element__row">
+                                                        <div class="slds-form-element slds-size_1-of-2 slds-col slds-p-horizontal_medium slds-form-element__label slds-text-align_left"> 
+                                                            <div>
+                                                                <legend class="slds-form-element__legend slds-form-element__label slds-text-heading_small">
+                                                                    {!$Label.c.PyAp_SelectActionLabel}
+                                                                </legend>
+                                                            </div>
+                                                            <lightning:radioGroup aura:id="mygroup"
+                                                                                  name="radioButtonGroup"
+                                                                                  label=""
+                                                                                  options="{!v.options}"
+                                                                                  value="{!v.radioValue}"
+                                                                                  onchange="{!c.handleChange}"
+                                                                                  />
+                                                            
+                                                        </div> 
+                                                    </div>
+                                                    <aura:iteration items="{!v.paymentFields}" var="pmtFields">
+                                                        <div class="slds-form-element__row">          
+                                                            <aura:iteration items="{!pmtFields}" var="pmtField">
+                                                                <div class="slds-form-element slds-size_1-of-2 slds-col slds-p-horizontal_medium slds-form-element__label slds-text-align_left slds-p-bottom_medium" 
+                                                                     >
+                                                                    <c:GlAp_GenericField aura:id="{!pmtField.fieldLabel}" 
+                                                                                         object="{!v.paymentObject}" 
+                                                                                         objectName="{!pmtField.parentObject}" 
+                                                                                         fieldType="{!pmtField.fieldType}" 
+                                                                                         fieldName="{!pmtField.fieldName}"
+                                                                                         listView="{!pmtField.showLabel}"
+                                                                                         showLabel="{!pmtField.showLabel}"
+                                                                                         editMode="{!pmtField.isEditable}" 
+                                                                                         isEditable="{!pmtField.isEditable}"
+                                                                                         picklistValues="{!pmtField.pickListValues}" 
+                                                                                         label="{!pmtField.fieldLabel}" 
+                                                                                         />
+                                                                </div>
+                                                            </aura:iteration>
+                                                        </div>
+                                                    </aura:iteration>
+                                                    
+                                                    <aura:if isTrue="{!v.isShowTransfer}">
+                                                        <div class="slds-container_fluid slds-border_top slds-border_bottom slds-clearfix slds-p-top_medium slds-p-bottom_medium">
+                                                            <!--AT-4897 -->
+                                                            <div class="slds-form slds-form_compound">                   
+                                                                <div class="slds-grid slds-gutters">
+                                                                    <div class="slds-col slds-p-bottom_medium slds-p-left_medium slds-m-left_medium">   
+                                                                     <!-- AT-4897 -->
+                                                                        <div class="slds-form-element__group slds-p-left_medium ">
+                                                                            <div class="slds-form-element__row">
+                                                                                <div class="slds-grid">
+                                                                                    <ui:inputCheckbox aura:id="chkTransferToSuspense" value="{!v.isTransferToSuspense}" label=""/>
+                                                                                    <div class="slds-text-heading_small slds-text-align_left slds-p-right_medium slds-p-left_medium">
+                                                                                        {!$Label.c.PyAp_TransferToSuspense}
+                                                                                    </div> 
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- AT-4897  Start -->
+                                                                    <div class="slds-col slds-p-bottom_medium slds-p-left_medium slds-m-left_medium">                                                            
+                                                                        <div class="slds-form-element__group slds-p-left_medium ">                                                                        
+                                                                            <div class="slds-form-element__row">
+                                                                                <div class="slds-grid">
+                                                                                    <ui:inputCheckbox aura:id="doNotPrint" value="{!v.isDoNotPrint}" label=""/>
+                                                                                    <div class="slds-text-heading_small slds-text-align_left slds-p-right_medium slds-p-left_medium">
+                                                                                        {!$Label.c.PyAp_DoNotPrint}
+                                                                                    </div> 
+                                                                                </div>
+                                                                            </div>                                                                       
+                                                                        </div>
+                                                                    </div>
+                                                                    <!-- AT-4897  End --> 
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <aura:if isTrue="{!!v.isTransferToSuspense}">
+                                                            <div class="slds-container_fluid slds-border_top slds-border_bottom ">                                                            
+                                                                <div class="slds-grid slds-wrap slds-p-top_medium slds-p-bottom_medium">
+                                                                    <div class="slds-size_2-of-3 slds-p-horizontal_medium slds-text-align_left">
+                                                                        <div>
+                                                                            <legend class="slds-form-element__legend slds-form-element__label slds-text-heading_small">
+                                                                                {!$Label.c.PyAp_AccountToTransfer}
+                                                                            </legend>
+                                                                        </div>
+                                                                        <c:GlAp_CustomLookup objectName="Account"                                                                                                     
+                                                                                             field_API_text="Id,Name"
+                                                                                             limit="6"
+                                                                                             field_API_search="Name"
+                                                                                             field_API_FilterText=""
+                                                                                             field_API_FilterVal=""
+                                                                                             selItem="{!v.existingPaymentAccount}"
+                                                                                             lookupIcon="standard:account" 
+                                                                                             placeholder="{!$Label.c.CuAp_SearchText}"
+                                                                                             field_API_Field_Concatenate = "{!v.namespace + 'AccountReference__c'}"/> <!--Changes for AT-1742 Starts/Ends Here -->
+                                                                    </div>
+                                                                    <aura:if isTrue="{!v.existingPaymentAccount.Id}">
+                                                                        <div class="slds-form slds-form_compound slds-p-top_medium slds-p-bottom_medium"/>
+                                                                        <div class="slds-size_2-of-3 slds-p-horizontal_medium slds-text-align_left">                                                                         
+                                                                            <div>
+                                                                                <legend class="slds-form-element__legend slds-form-element__label slds-text-heading_small">
+                                                                                    {!$Label.c.PyAp_ContractToTransfer}
+                                                                                </legend>
+                                                                            </div>                                                                        
+                                                                            <c:GlAp_CustomLookup objectName="{!v.namespace + 'BillingContract__c'}"
+                                                                                                 field_API_text="Id,Name"
+                                                                                                 limit="6"
+                                                                                                 field_API_search="Name"
+                                                                                                 field_API_FilterText="{!v.namespace + 'AccountName__c'}"
+                                                                                                 field_API_FilterVal="{!v.existingPaymentAccount.Id}"
+                                                                                                 lookupIcon="standard:contract"
+                                                                                                 selItem="{!v.selectedContractId}"
+                                                                                                 placeholder="{!$Label.c.CuAp_SearchText}"
+                                                                                                 /> 
+                                                                        </div>  
+                                                                    </aura:if>
+                                                                </div>  
+                                                            </div> 
+                                                        </aura:if>
+                                                    </aura:if>     
+                                                </div> 
+                                            </fieldset>
+                                        </div>                                 
+                                    </div>                                 
+                                </div>
+                            </div>
+                            <div class="slds-modal__footer">
+                                <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                                <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                            </div> 
+                            
+                        </div>
+                    </div>
+                </div>
+                <div class="slds-backdrop slds-backdrop--open"></div>
+            </aura:set>
+        </aura:if>
+    </aura:if>
+</aura:component>

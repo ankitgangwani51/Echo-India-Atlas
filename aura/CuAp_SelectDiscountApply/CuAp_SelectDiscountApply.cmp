@@ -1,0 +1,98 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		09-Jan-2018
+@description 	WS2 - Select Discount Apply - Component to show discount type on the basis of contract. 
+@param			wizardprop.wizardType
+@return			wizardprop.discountType (Object - DiscountType__c)
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+                controller="CuAp_SelectDiscountApplyCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>    
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->
+    <aura:attribute name="fieldList" type="List" access="public"/>
+    <aura:attribute name="recordList" type="List" access="public"/> 
+    <!-- <aura:attribute name="resultContainer" type="CuAp_SelectDiscountApplyCtrlr.ContainerWrapper" access="public"/> -->
+    <aura:attribute name="resultContainer" type="object" access="public"/> 
+    
+    <aura:attribute access="private"  name="discountTypeExist"  type="boolean"  default="False" />
+    <aura:attribute access="private" name="noResultFound" type="boolean" default="false"/>
+    <aura:attribute access="private" name="SelectedRecord" type="BlAp_CombinedRecord" default="" />
+    <aura:attribute access="private" name="criteria" type="string"/>
+    <aura:attribute access="private" name="operation" type="string"/>
+    <aura:attribute access="private" name="discountTypeRecordType" type="string"/>
+    <aura:attribute access="private" name="filterValue" type="string"/>
+    <aura:attribute access="private" name="criteriaVal" type="string[]"/>
+    <aura:attribute access="private" name="operationVal" type="string[]"/>
+    <aura:attribute access="private" name="concessions" type="string[]"/>
+    
+    <aura:handler name="change" value="{!v.criteria}" action="{!c.setSelectDiscountBlank}"/>
+    
+    <!-- Row Event methods -->
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        <c:GlAp_Notifier aura:id="notifier"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page --> 
+        <div class="slds-container_fluid">
+            <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element">
+                    <div class="slds-form-element__group">
+                        <div class="slds-form-element__row slds-grid_vertical-align-center">
+                            <div class="slds-form-element slds-size_1-of-8 slds-text-align_right">
+                                {!$Label.c.CuAp_MoveOutFilterLabel}
+                            </div>
+                            <div class="slds-form-element slds-size_1-of-8">
+                                <c:GlAp_InputField value="{!v.criteria}" type="select" picklistValues="{!v.criteriaVal}"/>
+                            </div>
+                            <div class="slds-form-element slds-size_1-of-8">
+                                <c:GlAp_InputField value="{!v.operation}" type="select" picklistValues="{!v.operationVal}"/>
+                            </div>
+                            <div class="slds-form-element slds-size_2-of-8">
+                                <c:GlAp_InputField value="{!v.filterValue}" type="text"/>
+                            </div>
+                            <div class="slds-form-element slds-size_1-of-8">
+                                <button type="button" class="slds-button slds-button--brand slds-p-right_small" onclick="{!c.doFilter}">
+                                    {!$Label.c.CuAp_OKButton}
+                                </button>
+                                <button type="button" class="slds-button slds-button--brand" onclick="{!c.doReset}">
+                                    {!$Label.c.GlAp_CancelButton}
+                                </button> 
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <aura:if isTrue="{!v.discountTypeExist}">
+                <div>
+                    <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_AvailableDiscounts}</legend>
+                </div>
+                <br></br>
+                <div class="slds-container_fluid">
+                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" forceEditMode="true"/> 
+                </div>
+                <aura:set attribute="else">
+                    <aura:if isTrue="{!v.noResultFound}">
+                        <div class="slds-notify_container slds-is-relative">
+                            <div class="slds-notify slds-notify--alert slds-theme--alt-inverse" role="alert">
+                                <h2>{!$Label.c.GlUt_NoRecordsFound}</h2>
+                            </div>
+                        </div>
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+        </div> 
+    </aura:if>
+</aura:component>

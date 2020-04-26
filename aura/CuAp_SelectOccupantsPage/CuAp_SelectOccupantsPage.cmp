@@ -1,0 +1,73 @@
+<!-- 
+/******************************************************************************
+@author    	 :	Accenture: Ashish Tiwari
+@date      	 :	15 Nov 2017
+@Input       :  locationId,MoveOutDate
+@OutPut      :  List<LocationOccupant__c> moveOutRecords
+@description : 	Component to select the Current Occupents to Move Out for process using the Wizard framework
+*******************************************************************************/
+-->
+<aura:component access="global" 
+		controller="CuAp_SelectOccupantsPageCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+
+	<!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<c:GlAp_Notifier aura:id="notifier"/>
+	<!-- END: REQUIRED BY FRAMEWORK -->
+	
+    <!--Page specific attributes -->
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="locationId"/>
+    <aura:attribute access="private" type="String" name="moveOutDate"/>
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/> 
+    <aura:attribute access="private" type="String[]" name="locationsRef"/>
+    <aura:attribute access="private" type="Boolean" name="noResultFound" default="false"/>
+    
+    <!--Page specific handlers -->
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    
+	<aura:if isTrue="{!v.isActive}">
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <aura:if isTrue="{!!v.noResultFound}">    
+                <div class="slds-tile__detail slds-p-bottom_small">
+                    <dl class="slds-dl_inline slds-p-bottom_x-small">
+						<dt class="slds-dl_inline__label slds-text-heading_small">{!$Label.c.CuAp_LocationRef}</dt>
+						<dd class="slds-dl_inline__detail">{!v.locationsRef[0]}</dd>
+						<dt class="slds-dl_inline__label slds-text-heading_small">{!$Label.c.CuAp_LocationAddress}</dt>
+						<dd class="slds-dl_inline__detail">{!v.locationsRef[1]}</dd>
+                    </dl>
+                </div>
+
+                <div class="slds-p-bottom_medium">
+	                <legend class="slds-form-element__label slds-text-title_caps">
+	                	{!$Label.c.CuAp_CurrentLocationOccupantsLegend}
+	                </legend>
+	                <legend class="slds-form-element__label slds-text-title_caps">
+	                	{!$Label.c.CuAp_ConfirmOccupantsMovingOut}
+	                </legend>
+                </div>
+                <div class="slds-container_fluid">
+                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true"/> 
+                </div>
+                <aura:set attribute="else">
+					<div class="slds-notify_container slds-is-relative">
+						<div class="slds-notify slds-notify--alert slds-theme--alt-inverse" role="alert">
+							<h2>{!$Label.c.GlUt_NoRecordsFound}</h2>
+					   	</div>
+					</div>
+				</aura:set>
+            </aura:if>
+        </div>
+    </aura:if>
+</aura:component>

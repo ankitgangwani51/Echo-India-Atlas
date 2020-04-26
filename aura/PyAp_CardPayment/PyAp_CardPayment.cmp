@@ -1,0 +1,99 @@
+<!--**********************************************************************************************
+@author      : Echo : Amit K.
+@date        : 17 Jan 2019
+@description : LC used to take a card payment over the phone So that a customer can pay their bill
+**********************************************************************************************!-->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:lightningQuickAction,force:hasRecordId,lightning:actionOverride" 
+                access="global"
+                controller="PyAp_CardPaymentCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute name="resultContainer" 	     type="object" 	 access="private"                   description="Wrapper container for field and other information"/>
+    <aura:attribute name="authKey"               type="string"   access="private" />
+    <aura:attribute name="iframeSrcUrl"          type="string"   access="private" />
+    <aura:attribute name="paymentFields"         type="List" 	 access="private"/>
+    <aura:attribute name="isActive"              type="boolean"  access="private"     default="false" description="true if this is the active page"/>
+    <aura:attribute name="TransformPaymentObject" type="object"  access="private"/> 
+    <aura:attribute name="frameWidth"             type="String"  access="private"    default="100%" />
+    <aura:attribute name="frameHeight"            type="String"  access="private"    default="160px" />    
+    <!-- Component handler -->
+    <aura:if isTrue="{!v.isActive}">
+        <section class="slds-modal slds-slide-up-open slds-modal_medium" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container "> 
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>  
+                    <div class="slds-text-heading_medium">{!$Label.c.PyAp_CardPayment}</div>
+                </header>
+                <!-- Spinner Component -->
+                <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                    <div class="slds-grid slds-grid_vertical slds-modal__content ">
+                        <!-- Notification Component -->
+                        <c:GlAp_NotificationComponent aura:id="notification"/>
+                        <div class="slds-form slds-form_compound slds-p-top_medium slds-p-around--medium">
+                            <fieldset class="slds-form-element slds-size_1-of-1">
+                                <legend class="slds-form-element__label slds-text-title_caps"></legend>
+                                <div class="slds-form-element__label slds-notify slds-notify--alert slds-theme_info" role="alert">
+                                    <h2>{!$Label.c.PyAp_PaymentDetails}</h2>
+                                </div>
+                                <div class="slds-container_fluid">
+                                    <div class="slds-form slds-form_compound slds-p-top_medium">
+                                        <fieldset class="slds-form-element">                    
+                                            <div class="slds-form-element__group"> 
+                                                <aura:iteration items="{!v.paymentFields}" var="PaymentFields">
+                                                    <div class="slds-form-element__row slds-size--1-of-1">
+                                                        <aura:iteration items="{!PaymentFields}" var="PaymentField">
+                                                            <div class="slds-form-element slds-size--1-of-2"> 
+                                                                <c:GlAp_GenericField aura:id="{!PaymentField.fieldLabel}"                                                              
+                                                                                     object="{!v.TransformPaymentObject}"
+                                                                                     objectName="{!PaymentField.parentObject}" 
+                                                                                     fieldType="{!PaymentField.fieldType}" 
+                                                                                     fieldName="{!PaymentField.fieldName}" 
+                                                                                     listView="{!PaymentField.showLabel}"
+                                                                                     showLabel="{!PaymentField.showLabel}"
+                                                                                     editMode="{!PaymentField.isEditable}"                                                                         
+                                                                                     changeEvent="{!PaymentField.changeEvent}"
+                                                                                     required="{!PaymentField.isRequired}" 
+                                                                                     isEditable="{!PaymentField.isEditable}" 
+                                                                                     picklistValues="{!PaymentField.pickListValues}"
+                                                                                     label="{!PaymentField.fieldLabel}" />                                                    
+                                                            </div>
+                                                        </aura:iteration>
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+                            </fieldset>  
+                        </div>
+                        <div>
+                            <aura:if isTrue="{!v.iframeSrcUrl}">
+                                <div class="slds-form slds-form_compound slds-p-top_medium slds-p-around--medium">
+                                    <fieldset class="slds-form-element slds-size_1-of-1">
+                                        <legend class="slds-form-element__label slds-text-title_caps"></legend>
+                                        <div class="slds-form-element__label slds-notify slds-notify--alert slds-theme_info" role="alert">
+                                            <h2>{!$Label.c.PyAp_CardDetails}</h2>
+                                        </div></fieldset></div>
+                                <iframe aura:id="BPointFrame" src="{!v.iframeSrcUrl}" width="{!v.frameWidth}" height="{!v.frameHeight}"  style="border-style: none;"/>
+                            </aura:if>
+                        </div>                    
+                    </div>
+                    <footer class="slds-modal__footer">
+                        <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                        <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                    </footer>       
+                </div></div>
+        </section>
+        <div class="slds-backdrop slds-backdrop--open"></div> 
+        <!-- Else section to show button only, On click of this button showingn modal box -->
+        <aura:set attribute="else">
+            <lightning:button variant="brand" disabled="false" label="Card Payment" onclick="{!c.doActive}" />        	
+        </aura:set>
+    </aura:if>
+</aura:component>

@@ -1,0 +1,92 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		26 Jun 2018
+@description 	Batch Request History component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="CuAp_BatchRequestHistoryCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+    <aura:attribute access="global" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="global" type="String" name="batchRequestFields" default="RelatedListDetails" description="name of the batch request queue fieldset"/>
+
+    <aura:attribute access="private" type="Map" name="object" description="map of the object properties"/> 
+    
+    <aura:attribute access="private" type="List" name="fields"/>
+    <aura:attribute access="private" type="List" name="records"/>
+    
+    <aura:attribute access="private" type="Map" name="tabFields"/>
+    <aura:attribute access="private" type="Map" name="tabRecords"/>
+    <aura:attribute access="private" type="String" name="activeTab"/>
+    <aura:attribute access="private" type="Integer" name="rowId"/>
+    <aura:attribute access="private" type="Boolean" name="showTabs" default="false"/> 
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/>
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    <aura:handler event="c:GlAp_AppRefreshEvent" action="{!c.doInit}"/>
+    
+    <div class="slds-container_fluid">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        
+		<!-- Notifications -->
+		<c:GlAp_NotificationComponent aura:id="notification"/>
+
+		<!-- Related Batch Request Queues -->
+		<article class="slds-card slds-card_boundary">
+
+			<!-- Heading -->
+			<div class="slds-card__header">
+				<header class="slds-grid slds-grid_align-spread slds-p-right_small">
+					<c:GlAp_RecordListTitleWithIcon objectName="{!v.namespace + 'BatchRequestQueue__c'}" object="{!v.object}" numberOfRecords="{!v.records.length}"/>
+
+					<!-- New Batch Request Component -->
+				<!--	<c.CuAp_NewBatchRequestQueue recordId="{!v.recordId}"/> -->
+				</header>
+			</div>
+			
+			<!-- Table of records -->
+			<div class="slds-card__body slds-scrollable_y medium_height">
+			    <div class="slds-p-horizontal_small">
+			        <c:GlAp_GenericTable tableName="BatchRequestQueueTable" fieldList="{!v.fields}" recordList="{!v.records}" showSelect="false"/> 
+			    </div>
+			    <aura:if isTrue="{!v.records.length == 0}">
+			        <div class="slds-align_absolute-center">
+			            {!$Label.c.GlAp_NoItemsToDisplayMsg}
+			        </div>
+			    </aura:if>
+			</div>
+                      
+           	<!-- Tabs -->
+			<aura:if isTrue="{!v.showTabs}">
+				<div class="tabset slds-tabs_card slds-p-vertical_small">
+
+               		<div class="slds-card__header">
+                		<h2 class="slds-text-heading--small">{!$Label.c.GlAp_RelatedRecords}</h2>
+                	</div>
+                	
+					<div class="slds-card__body">
+	                    <lightning:tabset variant="scoped" onselect="{!c.handleTab}" selectedTabId="{!v.activeTab}">            
+	                        <aura:iteration indexVar="index" items="{!v.tabRecords}" var="tab">
+	                            <lightning:tab id="{!tab.tabName}" label="{!tab.tabName + ' (' + tab.numberOfRecords + ')'}">
+	                                <c:GlAp_GenericTable aura:id="Tab + {!index}" tableName="{!v.activeTab}" fieldList="{!tab.fields}" recordList="{!tab.records}" showSelect="false"/>
+									<aura:if isTrue="{!tab.numberOfRecords == 0}">
+										<div class="slds-align_absolute-center">
+											{!$Label.c.GlAp_NoItemsToDisplayMsg}
+										</div>
+									</aura:if>
+	                            </lightning:tab>
+	                        </aura:iteration>             
+	                    </lightning:tabset>
+	            	</div>
+				</div>
+			</aura:if>
+		</article>
+	    	
+	</div>
+        
+</aura:component>

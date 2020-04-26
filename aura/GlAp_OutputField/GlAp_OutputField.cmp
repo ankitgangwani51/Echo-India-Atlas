@@ -1,0 +1,70 @@
+<aura:component >
+    <!--Attributes List-->
+    <aura:attribute name="value" type="object" />
+    <aura:attribute name="type" type="String" required="true"/>
+    <aura:attribute access="public" name="urlString" type="string"/>
+    <aura:attribute access="public" name="urlLabel" type="string"/>
+    <aura:attribute access="public" name="fieldName" type="String" />
+    <aura:attribute access="public" name="label" type="string" />
+    <aura:attribute access="public" name="currencyCode" type="string" />
+    <aura:attribute access="public" name="customUrlLabel" type="string" />
+
+    <aura:if isTrue="{!v.type == 'currency'}">
+        <ui:outputCurrency aura:id="curr" value="{!v.value}" /> <!--  currencyCode="{!v.currencyCode}"/-->
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'number'}">
+        <ui:outputNumber aura:id="num" value="{!v.value}" />
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'percent'}">
+        <!--<ui:outputNumber aura:id="per" value="{!v.value}"/>-->
+        <!-- Gopal Gupta - changes to show % -->
+        <aura:if isTrue="{!v.value}">
+            <ui:outputNumber value="{!v.value/100}" format="##.00%" />
+            <aura:set attribute="else">
+                <ui:outputNumber value="{!v.value}" />
+            </aura:set>
+        </aura:if>
+        
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'date'}">
+        <ui:outputDate aura:id="date1" value="{!v.value}"/>     
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'datetime-local'}">
+        <ui:outputDate aura:id="date1" value="{!v.value}" />     
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'text'}">
+        <ui:outputText aura:id="text" value="{!v.value}"/>
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'formula'}">
+        <aura:unescapedHTML aura:id="formula" value="{!v.value}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'checkbox'}">
+        <ui:outputCheckbox aura:id="checkbox" value="{!v.value}"/>
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'TextArea'}">
+        <ui:outputTextArea aura:id="textarea" value="{!v.value}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'url'}">
+        <!-- Put label just for testing -->
+        <ui:outputURL aura:id="url" value="{!v.value}" label="{!v.customUrlLabel}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'reference'}">
+        <ui:outputURL aura:id="reference" value="{!v.urlString}" label="{!v.urlLabel}" />
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'tel'}">
+        <ui:outputPhone aura:id="phone" value="{!v.value}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'email'}">
+        <ui:outputEmail aura:id="email" value="{!v.value}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'select'}">
+        <!--<aura:if isTrue="{!v.value == 'GBP'}">
+            <ui:outputText aura:id="text" value="British Pound"/> 
+            <aura:set attribute="else">
+                <ui:outputText aura:id="text" value="{!v.value}" />
+            </aura:set>        	
+        </aura:if>-->        
+        <ui:outputText aura:id="text" value="{!v.value}" />
+    </aura:if>    
+    {!if(empty(v.value), '&nbsp;' , '')}
+</aura:component>

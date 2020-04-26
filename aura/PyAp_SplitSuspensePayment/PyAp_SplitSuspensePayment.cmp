@@ -1,0 +1,175 @@
+<!-- 
+    /******************************************************************************
+    @author    		Echo: Dependra Singh
+    @date      		15 Jan 2018
+    @description 	Split Suspense Payment Lightning Component
+    @param			
+    *******************************************************************************/
+    -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:lightningQuickAction"
+                access="global"                
+                extends="c:GlAp_LightningComponentBase"
+                controller="PyAp_SplitSuspensePaymentCtrlr"
+                >    
+    
+    <!-- Component variables -->
+    <aura:attribute name="isActive" type="Boolean" default="false"/> 
+    <aura:attribute name="isShowButton" type="Boolean" default="false"/> 
+    <aura:attribute name="sObjectName" type="String" /> 
+    
+    <aura:attribute access="private" type="object" name="objPayment" />	
+
+    <aura:attribute access="private" type="List" name="recordList" />
+    <aura:attribute access="private" type="List" name="fieldList" />
+    <aura:attribute access="private" name="addMoreInfoList" type="object[]" />
+    
+    <aura:attribute access="public" type="String" name="buttonName" default="Split Suspense Payment "  description="The button name to start the Wizard"/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>    
+    <aura:handler name="inputFieldEvent" event="c:GlAp_GenericInputEvent" action="{!c.handleInputChangeEvent}"/>
+    <aura:handler name="selectedValueEvent" event="c:GlAp_CustomLookUpEvent" action="{!c.handleCustomLookUpEvent}"/>
+    <!--<aura:handler name="change" value="{!v.addMoreInfoList}" action="{!c.itemsChange}"/>-->
+
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    <aura:if isTrue="{!v.isActive}">        
+        <section class="slds-modal slds-slide-up-open slds-modal_medium" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding"> 
+                
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>   
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.PyAp_SplitSuspensePayment}</h2>
+                </header>
+                <div class="slds-modal__content ">	
+                    <!-- Notifications -->
+                    <c:GlAp_NotificationComponent aura:id="notification"/>
+                    <c:GlAp_SpinnerComponent aura:id="spinner"/>                    
+                    <fieldset class="slds-form-element slds-size_1-of-1">
+                        <legend class="slds-form-element__label slds-text-title_caps"></legend>
+                        <div class="slds-container_fluid">
+                            <div class="slds-form slds-form_compound slds-p-top_medium slds-p-around_large">
+                                <fieldset class="slds-form-element">                    
+                                    <div class="slds-form-element__group"> 
+                                        <aura:iteration items="{!v.recordList}" var="recordList">
+                                            <div class="slds-form-element__row slds-size--1-of-1">
+                                                <aura:iteration items="{!recordList}" var="record">
+                                                    <div class="slds-form-element slds-size--1-of-2"> 
+                                                        <c:GlAp_GenericField aura:id="{!record.fieldLabel}"
+                                                                             object="{!v.objPayment}" 
+                                                                             objectName="{!record.parentObject}"
+                                                                             fieldType="{!record.fieldType}" 
+                                                                             fieldName="{!record.fieldName}"
+                                                                             listView="{!record.showLabel}"
+                                                                             showLabel="{!record.showLabel}"
+                                                                             isEditable="{!record.isEditable}" 
+                                                                             editMode="{!record.isEditable}" 
+                                                                             picklistValues="{!record.pickListValues}"
+                                                                             label="{!record.fieldLabel}" 
+                                                                             required="{!record.isRequired}"
+                                                                             />                                                    
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </fieldset>
+                            </div>
+                            <table class="slds-table slds-table_fixed-layout slds-table--bordered slds-table--col-bordered">
+                                <thead>
+                                    <tr class="slds-text-title--caps" >
+                                        <th scope="col" class="column1" style= "width:5%;">
+                                            <div class="slds-truncate" title="Name">{!$Label.c.GlAp_SN}</div>
+                                        </th>
+                                        <th scope="col" class="column1" >
+                                            <div class="slds-truncate" title="Name">{!$Label.c.GlAp_ContractNumber}  </div>
+                                        </th>
+                                        <th scope="col" class="column2" >
+                                            <div class="slds-truncate" title="Email">{!$Label.c.GlAp_AccountName}</div>
+                                        </th>
+                                        <th scope="col" class="column3" >
+                                            <div class="slds-truncate" title="Mobile">{!$Label.c.GlAp_Amount}</div>
+                                        </th>
+                                         <th scope="col" class="column3" style= "width:5%;">
+                                            <div class="slds-truncate" title=""></div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <aura:iteration items="{!v.addMoreInfoList}" var="addMoreInfo" indexVar="index">
+                                        <tr class="slds-text-title--caps" >
+                                            <td class="slds-hint-parent" id ="{!index}" > 
+                                                {!index +1} 
+                                            </td>
+                                            <td data-label="Name" style="slds-cell-wrap" >
+                                                <c:GlAp_CustomLookup objectName="{!v.namespace + 'BillingContract__c'}"
+                                                                     field_API_text="{!addMoreInfo.displayFields}"
+                                                                     limit="10"
+                                                                     field_API_search="Name"
+                                                                     field_API_FilterText=""
+                                                                     field_API_FilterVal=""
+                                                                     lookupIcon="standard:contract" 
+                                                                     selItem="{!addMoreInfo.objBillingContract}" 
+                                                                     itemFieldValues="{!addMoreInfo.conFieldValues}"           
+                                                                     placeholder="{!$Label.c.CuAp_SearchText}"
+                                                                     /> <!--Changes for AT-1742 Starts/Ends Here -->
+                                            </td>
+                                            <td data-label="Account" style="slds-cell-wrap" >
+                                                <c:GlAp_OutputField label="" value="{!addMoreInfo.objBillingContract.AccountName}" type="text"/>				 
+                                            </td>
+                                            
+                                            <td data-label="Amount" style="slds-cell-wrap" >
+                                                <c:GlAp_GenericField aura:id="{!$Label.c.GlAp_Amount}"
+                                                                     object="{!addMoreInfo.paymentObj}" 
+                                                                     objectName="{!v.namespace + 'Payment__c'}"
+                                                                     fieldType="currency" 
+                                                                     fieldName="{!v.namespace + 'Amount__c'}"
+                                                                     isEditable="true" 
+                                                                     editMode="true" 
+                                                                     label= ""
+                                                                     changeEvent="true"
+                                                                     /> 
+                                            </td>
+                                            <td data-label="Amount" style="slds-cell-wrap" >
+                                               <!-- <a onclick="{!c.removeRow}">
+                                                    <lightning:icon variant="error" iconName="utility:delete" class="slds-icon slds-icon_small" size="small" alternativeText="icon"/>
+                                                </a>-->
+                                                <button aura:id="{!index +1} " class="slds-button" onclick="{!c.removeRow}" >
+                                                    <lightning:icon variant="error" iconName="utility:delete" class="slds-icon slds-icon_small" size="small" alternativeText="icon"/>
+                                                </button>
+                                            </td>
+   
+                                        </tr>
+                                    </aura:iteration>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="slds-container_fluid  slds-p-around_medium">
+                            <button type="button" 
+                                    class="slds-button slds-button--neutral slds-float_right slds-m-bottom_small" 
+                                    onclick="{!c.addMoreRows}">
+                                {!$Label.c.CuAp_AddMoreButton}
+                            </button>
+                        </div>
+                    </fieldset> 
+                </div>                
+                <footer class="slds-modal__footer">
+                    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                    <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                </footer>       
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop--open"></div> 
+        <aura:set attribute="else">
+            <aura:if isTrue="{!v.isShowButton}">  
+                <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doActive}" />        	
+            </aura:if>
+        </aura:set>
+        
+    </aura:if>
+</aura:component>

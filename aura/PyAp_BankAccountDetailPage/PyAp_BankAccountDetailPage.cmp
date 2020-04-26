@@ -1,0 +1,160 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" 
+                access="global" extends="c:GlAp_LightningComponentBase"
+                controller="PyAp_BankAccountDetailCtrlr">
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="true" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties" default=""/>
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    <!-- Component variables --> 
+    <aura:attribute access="private" name="radioValue" type="String" default="New"/>
+    <aura:attribute access="private" type="List" name="options" description="Type of operation"/>
+    
+    <aura:attribute access="private" type="Boolean" name="isShowExisting" default="false" />
+    <aura:attribute access="private" type="Boolean" name="isShowNew"  default="false"/>
+    
+    <aura:attribute access="private" type="Account" name="objAccount" />
+    <aura:attribute access="private" type="List" name="bankAccountDetailsFields"/>
+    <aura:attribute access="private" type="string"  name="selectedBankAccountDetailId" />
+    <aura:attribute access="private" type="object" name="objBankAccountDetail" />
+    
+    <aura:attribute access="private" type="Boolean" name="validateButtonEnabled"  default="false"/>
+    <aura:attribute access="private" name="bankBranchFound" type="boolean" default="false" />
+    <aura:attribute access="private" type="List" name="bankBranchFields"/>
+    <aura:attribute access="private" name="bankBranchRec" type="object" />
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-container_fluid slds-p-top_medium">
+            <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">        
+                <div class="slds-container_fluid">
+                    <div class="slds-form slds-form_compound ">
+                        <!-- Radio Button to select and operation-->
+                        <fieldset class="slds-form-element">
+                            <legend class="slds-form-element__legend slds-form-element__label">{!$Label.c.GlUt_SelectOperation}</legend>
+                            <div class="slds-form-element__control">
+                                <div class="slds-radio_button-group">
+                                    <aura:iteration items="{!v.options}" var="option">
+                                        <span class="slds-button slds-radio_button">
+                                            <input type="radio" name="processAsRadio" id="{!option.value}" value="{!option.value}" onclick="{!c.handleChange}" />
+                                            <!--lightning:input type="radio" name="processAsRadio" id="{!option.value}" value="{!option.value}" onchange="{!c.handleChange}" /-->
+                                            <label class="slds-radio_button__label" for="{!option.value}">
+                                                <span class="slds-radio_faux"  >{!option.label}</span>
+                                            </label>
+                                        </span>
+                                    </aura:iteration>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            <!--Select Existing Bank Account Detail Section-->
+            <aura:if isTrue="{!v.isShowExisting}">
+                <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                    <div class="slds-form slds-form_compound">                   
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-p-bottom_medium slds-p-left_medium slds-m-left_medium">
+                                <div class="slds-form-element__group ">
+                                    <div class="slds-form-element__row">
+                                        <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                                    </div>
+                                </div> 
+                                {!$Label.c.PyAp_BankAccountDetail}
+                                <c:GlAp_CustomLookup objectName="{!v.namespace + 'BankAccountDetails__c'}"
+                                                     field_API_text="Id, Name"
+                                                     limit="10"
+                                                     field_API_search="Name"
+                                                     field_API_FilterText="{!v.namespace + 'Account__c'}"
+                                                     field_API_FilterVal="{!v.objAccount.Id}"
+                                                     lookupIcon="custom:custom2" 
+                                                     placeholder="{!$Label.c.CuAp_SearchText}"
+                                                     selItem="{!v.selectedBankAccountDetailId}"
+                                                     /> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aura:if>
+            <!--New Bank Account Details Section-->
+            <aura:if isTrue="{!v.isShowNew}">
+                <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                    <div class="slds-form slds-form_compound">
+                        <div class="slds-grid slds-gutters">
+                            <div class="slds-col slds-p-bottom_medium slds-p-left_medium slds-m-left_medium">
+                                <div class="slds-form-element__group ">
+                                    <div class="slds-form-element__row">
+                                        <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                                    </div>
+                                </div>
+                                <div class="slds-form-element__group slds-p-left_medium slds-p-bottom_large slds-p-right_medium">    
+                                    <aura:iteration items="{!v.bankAccountDetailsFields}" var="bankAccFields">      
+                                        <aura:iteration items="{!bankAccFields}" var="bankAccField">
+                                            <div class="slds-form-element slds-size_1-of-1">
+                                                <c:GlAp_GenericField object="{!v.objBankAccountDetail}" 
+                                                                     objectName="{!bankAccField.parentObject}" 
+                                                                     fieldType="{!bankAccField.fieldType}" 
+                                                                     fieldName="{!bankAccField.fieldName}" 
+                                                                     isEditable="{!bankAccField.isEditable}" 
+                                                                     picklistValues="" 
+                                                                     showLabel="true"
+                                                                     listView="true"
+                                                                     label="{!bankAccField.fieldLabel}" 
+                                                                     required="true"
+                                                                     />
+                                            </div>
+                                        </aura:iteration>
+                                    </aura:iteration>
+                                    <aura:if isTrue="{!v.validateButtonEnabled}">
+                                        <div class="slds-p-top_medium">
+                                            <button type="button" class="slds-button slds-button--brand" onclick="{!c.validateSortCode}">{!$Label.c.PyAp_SelectValidate}</button>
+                                        </div>
+                                    </aura:if>
+                                    <aura:if isTrue="{!v.bankBranchFound}"> 
+                                        <div class="slds-container_fluid">
+                                            <div class="slds-m-top_x-large"> </div>
+                                            <b>{!$Label.c.PyAp_BranchDetailsLabel}</b>  
+                                            <div class="slds-form slds-form_compound slds-p-top_medium">
+                                                <fieldset class="slds-form-element">                    
+                                                    <div class="slds-form-element__group">
+                                                        <aura:iteration items="{!v.bankBranchFields}" var="bankBranchFields">
+                                                            <div class="slds-form-element__row">          
+                                                                <aura:iteration items="{!bankBranchFields}" var="bankBranchField">
+                                                                    <div class="slds-form-element slds-size_1-of-2">                                   
+                                                                        <c:GlAp_GenericField aura:id="{!bankBranchField.fieldLabel}" 
+                                                                                             object="{!v.bankBranchRec}" 
+                                                                                             objectName="{!bankBranchField.parentObject}" 
+                                                                                             fieldType="{!bankBranchField.fieldType}" 
+                                                                                             fieldName="{!bankBranchField.fieldName}"
+                                                                                             listView="{!bankBranchField.showLabel}"
+                                                                                             showLabel="{!bankBranchField.showLabel}"
+                                                                                             editMode="{!bankBranchField.isEditable}" 
+                                                                                             isEditable="{!bankBranchField.isEditable}"
+                                                                                             picklistValues="" 
+                                                                                             label="{!bankBranchField.fieldLabel}" 
+                                                                                             />
+                                                                    </div>
+                                                                </aura:iteration>
+                                                            </div>
+                                                        </aura:iteration>
+                                                    </div>                       
+                                                </fieldset>
+                                            </div>                      
+                                        </div>
+                                    </aura:if>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aura:if>
+        </div>
+    </aura:if>
+</aura:component>

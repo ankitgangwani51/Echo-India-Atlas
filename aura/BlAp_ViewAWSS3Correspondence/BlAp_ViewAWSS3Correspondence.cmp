@@ -1,0 +1,25 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		04 June 2018
+@description 	View Correspondence Lightning Component
+@param			
+@Revision	 	AT-3965, Tarun - Modified as per security review
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId" access="global"
+                extends="c:GlAp_LightningComponentBase"
+                controller="BlAp_ViewAWSS3CorrespondenceCtrlr">
+    
+    <aura:attribute name="signedUrl"  type="string"   access="private"   default="false"/>
+    <aura:handler name="init" action="{!c.doInit}" value="{!this}" />
+    
+    <div class="slds-modal__content slds-p-around--medium">	
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        <lightning:button variant="brand" 
+                          label="{!$Label.c.BlAp_ViewCorrespondenceHeader}" 
+                          name="{!$Label.c.BlAp_ViewCorrespondenceHeader}" 
+                          disabled="false" 
+                          onclick="{!c.ViewDocument}"/>
+    </div>
+</aura:component>

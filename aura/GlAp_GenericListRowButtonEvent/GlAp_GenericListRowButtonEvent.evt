@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Button in a generic list row has been pressed">
+	<aura:attribute name="RowId" type="String"/>
+    <aura:attribute name="ButtonId" type="String"/>
+</aura:event>

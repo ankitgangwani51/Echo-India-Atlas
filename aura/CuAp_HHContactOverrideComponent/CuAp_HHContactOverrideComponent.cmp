@@ -1,0 +1,15 @@
+<!-- 
+/******************************************************************************
+@author          Accenture: Shivangi Gaur
+@date            18-09-2017
+@description     Lightning component for overriding contact record type selection page.
+@Revisions		 AT-3984 . Tarun, Changed the name of class as per security review changes 
+*******************************************************************************/
+-->
+<aura:component controller="CuAp_HHContactOverrideComponentCtrlr" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction,lightning:actionOverride" access="global">
+
+<!--Page specific attributes declaration start-->
+    <aura:handler name="init" value="{!this}" action="{!c.createRecord}"/>
+<!--Page specific attributes declaration end-->
+    
+</aura:component>

@@ -1,0 +1,74 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Vivek Sethi
+@date      		07 Dec 2018
+@description 	New Batch Request component for Entitlement Renewal
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="LoAp_EntitlementRenewalCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="public" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="public" type="String" name="batchRequestFields" default="RelatedListDetails" description="name of the batch request queue fieldset"/>
+    <aura:attribute access="private" type="List" name="recordList" />
+    <aura:attribute access="private" type="List" name="fieldList" />
+    <aura:attribute access="private" type="Date" name="renewalDate" />
+    <aura:attribute access="private" type="Decimal" name="seasonAllocation" />
+    <aura:attribute name="lcHost" type="String"  />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="refreshEvent" type="c:GlAp_AppRefreshEvent"/> 
+    
+    <div class="slds-container_fluid">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        
+        <!-- Related Batch Request Queues -->
+        <article class="slds-card slds-card_boundary">
+            <div class="slds-modal__header ">
+                <!-- Title with Icon -->
+                <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <div class="slds-media__figure">
+                                <div class="extraSmall forceEntityIcon" style="background-color: #7698f0">
+                                    <span class="uiImage" data-aura-class="uiImage">
+                                        <img src= "{!v.lcHost}" class="icon" alt="{!$Label.c.LoAp_BookExportRequestNewReqBtn}" title="{!$Label.c.LoAp_BookExportRequestNewReqBtn}"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-media__body">
+                                <h2 id="header">
+                                    <div class="slds-card__header-link baseCard__header-title-container" href="javascript:void(0);">
+                                        <span class="slds-text-heading--small slds-truncate slds-m-right--xx-small" title="{!$Label.c.LoAp_BookExportRequestNewReqBtn}">
+                                            {!$Label.c.LoAp_BookExportRequestNewReqBtn} - {!$Label.c.LoAp_EntitlementRenewalLabel} 
+                                        </span>
+                                    </div>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Notifications -->
+            <c:GlAp_NotificationComponent aura:id="notification"/>
+            <!-- Table of records -->
+            <div class="slds-grid slds-wrap slds-p-top_medium slds-p-bottom_medium">
+                <div class="slds-size_1-of-3 slds-p-horizontal_medium">
+                    <lightning:input type="date" name="RenewalDate" label="Renewal Date" value="{!v.renewalDate}" />
+                </div>
+                <div class="slds-size_1-of-3 slds-p-horizontal_medium">
+                    <lightning:input type="number" name="SeasonAllocation"  formatter="percent-fixed" label="Season Allocation" value="{!v.seasonAllocation}"/>
+                </div>
+                <div class="slds-form slds-form_compound slds-p-top_medium"/>                
+                <!-- New Request Button -->
+                <div class=" slds-container_fluid slds-p-right_xx-small" align="right" >
+                    <lightning:button variant="brand" label="{!$Label.c.DrUI_RunLabel}" name="new_Request" onclick="{!c.newRequest}" />
+                </div>
+            </div>
+        </article>
+    </div>
+</aura:component>

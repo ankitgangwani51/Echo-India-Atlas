@@ -1,0 +1,54 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		09-Jan-2018
+@description 	Component to implement the Discount process using the Wizard framework
+@Revision	 	AT-3975, Tarun - Modified as per security review
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="CuAp_DiscountWizardCtrlr"
+                extends="c:GlAp_WizardTemplate">
+    
+    <!-- set Wizard variables -->
+    <aura:set attribute="title" value="{!$Label.c.CuAp_DiscountWizardHeader}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.CuAp_ManageDiscount}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+    <aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->    
+    
+    <!-- event handlers -->
+    <!-- have to be here as we can't override an inherited helper method from the parent -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    
+    <aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+                  description="handler for bill calculation complete events"/>
+    
+    <!-- local variables -->
+    <aura:attribute access="private" type="Id" name="finalDiscountId" description="Id of the final Discount for bill calculation"/> <!--Changes for AT-3448 Starts/Ends here -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- Wizard pages -->
+    <!--Changes for AT-3448 Starts here -->
+    <!-- Bill Calculation component -->
+    <c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" 
+                                   recordId="{!v.finalDiscountId}" sObjectName="{!v.namespace + 'Discount__c'}" 
+                                   showButton="false" calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+    <!--Changes for AT-3448 Ends here -->
+    <!-- WS1 - Select Discount Operation --> 
+    <c:CuAp_SelectDiscountOperation aura:id="selectDiscountOperationPage" isActive="{!v.stepName == $Label.c.CuAp_DiscountPathPage1}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!-- WS2 - Select Discount Apply -->
+    <c:CuAp_SelectDiscountApply aura:id="selectDiscountApplyPage" isActive="{!v.stepName == $Label.c.CuAp_DiscountPathPage2}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS2 - Add Discount -->
+    <c:CuAp_AddDiscountPage aura:id="addDiscountPage" isActive="{!v.stepName == $Label.c.CuAp_DiscountPathPage3}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS2 - Manage Discount -->
+    <c:CuAp_ManageDiscounts aura:id="manageDiscount" isActive="{!v.stepName == $Label.c.CuAp_DiscountPathPage4}" wizardprop="{!v.wizardprop}"/>
+    <!-- Navigation -->
+    <div class="slds-container_fluid">
+        <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+    </div> 
+</aura:component>

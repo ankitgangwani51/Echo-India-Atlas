@@ -1,0 +1,89 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		22-Oct-2018
+@description 	WS4: Transfer Debit\Credit
+    Wizard screen to transfer Debit\Credit as part of the AU Move In Wizard
+ 
+@param			wizardprop - need it from the previous screen to fetch the locationId
+       and to set the variables to be returned to next screen
+@return			
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId"
+                controller="CuAp_AUTransferCreditOrDebitCtrlr"  
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->  
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="locationId" default="" />
+    <aura:attribute access="private" name="objCreditDebit" type="object" /> 
+    
+    <aura:attribute access="private" name="totalCreditOnContract" type="Decimal" />
+    <aura:attribute access="private" name="creaditToTransfer" type="Decimal" />
+    <aura:attribute access="private" name="amountOfDebt" type="Decimal" />
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-container_fluid">
+            <div class="slds-form-element"> 
+                <div class="slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                    <!-- Notification Component to show Toast (Error/Info) -->
+                    <c:GlAp_Notifier aura:id="notifier"/>
+                    <aura:if isTrue="{! (v.totalCreditOnContract > 0)}">
+                        <div class="slds-form slds-form_compound slds-p-top_medium slds-p-horizontal_large">
+                            <div class="slds-p-bottom_medium">
+                                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_AUMoveInCreditText}</legend>
+                            </div>
+                            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                            
+                            <div class="slds-grid slds-wrap">            
+                                <div class="slds-size_1-of-7">
+                                    <c:GlAp_InputField type="currency" label="{!$Label.c.CuAp_AUMoveInCreditOnContract}" value="{!v.totalCreditOnContract}" disableField="true"/>
+                                </div>
+                                
+                            </div>
+                            <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                            <div class="slds-grid slds-wrap">            
+                                <div class="slds-size_1-of-7">
+                                    <c:GlAp_InputField type="currency" label="{!$Label.c.CuAp_AUMoveInAmtOfCreditToTransfer}" value="{!v.creaditToTransfer}"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                    </aura:if>
+                    
+                    <aura:if isTrue="{! (v.amountOfDebt > 0)}">
+                        <div class="slds-form slds-form_compound slds-p-top_medium slds-p-horizontal_large">
+                            <div class="slds-p-bottom_medium">
+                                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_AUMoveInDebitText}</legend>
+                            </div>
+                            <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                            
+                            <div class="slds-grid slds-wrap">            
+                                <div class="slds-size_1-of-7">
+                                    <c:GlAp_InputField type="currency" label="{!$Label.c.CuAp_AUMoveInAmtOfDebit}" value="{!v.amountOfDebt}" disableField="true"/>
+                                </div>
+                            </div>
+                            
+                            <div class="slds-form slds-form_compound slds-p-top_medium"/> 
+                        </div>
+                    </aura:if>
+                </div>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

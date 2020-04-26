@@ -1,0 +1,34 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Sudhir Kumar
+@date      		18-Jan-2019
+@description 	AT-4849: Real Time Concession Validation
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" access="global" 
+                extends="c:GlAp_LightningComponentBase"
+                controller="CuAp_ConcessionValidationCtrlr">
+	<!--Component Variables-->
+    <aura:attribute access="public" type="Boolean" name="displayButton" default="true" description="displays a button to calculate charges" />
+    <aura:attribute name="isActive" type="Boolean" default="false"/>  
+    <aura:attribute access="public" type="String" name="buttonName" default="Validate Concession"  description="The button name to start "/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <aura:attribute access="public" type="Object" name="concessionObj" description="concession object"/>
+    <!--Child Components-->
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/> <!--Sudhir: AT-3738-->
+	
+    <!--Component markup-->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div class="slds-container__fluid">
+        <c:GlAp_NotificationComponent aura:id="notifier"/>
+        <!--Button to invoke heroku for Information Statement calculate charges-->
+        <aura:if isTrue="{!v.isActive}">
+            <aura:set attribute="else">
+                <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doConcessionValidation}" />        	
+            </aura:set>
+        </aura:if>
+    </div>	
+</aura:component>

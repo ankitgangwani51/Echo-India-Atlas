@@ -1,0 +1,138 @@
+<aura:component access="global">
+    <!--Attributes List-->
+    <aura:attribute access="global" name="value" type="object" required="true"/>
+    <aura:attribute access="public" name="objectName" type="String" />
+    <aura:attribute access="public" name="fieldName" type="String" />
+    <aura:attribute access="global" name="type" type="String" required="true"/>
+    <aura:attribute access="public" name="picklistValues" type="String[]" />
+    <aura:attribute access="public" name="object" type="sObject" />
+    <aura:attribute access="global" name="required" type="boolean" default="false" />
+    <aura:attribute access="global" name="label" type="string" />  
+    <aura:attribute access="public" name="helpText" type="string" />
+    <aura:attribute access="public" name="labelSize" type="Integer" />
+    <aura:attribute access="public" name="disableField" type="boolean" default="false"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" />
+    <aura:if isTrue="{!v.helpText != null &amp;&amp; v.helpText != '' }">
+        <aura:if isTrue="{!v.labelSize lt 10}">
+            <span style="position:absolute!important; padding-left:11%; z-index: 1" >
+                <span class="slds-form-element__icon slds-align-right" onmouseover="{!c.display1}" onmouseout="{!c.displayOut2}">
+                    <button class="slds-button slds-button slds-button--icon" aria-describedby="help">
+                        <lightning:icon iconName="utility:info" size="xx-small" alternativeText="Help" title="{!v.helpText}"/>         
+                    </button>                  
+                    
+                    <div class="slds-hide slds-popover slds-popover--tooltip slds-nubbin--left " role="tooltip" id="help" style="position:absolute;top:-12px;left:35px;height:inherit;width:235px" aura:id="tooltip1">
+                        <div class="slds-popover__body">{!v.helpText}</div>
+                    </div>
+                </span>	
+            </span> 
+        </aura:if>
+        
+        <aura:if isTrue="{!v.labelSize ge 10 &amp;&amp; v.labelSize le 20 }">
+            <span style="position:absolute!important; padding-left:22%; z-index: 1" >
+                <span class="slds-form-element__icon slds-align-right" onmouseover="{!c.display1}" onmouseout="{!c.displayOut2}">
+                    <button class="slds-button slds-button slds-button--icon" aria-describedby="help">
+                        <lightning:icon iconName="utility:info" size="xx-small" alternativeText="Help" title="{!v.helpText}"/>         
+                    </button>                  
+                    
+                    <div class="slds-hide slds-popover slds-popover--tooltip slds-nubbin--left " role="tooltip" id="help" style="position:absolute;top:-12px;left:35px;height:inherit;width:235px" aura:id="tooltip1">
+                        <div class="slds-popover__body">{!v.helpText}</div>
+                    </div>
+                </span>	
+            </span> 
+        </aura:if>
+    
+        <aura:if isTrue="{!v.labelSize ge 21 &amp;&amp; v.labelSize le 25 }">
+            <span style="position:absolute!important; padding-left:37%; z-index: 1" >
+                <span class="slds-form-element__icon slds-align-right" onmouseover="{!c.display1}" onmouseout="{!c.displayOut2}">
+                    <button class="slds-button slds-button slds-button--icon" aria-describedby="help">
+                        <lightning:icon iconName="utility:info" size="xx-small" alternativeText="Help" title="{!v.helpText}"/>         
+                    </button>                  
+                    
+                    <div class="slds-hide slds-popover slds-popover--tooltip slds-nubbin--left " role="tooltip" id="help" style="position:absolute;top:-12px;left:35px;height:inherit;width:235px" aura:id="tooltip1">
+                        <div class="slds-popover__body">{!v.helpText}</div>
+                    </div>
+                </span>	
+            </span> 
+        </aura:if>
+    	
+        <aura:if isTrue="{!v.labelSize ge 26 &amp;&amp; v.labelSize le 30 }">
+            <span style="position:absolute!important; padding-left:36%; z-index: 1" >
+                <span class="slds-form-element__icon slds-align-right" onmouseover="{!c.display1}" onmouseout="{!c.displayOut2}">
+                    <button class="slds-button slds-button slds-button--icon" aria-describedby="help">
+                        <lightning:icon iconName="utility:info" size="xx-small" alternativeText="Help" title="{!v.helpText}"/>         
+                    </button>                  
+                    
+                    <div class="slds-hide slds-popover slds-popover--tooltip slds-nubbin--left " role="tooltip" id="help" style="position:absolute;top:-12px;left:35px;height:inherit;width:235px" aura:id="tooltip1">
+                        <div class="slds-popover__body">{!v.helpText}</div>
+                    </div>
+                </span>	
+            </span> 
+        </aura:if>
+    
+        <aura:if isTrue="{!v.labelSize gt 30}">
+            <span style="position:absolute!important; padding-left:65%; z-index: 1" >
+                <span class="slds-form-element__icon slds-align-right" onmouseover="{!c.display1}" onmouseout="{!c.displayOut2}">
+                    <button class="slds-button slds-button slds-button--icon" aria-describedby="help">
+                        <lightning:icon iconName="utility:info" size="xx-small" alternativeText="Help" title="{!v.helpText}"/>         
+                    </button>                  
+                    
+                    <div class="slds-hide slds-popover slds-popover--tooltip slds-nubbin--left " role="tooltip" id="help" style="position:absolute;top:-12px;left:35px;height:inherit;width:235px" aura:id="tooltip1">
+                        <div class="slds-popover__body">{!v.helpText}</div>
+                    </div>
+                </span>	
+            </span> 
+        </aura:if>
+    </aura:if>  
+    
+    <aura:if isTrue="{!v.type == 'currency'}">
+        <ui:inputCurrency aura:id="cur" value="{!v.value}" label="{!v.label}" class="slds-input" required="{!v.required}" disabled="{!v.disableField}"/>
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'number'}">
+        <ui:inputNumber aura:id="num" value="{!v.value}" label="{!v.label}" class="slds-input" required="{!v.required}" />
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'percent'}">
+        <ui:inputNumber aura:id="per" value="{!v.value}" label="{!v.label}" class="slds-input" required="{!v.required}" />
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'date'}">
+        <ui:inputDate aura:id="date1" value="{!v.value}" label="{!v.label}" class="slds-field" displayDatePicker="true" required="{!v.required}" change="{!c.onChangeFunction}" disabled="{!v.disableField}"/>     
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'datetime-local'}">
+        <ui:inputDate aura:id="date1" value="{!v.value}" label="{!v.label}" class="field" displayDatePicker="true" required="{!v.required}" change="{!c.onChangeFunction}"/>     
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'text'}">
+        <ui:inputText aura:id="text" label="{!v.label}" value="{!v.value}" class="slds-input" required="{!v.required}"  change="{!c.onChangeFunction}"/>        
+    </aura:if>
+    <!-- Added  by Dependra - Core 7a -->
+     <aura:if isTrue="{!v.type == 'textEncrypted'}">
+        <ui:inputSecret aura:id="textEncrypted" label="{!v.label}" value="{!v.value}" class="slds-input" required="{!v.required}" />        
+    </aura:if>
+    
+    <aura:if isTrue="{!v.type == 'checkbox'}">
+        <ui:inputCheckbox aura:id="checkbox" value="{!v.value}" label="{!v.label}" class="slds-checkbox" required="{!v.required}" change="{!c.onChangeFunction}"/>
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'TextArea'}">
+        <ui:inputTextArea aura:id="textarea" value="{!v.value}" label="{!v.label}" class="slds-input" required="{!v.required}" change="{!c.onChangeFunction}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'url'}">
+        <ui:inputURL aura:id="url" value="{!v.value}" label="{!v.label}" class="slds-input" required="{!v.required}" change="{!c.onChangeFunction}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'reference'}">
+        <label class="slds-form-element__label" for="{!v.fieldName}">{!v.label}</label>
+        <c:GlAp_ReferenceField aura:id="reference" value="{!v.value}" fieldName="{!v.fieldName}" objectName="{!v.objectName}" required="{!v.required}" />
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'tel'}">
+        <ui:inputPhone aura:id="phone" value="{!v.value}" label="{!v.label}" class="slds-input" required="{!v.required}" change="{!c.onChangeFunction}"/> 
+    </aura:if>
+    <aura:if isTrue="{!v.type == 'email'}">
+        <ui:inputEmail aura:id="email" value="{!v.value}" label="{!v.label}" class="slds-input" required="{!v.required}" change="{!c.onChangeFunction}"/> 
+    </aura:if>    
+    <aura:if isTrue="{!v.type == 'select'}">                                
+        <ui:inputSelect aura:id="picklist" value="{!v.value}" label="{!v.label}"  required="{!v.required}" change="{!c.onChangeFunction}" disabled="{!v.disableField}">
+            <aura:iteration items="{!v.picklistValues}" var="picklistValue">
+                <ui:inputSelectOption text="{!picklistValue}" label="{!picklistValue}"/>
+            </aura:iteration>                
+        </ui:inputSelect>                
+    </aura:if>    
+     
+</aura:component>

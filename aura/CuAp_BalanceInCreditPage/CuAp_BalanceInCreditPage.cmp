@@ -1,0 +1,62 @@
+<!-- 
+/******************************************************************************
+@author    	 :	Echo: Swati Mathur
+@Input       :  wizObj.creditAmount
+@Output		 :  wizObj.creditRefund  			
+@date      	 :	18-Jan-2018
+@description : 	WS1- Wizard screen to select action to be perormed as part of the Payment Plan Wizard
+@revision    :  modified layout of the screen 
+*******************************************************************************/
+ -->
+
+<aura:component access="global"
+                extends="c:GlAp_LightningComponentBase" >
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    
+    <aura:attribute name="options" type="List"/>
+    
+    <aura:attribute name="radioValue" type="String" default="refundSelected"/>
+    <aura:attribute access="private" type="currency" name="creditAmount"  />
+    
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-container_fluid slds-p-top_medium">            
+            <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">                
+                
+                <div class="slds-align_absolute-center">
+                    <fieldset class="slds-form-element"> 
+                        <div class="slds-form-element__group">
+                            {!$Label.c.PyAp_TotalCreditOnContract}
+                            <div class="slds-p-top_xxx-small">
+                                <c:GlAp_OutputField type="currency" value="{!v.creditAmount}" />
+                            </div>
+                        </div>
+                        <div class="slds-p-top_medium">
+                        <div class="slds-form-element__control">   
+                            <lightning:radioGroup aura:id="mygroup"
+                                                  name="radioButtonGroup"
+                                                  label=""
+                                                  options="{!v.options}"
+                                                  value="{!v.radioValue}"
+                                                  onchange="{!c.setNextScreen}"
+                                                  />  
+                        </div> 
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+        
+    </aura:if>
+    
+</aura:component>

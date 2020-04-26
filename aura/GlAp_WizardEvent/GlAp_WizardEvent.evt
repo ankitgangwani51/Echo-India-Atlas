@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="Wizard Event To Show Navigation">
+	<aura:attribute name="message" type="String"/>
+</aura:event>

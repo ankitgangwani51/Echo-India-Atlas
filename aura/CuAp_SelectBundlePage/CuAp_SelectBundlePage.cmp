@@ -1,0 +1,77 @@
+<!-- 
+/******************************************************************************
+@author         Echo: Satish Nair
+@date           06-Nov-2017
+@description    WS5: Select Available Bundles
+                Wizard screen to select/de select available Bundles as part of the Move In Wizard.
+                Also displays the Available Service, Available Service Items and the Supply Points  
+
+				wizardprop			
+@param			selectedServices (List<AvailableService__c>)
+@return			allBundles (List<AvailableBundle__c>)
+				
+@revision(s)	17 Jan 2018, P Dixon - cleanup
+@Revisions		28/03/2019, AT-5336,5504 , Tarun
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+		controller="CuAp_SelectBundleCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+
+	<!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+
+    <!--Page specific attributes -->
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="List" name="selectedServiceIds" default=""/>
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordTempList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    <aura:attribute access="private" type="List" name="fieldList1"/>
+    <aura:attribute access="private" type="List" name="recordList1"/>
+    <aura:attribute access="private" type="List" name="fieldListSundry"/>
+    <aura:attribute access="private" type="List" name="recordListSundry"/>
+    <aura:attribute access="private" type="Boolean" name="isActiveTariffLimit"/>
+    <aura:attribute access="private" name="errorMessage" type="String[]" default="" />
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <div class="slds-p-bottom_medium">
+                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_SelectBundlePageHeader}</legend>
+                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_SelectBundlePageSubHeader}</legend>
+            </div>
+            
+            <div class="slds-container_fluid">
+                <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true"/>
+            </div>
+            <aura:if isTrue="{!v.isActiveTariffLimit}">
+                <div class="slds-p-top_medium slds-p-bottom_medium">
+                    <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_SocialBundleSubHeader}</legend>
+                </div>
+                <div class="slds-container_fluid">
+                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList1}" showSelect="false"/>
+                </div>     
+            </aura:if>
+            
+            <div class="slds-p-top_medium slds-p-bottom_medium">
+                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_SundryHeader}</legend>
+            </div>
+            
+            <div class="slds-container_fluid">
+                <c:GlAp_GenericTable fieldList="{!v.fieldListSundry}" recordList="{!v.recordListSundry}" showSelect="true"/>
+            </div>   
+        </div>
+    </aura:if>
+    
+</aura:component>

@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="Component Event To indicate input event">
+	<aura:attribute name="PicklistValue" type="String"/>
+</aura:event>

@@ -1,0 +1,70 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Mohit Tayal
+@date      		16 July 2018
+@description 	Component to display available bundles related to available services
+@Revisions	 	
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" access="global" 
+                controller="LoAp_AvailableServicesBundlesCtrl"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!--Component attributes-->
+    <aura:attribute name="mapOfAvailableServiceIdTOServiceTypeName" type="List" access="private" description="list to hold available services on a supply point" />
+    <aura:attribute name="listAvailableBundles" type="List" access="private" description="list to hold available bundles of a given Available service on a supply point" />
+    <aura:attribute name="fieldList" type="List" access="private" description="list to hold available bundles of a given Available service on a supply point" />
+    <aura:attribute name="recordList" type="List" access="private" description="list to hold available bundles of a given Available service on a supply point" />
+    <aura:attribute name="openMakeBundleActiveComponent" type="Boolean" default="false" access="private" description="shows up Active Bundle Component" />
+    <aura:attribute name="openChangeBundleComponent" type="Boolean" access="private" description="shows up Change Bundle Component" />
+    <aura:attribute name="availableBundleRecordId" type="String" access="public"/>
+    <aura:attribute name="objectName" type="String" access="private"/>
+    <aura:attribute name="supplyPointId" type="String" access="private"/>
+    
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.buttonPressed}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialization event handler" />
+    <aura:handler name="refresh" event="c:CmAp_RefreshEvent" action="{!c.refreshView}"/>
+    
+    <div class="slds-container_fluid">
+        <c:GlAp_NotificationComponent aura:id="notifier" />
+        <c:GlAp_SpinnerComponent aura:id="spinner" />
+        
+        <div class="slds-grid slds-grid_vertical">
+            <div class="slds-grid slds-col slds-box slds-box_small slds-theme_shade">
+                <!-- Title -->
+                <h1>{!$Label.c.LoAp_AvailableServicesBundlesTitle}</h1>
+            </div>
+            <div class="slds-m-top_small"> </div>
+            <div class="slds-col">
+                <fieldset class="slds-form-element">
+                    <div class="slds-form-element__control">
+                        <div class="slds-radio_button-group">
+                            <aura:iteration items="{!v.mapOfAvailableServiceIdTOServiceTypeName}" var="availableService">
+                                <span class="slds-button slds-radio_button">
+                                    <input type="radio" name="radio" id="{!availableService.key}" value="{!availableService.value}" onclick="{!c.fetchAvailableBundleRecords}" />
+                                    <label class="slds-radio_button__label" for="{!availableService.key}">
+                                        <span class="slds-radio_faux">{!availableService.value}</span>
+                                    </label>
+                                </span>
+                            </aura:iteration>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="slds-m-top_small slds-card__body slds-scrollable_y medium_height">
+                    <c:GlAp_GenericTable aura:id="Available_Bundle" tableName="Available_Bundle" fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/> 
+                <aura:if isTrue="{!v.recordList.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+            </div>
+            <aura:if isTrue="{!v.openMakeBundleActiveComponent}">
+                <c:LoAp_MakeBundleActive recordId="{!v.availableBundleRecordId}" isActive="{!v.openMakeBundleActiveComponent}" objectName="{!v.objectName}"/>
+            </aura:if>
+            <aura:if isTrue="{!v.openChangeBundleComponent}">
+                <c:LoAp_ChangeBundle recordId="{!v.availableBundleRecordId}" isActive="{!v.openChangeBundleComponent}" objectName="{!v.objectName}" supplyPointId="{!v.supplyPointId}"/>
+            </aura:if>
+        </div>
+    </div>
+</aura:component>

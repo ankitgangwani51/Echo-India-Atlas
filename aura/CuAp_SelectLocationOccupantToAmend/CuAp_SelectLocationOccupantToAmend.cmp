@@ -1,0 +1,88 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		17 Sep 2018
+@description 	Lightning Component to select primary location occupant for amendment
+
+*******************************************************************************/
+ -->
+<aura:component implements="force:hasRecordId"
+                access="global"
+                controller="CuAp_SelectLocationOccToAmendCtrlr"  
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!--Page specific handlers -->
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}" />  
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/>
+    <aura:registerEvent name="passValueEvent" type="c:CuAp_AmendMoveEvent" />
+    
+    <!-- Component variables -->  
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    <aura:attribute access="private" type="String" name="accName" />
+    <aura:attribute access="private" type="String" name="recordToDelete"/>
+    <aura:attribute access="private" type="String" name="selectedOptionToAmend"/>
+    <aura:attribute access="private" type="String" name="checkedButton" default=""/>
+    <aura:attribute access="private" type="List" name="optionsList"  />
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <div class="slds-p-bottom_medium">
+                <legend class="slds-form-element__label slds-text-title_caps slds-text-align_center">{!$Label.c.CuAp_AmendDetails}</legend>
+            </div>
+            <div class="slds-p-bottom_medium">
+                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_AccountNameLabel} : "{!v.accName}"</legend>
+            </div>
+            
+            <fieldset class="slds-form-element slds-p-bottom_large">
+                <legend class="slds-form-element__legend slds-form-element__label slds-p-left_medium">{!$Label.c.GlUt_SelectOperation}</legend>
+                <div class="slds-form-element__control slds-p-left_medium">
+                    <div class="slds-radio_button-group">
+                        <aura:iteration items="{!v.optionsList}" var="option">
+                            <span class="slds-button slds-radio_button">
+                                <input type="radio" name="processAsInnerRadio" id="{!option.value}"  
+                                       value="{!option.value}" checked="{!v.checkedButton == option.value ? true : false}" onclick="{!c.innerSectionHandleChange}" />
+                                <label class="slds-radio_button__label" for="{!option.value}">
+                                    <span class="slds-radio_faux"  >{!option.label}</span>
+                                </label>
+                            </span>
+                        </aura:iteration>
+                        
+                    </div>
+                </div>
+            </fieldset> 
+            
+            <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+            <div class="slds-card__body slds-scrollable_y medium_height">
+                <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                           
+                    
+                    <c:GlAp_GenericTable aura:id="LocationOcc" tableName="LocationOcc" fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true"/>
+                </div>
+                <aura:if isTrue="{!v.recordList.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+            </div>
+        </article>
+            
+                   
+        </div>
+    </aura:if>
+</aura:component>

@@ -1,0 +1,80 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Sudhir Kumar
+@date      		04-April-2018
+@description 	Submit My Meter Reading Lightning Component
+@param			
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,forceCommunity:availableForAllPageTypes"
+                access="global" 
+                controller="CmAp_MyMeterDetailsCtlr"
+                extends="c:GlAp_LightningComponentBase">
+    <!-- Component Attributes -->
+    <aura:attribute access="public" name="recordId" type="String" default="" />
+    <aura:attribute access="public" type="boolean" name="showSubmitReading" default="false" />
+    <aura:attribute access="public" type="Decimal" name="reading" default="" />
+    <aura:attribute access="public" type="Date" name="readingDate" default="" />
+    <aura:attribute access="public" type="String" name="deviceRef" default="" />
+    <aura:attribute name="deviceDigit" type="String" access="public"/>
+    <aura:attribute access="private" name="newReading" type="Object"/>  
+    <aura:attribute access="private" name="newReadingFieldList" type="List" />
+    <aura:attribute access="public" name="lastActualReading" type="String" default=""/> 
+    
+    <!-- Event Registration -->
+    <aura:registerEvent name="refreshMyPayments" type="c:CmAp_RefreshEvent" />
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    <aura:handler name="init" action="{!c.doInit}" value="this" />
+    
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div style="height: 640px;">
+        <div role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" class="slds-modal slds-fade-in-open ">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.submitReading}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CmAp_MyReadingHeader} </legend>
+                </header>
+                <c:GlAp_NotificationComponent aura:id="notification"/>
+                <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+                    
+                    <div class="slds-form slds-form_compound slds-p-top_medium">
+                        <fieldset class="slds-form-element slds-size_1-of-1">
+                            <div class="slds-form-element__group">
+                                <aura:iteration items="{!v.newReadingFieldList}" var="newReadingFields">
+                                    <div class="slds-form-element__row">
+                                        <aura:iteration items="{!newReadingFields}" var="newReadingField">
+                                            <div class="slds-form-element slds-size_1-of-2">   
+                                                <div class="slds-m-top--small"> </div>                                            
+                                                <c:GlAp_GenericField aura:id="{!newReadingField.fieldLabel}" 
+                                                                     object="{!v.newReading}" 
+                                                                     objectName="{!newReadingField.parentObject}" 
+                                                                     fieldType="{!newReadingField.fieldType}" 
+                                                                     fieldName="{!newReadingField.fieldName}"
+                                                                     editMode="true" 
+                                                                     required="true"
+                                                                     isEditable="{!newReadingField.isEditable}"
+                                                                     picklistValues="" 
+                                                                     label="{!newReadingField.fieldLabel}" 
+                                                                     />
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </aura:iteration>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.saveMyReading}">{!$Label.c.CmAp_MyNewReadingSaveButton}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="slds-backdrop slds-backdrop--open"></div>
+</aura:component>

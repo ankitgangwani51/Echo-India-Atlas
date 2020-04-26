@@ -1,0 +1,38 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		06 Sep 2017
+@description 	Component to render a spinner which can be shown and hidden
+				by calling the child component methods
+				
+	USAGE:	include:
+				<c:GlAp_SpinnerComponent aura:id="spinner"/>
+			in your component markup, and call:				
+				component.find('spinner').show();
+				component.find('spinner').hide();
+			from your controller, to show or hide the spinner as appropriate
+			
+			This component maintains the number of active spinners so that  
+			asynchronous server calls will only hide the spinner when they have 
+			all completed.
+
+*******************************************************************************/
+ -->
+<aura:component access="global">
+    
+    <aura:attribute access="public" type="Boolean" name="showSpinner" default="false" description="Shows the spinner. Can be set on component load"/>
+    <aura:attribute access="private" type="Integer" name="spinnerCounter" default="0"/>
+
+	<!-- component methods -->
+    <aura:method name="reset" action="{!c.reset}"/>
+    <aura:method name="show" action="{!c.show}"/>
+    <aura:method name="hide" action="{!c.hide}"/>
+
+	<!-- HTML markup -->
+	<aura:if isTrue="{!v.showSpinner}">
+		<div class="slds-container">
+			<lightning:spinner aura:id="spinner" class="no-background" variant="brand" alternativeText="waiting for server response"/>
+		</div>
+	</aura:if>
+
+</aura:component>
