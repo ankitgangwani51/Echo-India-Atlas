@@ -1,0 +1,8 @@
+.THIS {
+}
+.THIS .slds-modal__container.modal_top_padding {
+	padding-top: 10rem;
+}
+.THIS .slds-card__body.slds-scrollable_y.medium_height {
+	max-height: 300px;
+}

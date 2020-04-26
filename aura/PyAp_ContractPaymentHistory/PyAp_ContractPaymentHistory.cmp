@@ -1,0 +1,65 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		01-Feb-2018
+@description 	Contract Payment History Lightning Component
+				It shows all Payments made against the Contract 
+				And All Bills corresponding to selected Payment 
+				And all Bill items corresponding to selected Bill	
+@param			recordId - Contract Id
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction" 
+                controller="PyAp_ContractPaymentHistoryCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+
+    <!-- Component Variables -->
+    <aura:attribute access="private" type="List" name="paymentFldList"/>
+    <aura:attribute access="private" type="List" name="paymentRecordList"/>    
+    <aura:attribute access="private" type="List" name="billFldList"/>
+    <aura:attribute access="private" type="List" name="billRecordList"/>
+    <aura:attribute access="private" type="List" name="billItmFldList"/>
+    <aura:attribute access="private" type="List" name="billItmRecordList"/>
+    
+    <aura:attribute access="private" name="paymentRecordId" type="string"/>     
+    
+    <!-- Page Specific Methods -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+    
+    <!-- Spinner Component -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+        <!-- Component Header-->
+        <div class="slds-modal__header">
+            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.PyAp_PaymentHistoryHeader}</legend>
+        </div>
+        
+        <!-- Payments table -->
+        <div class="slds-p-top_medium slds-p-bottom_medium">
+            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.PyAp_PaymentHistoryPaymentTableName}</legend>
+        </div>
+        <div class="slds-container_fluid">
+            <c:GlAp_GenericTable tableName="{!$Label.c.PyAp_PaymentHistoryPaymentTableName}" fieldList="{!v.paymentFldList}" recordList="{!v.paymentRecordList}" showSelect="false" forceEditMode="false"/>
+        </div>
+        
+        <!-- Allocation to Bill Items table -->
+        <div class="slds-p-top_medium slds-p-bottom_medium">
+            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.PyAp_PaymentHistoryBillTableName}</legend>
+        </div>
+        <div class="slds-container_fluid">
+            <c:GlAp_GenericTable tableName="{!$Label.c.PyAp_PaymentHistoryBillTableName}" fieldList="{!v.billFldList}" recordList="{!v.billRecordList}" showSelect="false" forceEditMode="false"/>
+        </div>
+        
+        <!-- Allocation to Bill Items table -->
+        <div class="slds-p-top_medium slds-p-bottom_medium">
+            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.PyAp_PaymentHistoryBillItemTableName}</legend>
+        </div>
+        <div class="slds-container_fluid">
+            <c:GlAp_GenericTable tableName="{!$Label.c.PyAp_PaymentHistoryBillItemTableName}" fieldList="{!v.billItmFldList}" recordList="{!v.billItmRecordList}" showSelect="false" forceEditMode="false"/>
+        </div>
+        
+    </div>
+</aura:component>

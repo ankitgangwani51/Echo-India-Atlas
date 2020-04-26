@@ -1,0 +1,55 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		06 Sep 2017
+@description 	Component to implement bill calculation from a button
+				Can also be used as a component without button, in a wizard
+				Requires contract Id from parent component/page
+Revision(s)		20 Dec 2017, P Dixon - revised to use without button in wizards
+Revision(s)		27 Sep 2018, Tarun Gupta - revised to pass listOfContractId in wizards to handle multiple contract Ids
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" 
+                access="global" 
+                controller="BlAp_CalculateBillComponentCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+	<!-- component attributes -->
+	<aura:attribute access="global" type="Id" name="recordId" description="the record Id - always a contract Id if not simulated billing"/>
+	<aura:attribute access="global" type="String" name="sObjectName" description="the api name of the object"/>
+    <aura:attribute access="global" type="Boolean" name="showButton" default="true" description="displays a button to initiate bill calculation"/>
+    <aura:attribute access="global" type="String" name="calculationType" default="{!$Label.c.BlIn_BillCalculationTypeBillable}" 
+    											description="the type of bill calculation to be performed"/>
+
+	<aura:attribute access="public" type="String" name="pollerId" description="The Id of the bill response poller instance"/>
+
+	<aura:attribute access="private" type="List" name="billIds" description="The Ids of the calculated bills"/>
+	<aura:attribute access="private" type="List" name="billCalculations" description="The bill calculation records"/>
+	<aura:attribute access="private" type="Id" name="billCalculationId" description="The Id of the bill calculation bill response"/>
+    
+    <!-- This attribute is required in case  there are list of contracts for which bill request needs to be made-->
+    <aura:attribute access="global" name="listOfContractId" type="String[]" description="this is the list of contract record Id to pass to Heroku for Bill Calculation"/>
+    
+    <!-- component event fired to pass the bill Id to a parent component -->
+	<aura:registerEvent name="billCalculationCompleteEvent" type="c:BlAp_BillCalculationCompleteEvent"/>
+
+	<!-- method called to initiate a bill calculation from a wizard or other component -->
+    <aura:method name="calculateBills" description="call Heroku to calculate a bill"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.initialise}"/>
+    
+	<!-- HTML markup -->
+	<div class="slds-container_fluid">
+		<c:GlAp_Notifier aura:id="notifier"/>
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>
+		
+		<!-- button used to initiate bill calculation manually -->
+		<aura:if isTrue="{!v.showButton}">
+			<lightning:button variant="brand" label="{!((v.calculationType == $Label.c.BlIn_BillCalculationTypeBillable) 
+																		? $Label.c.BlAp_CalculateBillButton 
+																		: $Label.c.BlAp_CalculatePendingBillButton)}" 
+														onclick="{!c.calculateBills}" />
+		</aura:if>
+	</div>
+
+</aura:component>

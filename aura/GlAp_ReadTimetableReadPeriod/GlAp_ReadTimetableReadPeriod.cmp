@@ -1,0 +1,74 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Swati Mathur
+@date      		08 May 2018
+@description 	Displays Read Timetable records and related Read Periods records
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 		
+                controller="GlAp_ReadTimetableReadPeriodCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="public" type="List"   name="fieldList"/>
+    <aura:attribute access="public" type="List"   name="recordList"/>
+    <aura:attribute access="public" type="List"   name="recordFields"/>
+    <aura:attribute access="public" type="List"   name="records"/>
+    <aura:attribute access="public" type="String" name="defaultRowId"/>
+    <aura:attribute access="public" type="string" name="objectName" default="{!v.namespace + 'ReadTimetable__c'}"/>
+    <aura:attribute access="private" type="Map"   name="object" description="map of the object properties"/>
+    <aura:attribute access="public" type="string" name="ReadPeriodobjectName" default="{!v.namespace + 'ReadPeriod__c'}"/>
+    <aura:attribute access="private" type="Map"   name="ReadPeriodobject" description="map of the object properties"/> 
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/>
+
+    <div class="slds-container_fluid">
+    	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+    	
+        <!-- Read Timetable -->
+        <article class="slds-card slds-card_boundary">
+            <div class="slds-card__body slds-scrollable_y medium_height">
+
+				<!-- Displays Read Timetable records in the upper browser -->
+				<div class="slds-card__header">
+				    <header class="slds-grid slds-grid_align-spread">
+				        <div class="slds-media slds-media--center">
+				            <c:GlAp_RecordListTitleWithIcon objectName="{!v.objectName}" object="{!v.object}" numberOfRecords="{!v.recordList.length}"/> 
+				        </div>
+				    </header>
+				</div>
+				<c:GlAp_GenericTable tableName="{!$Label.c.LoAp_ReadTimetableObject}" fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/>
+
+                <aura:if isTrue="{!v.recordList.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+            </div>
+        </article>
+        <!-- Read Period -->
+        <div class="slds-p-top--medium">
+	        <article class="slds-card slds-card_boundary">
+	            <div class="slds-card__body slds-scrollable_y medium_height">
+	
+					<!-- Displays Read Period records in the lower browser based on Read Timetable Records -->
+					<div class="slds-card__header">
+					    <header class="slds-grid slds-grid_align-spread">
+					        <div class="slds-media slds-media--center">
+					            <c:GlAp_RecordListTitleWithIcon objectName="{!v.ReadPeriodobjectName}" object="{!v.ReadPeriodobject}" numberOfRecords="{!v.records.length}"/> 
+					        </div>
+					    </header>
+					</div>
+					<c:GlAp_GenericTable tableName="{!$Label.c.LoAp_ReadPeriodObject}" fieldList="{!v.recordFields}" recordList="{!v.records}" showSelect="false"/>
+	
+	                <aura:if isTrue="{!v.records.length == 0}">
+	                    <div class="slds-align_absolute-center">
+	                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+	                    </div>
+	                </aura:if>
+	            </div>
+	        </article>
+        </div>
+    </div>
+    
+</aura:component>

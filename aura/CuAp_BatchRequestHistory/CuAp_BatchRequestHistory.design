@@ -1,0 +1,3 @@
+<design:component label="CuAp_BatchRequestHistory">
+    <design:attribute name="batchRequestFields" label="Batch Request Queue Fieldset" description="The name of the batch request queue fieldset"/>
+</design:component>

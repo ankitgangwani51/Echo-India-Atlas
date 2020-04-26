@@ -1,0 +1,34 @@
+<!--
+/**********************************************************************************************
+@author         Echo : Sudhir Kumar
+@date           05-Nov-2018
+@description:   AT- (AU1) : Update Location Balance (Debt/ Credit)
+**********************************************************************************************/
+-->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId" 
+                access="global" 
+                controller="LoAp_InfoStatementUpdateBalanceCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+	<!--Component Variables-->
+    <aura:attribute access="public" type="Boolean" name="displayButton" default="true" description="displays a button to calculate charges" />
+    <aura:attribute name="isActive" type="Boolean" default="false"/>  
+    <aura:attribute access="public" type="String" name="buttonName" default="Update Balance"  description="The button name to start "/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <!--Child Components-->
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/> <!--Sudhir: AT-3738-->
+	
+    <!--Component markup-->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div class="slds-container__fluid">
+        <c:GlAp_NotificationComponent aura:id="notification"/>
+        <!--Button to invoke heroku for Information Statement calculate charges-->
+        <aura:if isTrue="{!v.isActive}">
+            <aura:set attribute="else">
+                <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doUpdateBalance}" />        	
+            </aura:set>
+        </aura:if>
+    </div>																																					
+</aura:component>

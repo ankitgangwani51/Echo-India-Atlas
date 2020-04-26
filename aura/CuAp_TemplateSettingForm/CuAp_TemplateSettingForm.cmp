@@ -1,0 +1,142 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		04 Jun 2018
+@description 	Component to Edit/Create New Template Setting
+Revision(s)		
+*******************************************************************************/
+ -->
+<aura:component implements="force:lightningQuickAction,lightning:actionOverride,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+		controller="CuAp_TemplateSettingFormCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+		
+    <aura:attribute access="public" type="Id" name="recordId" description="the Id of the parent record"/>
+    <aura:attribute access="public" type="String" name="sObjectName" description="the object type of the record"/>
+
+    <aura:attribute access="public" type="Boolean" name="readOnly" default="false"/>
+    <aura:attribute access="public" type="Boolean" name="editMode" default="true"/>
+    <aura:attribute access="public" type="String" name="currencyCode"/>
+    <aura:attribute access="public" type="Boolean" name="allowSectionToggle" default="false"/>
+        
+    <aura:attribute access="public" type="Object[]" name="correspondenceTemplates" />
+    <aura:attribute access="public" type="String" name="selectedTemplateName" />
+    <aura:attribute access="public" type="Boolean" name="isBillPDF" default="false"/>
+
+    <!--Event Handlers-->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleNavigationEvent}" description="handler for navigation button events"/>
+    <aura:handler name="editModeEvent" event="c:GlAp_SwitchToEditEvent" action="{!c.doEdit}"/>
+    <aura:handler name="inputFieldEvent" event="c:GlAp_GenericInputEvent" action="{!c.handleInputChangeEvent}"/>
+    
+	<!-- Markup -->
+	<section class="slds-modal slds-slide-up-open slds-modal_small" 
+			role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+		<div class="slds-modal__container modal_top_padding">
+        
+			<header class="slds-modal__header">
+				<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+			        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+			        		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+					<span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+				</button>
+				<h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">
+					<aura:if isTrue="{!v.recordId == null}"> 
+						{!$Label.c.CuAp_NewTemplateSetting}
+						<aura:set attribute="else">
+							{!$Label.c.CuAp_EditTemplateSetting}
+						</aura:set>
+					</aura:if>
+				</h2>
+			</header>
+
+			<div class="slds-modal__content slds-p-around--medium">
+
+				<c:GlAp_SpinnerComponent aura:id="spinner"/>
+				<div aura:id="detail">
+				
+					<!-- Notifications -->
+					<c:GlAp_NotificationComponent aura:id="notification"/>
+				            
+					<fieldset class="slds-box slds-theme--default slds-container">
+			
+						<!-- Form Section -->
+						<div class="slds-section slds-is-open" aura:id="formSect">
+						 
+							<!-- Title -->
+							<h3 class="slds-section__title">
+								<button class="slds-button slds-section__title-action" onclick="{!c.doToggleSection}">
+						      		<aura:if isTrue="allowSectionToggle">
+										<lightning:icon aura:id="DownIcon" iconName="utility:switch" size="x-small" alternativeText="{!$Label.c.GlUt_Close}"/>
+										<lightning:icon aura:id="RightIcon" iconName="utility:chevronright" size="x-small" alternativeText="{!$Label.c.GlUt_Expand}" class="slds-hide"/>
+									</aura:if>
+									<div>
+										{!$Label.c.CuAp_InformationSection}
+									</div>
+								</button>
+							</h3>
+						      
+							<!-- Content -->
+							<div class="slds-section__content">
+				        		<fieldset class="slds-form--compound">
+									<div class="slds-form-element__group">
+									
+									    <aura:iteration items="{!v.fieldSetResults}" var="FSREntry">								    	
+									    	<div class="slds-form-element__row slds-size--1-of-1">
+									    		<aura:iteration items="{!FSREntry}" var="FSR">	      
+											      	<div class="slds-form-element slds-size--1-of-2">                         											                                                       	  
+														<aura:if isTrue="{!FSR.fieldName != v.namespace + 'TemplateMapping__c' 
+																&amp;&amp; FSR.fieldName != v.namespace + 'EmailTemplateId__c'
+																&amp;&amp; FSR.fieldName != v.namespace + 'TemplateName__c'
+																&amp;&amp; (FSR.fieldName != v.namespace + 'BillingEvent__c' || v.isBillPDF)}">								                                                       	  
+															<c:GlAp_GenericField aura:id="{!FSR.label}" 
+																				recordId="{!v.recordId}"
+																				object="{!v.client}" 
+																				objectName="{!v.objectType}" 
+																				fieldType="{!FSR.fieldType}" 
+																				fieldName="{!FSR.fieldName}" 
+																				editMode="{!v.editMode}" 
+																				changeEvent="{!FSR.fieldName == v.namespace + 'Type__c'}"
+																				isEditable="{!FSR.isEditable &amp;&amp; !v.readOnly}" 
+																				picklistValues="{!FSR.pickListValues}" 
+																				label="{!FSR.fieldLabel}" 
+																				required="{!FSR.isRequired}" 
+																				currencyCode="{!v.currencyCode}"
+																				helpText="{!FSR.fldHelpText}"
+																				/>
+														</aura:if>
+											      	</div>
+										      	</aura:iteration>
+									  		</div>				  		
+									  	</aura:iteration>
+									  	
+										<!-- Bill/Correspondence template selection -->
+								      	<div class="slds-form-element slds-size--1-of-2">                         											                                                       	  
+											<ui:inputSelect aura:id="template" label="Template" value="{!v.selectedTemplateName}">
+											    <aura:iteration items="{!v.correspondenceTemplates}" indexVar="key" var="template">
+											    	<aura:if isTrue="{!!v.isBillPDF 
+											    			|| template.templateType == $Label.c.CuAp_TemplateTypePDF 
+											    			|| template.templateType == null}">
+											        	<ui:inputSelectOption text="{!template.templateName}" 
+											        			label="{!if(template.templateType == null, template.templateName, template.templateName + ' ('+ template.templateType + ')')}"/>
+													</aura:if>
+											    </aura:iteration>                
+											</ui:inputSelect> 
+										</div>
+									 </div>
+								</fieldset>
+				    		</div>
+						</div>
+					</fieldset>
+		
+					<!-- Navigation -->
+					<div class="slds-container_fluid">
+					    <c:GlAp_WizardButtons startStep="true" cancelStep="true" endStep="true"/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<div class="slds-backdrop slds-backdrop--open"></div>
+
+</aura:component>

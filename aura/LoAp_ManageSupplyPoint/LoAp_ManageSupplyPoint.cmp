@@ -1,0 +1,90 @@
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId"
+                controller="LoAp_ManageSupplyPointCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute name="fieldList"  			 type="List" 	 access="private"      description="latest values of field List"/>
+    <aura:attribute name="recordList" 			 type="List" 	 access="public"       description="latest values of record List"/>
+    <aura:attribute name="resultContainer" 	     type="object" 	 access="private"      description="Wrapper container for field and record List"/>
+    <aura:attribute name="objectName"            type="string"   access="public"       default="{!v.namespace + 'Location__c'}"/>
+    <aura:attribute name="object"                type="Map"      access="private"      description="map of the object properties"/>
+    <aura:attribute name="isActive" 			 type="Boolean"  access="private"      default="false"        description="Hide/Show Manage Supply Point Component"/>
+    
+    <aura:if isTrue="{!v.isActive}">        
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate"><b>Manage Supply Point</b></h2>                
+                </header>
+                <div class="slds-container_fluid">
+                    <div aura:id="detail" class="slds-modal__content slds-p-around--medium">
+                        <!-- Notifications -->
+                        <c:GlAp_NotificationComponent aura:id="notification"/>
+                        <div class="slds-box slds-theme--default slds-container">
+                            <!-- Form Section -->
+                            <div aura:id="formSect" class="slds-section slds-is-open">
+                                <div class="slds-box--x-small slds-theme--inverse">
+                                    Select Supply Point to be Transferred
+                                </div>
+                                <!-- Content -->
+                                <div class="slds-section__content">
+                                    <article class="slds-card slds-card_boundary">                        
+                                        <div class="slds-card__body slds-scrollable_y medium_height">
+                                            <div class="slds-card__header">
+                                                <header class="slds-grid slds-grid_align-spread">
+                                                    <div class="slds-media slds-media--center">
+                                                        <c:GlAp_RecordListTitleWithIcon objectName="{!v.objectName}" object="{!v.object}" numberOfRecords="{!v.recordList.length}"/>
+                                                    </div>
+                                                </header>
+                                            </div>
+                                            <c:GlAp_GenericTable tableName="selectSupplyPoints"  fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true"  />
+                                            <aura:if isTrue="{!v.recordList.length == 0}">
+                                                <div class="slds-align_absolute-center">
+                                                    {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                                                </div>
+                                            </aura:if>
+                                        </div>
+                                    </article>
+                                    <div class="slds-container_fluid">
+                                        <div class="slds-form slds-form_compound slds-p-around_medium">
+                                            <fieldset class="slds-form-element">
+                                                <div class="slds-form-element__group">
+                                                    <div class="slds-form-element__row slds-grid_vertical-align-center">
+                                                        <div class="slds-form-element slds-size_1-of-8 slds-text-align_right">
+                                                            Transfer to Book No.
+                                                        </div>
+                                                        <div class="slds-form-element slds-size_1-of-8">
+                                                            <c:GlAp_InputField value="{!v.bookVal}" type="select" picklistValues="{!v.bookOptions}"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Navigation -->
+                            <footer class="slds-modal__footer">                    
+                                <lightning:button variant="brand" label="Save"	    onclick="{!c.doRemove}"/>
+                                <lightning:button variant="brand" label="{!$Label.c.GlAp_CancelButton}"	        onclick="{!c.doCancel}"/>
+                            </footer> 
+                        </div>
+                    </div>
+                </div>
+            </div>  
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+        <!--  Manage Supply Point Button on Location Screen  -->
+        <aura:set attribute="else">
+            <lightning:button variant="brand" label="Manage Supply Point" name="Manage Supply Point" disabled="false" onclick="{!c.showManageSupplyPointComponent}"/>
+        </aura:set>
+    </aura:if>
+    
+    
+</aura:component>

@@ -1,0 +1,63 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Neha R
+@date      		08 May 2018
+@description 	Book Re-Sequence component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="LoAp_ReSequenceBookCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	        
+    <aura:attribute access="public" name="isActive"      type="Boolean" default="false"/>  
+    <aura:attribute access="public" name="reSequenceGap" type="Integer" default=""/>
+
+	<!-- Spinner -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+	
+	<aura:if isTrue="{!v.isActive}">
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+        		role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding"> 
+                
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                        		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.LoAp_ReSequenceBookHeader}</h2>
+                </header>
+
+                <div class="slds-modal__content slds-p-around--medium">
+	
+					<!-- Notifications -->
+					<c:GlAp_NotificationComponent aura:id="notification"/>
+					
+					<!-- text field -->
+					<div class="slds-grid slds-wrap">                        
+                        <div class="slds-size--1-of-2 slds-large-size--1-of-2 slds-p-bottom_medium">
+                            <c:GlAp_InputField type="text"
+                                               label= "{!$Label.c.LoAp_SequenceSpacing}"
+                                               required = "false"
+                                               value = "{!v.reSequenceGap}"/>                          
+                        </div>
+                    </div>                   
+                </div>
+				<footer class="slds-modal__footer">
+				    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+					<button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+				</footer>       
+            </div>
+        </section>
+
+		<div class="slds-backdrop slds-backdrop_open"></div>
+		<aura:set attribute="else">
+			<button type="button" class="slds-button slds-button--neutral slds-truncate" onclick="{!c.doReSequencing}">
+				{!$Label.c.LoAp_ReSequenceBookButton}
+			</button>
+		</aura:set>
+	</aura:if>
+
+</aura:component>

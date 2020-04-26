@@ -1,0 +1,48 @@
+<!-- 
+/******************************************************************************
+@author    		Neha Rajput 
+@date      		25 July 2018
+@description 	Component for Send Email 
+*******************************************************************************/
+ -->
+<aura:component access="global"                 
+                extends="c:GlAp_LightningComponentBase">
+
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page" />
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties" />
+    <aura:attribute access="public" type="String" name="fieldLabel" required="true" description="field Label" />
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed" />
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active" />
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step" />
+
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner" />
+    <c:GlAp_Notifier aura:id="notifier" />
+    <!-- END: REQUIRED BY FRAMEWORK -->  
+    <!--Page specific attributes -->
+    <aura:attribute access="private" type="boolean" name="checkWelcomeLetter" required="false" description="" />
+   
+    <!--Page specific handlers -->
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}" />
+
+    <aura:if isTrue="{!v.isActive}">        
+        <div class="slds-container_fluid slds-p-top_medium">
+            <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+                <div class="slds-container_fluid">
+                    <div class="slds-form slds-form_compound slds-p-top_medium">
+                        <fieldset class="slds-form-element slds-size_1-of-1">                                                      
+                            <div class="slds-form-element__row">                                             
+                                    <c:GlAp_InputField value="{!v.checkWelcomeLetter}" 
+                                                       type="checkbox" 
+                                                       label="{!v.fieldLabel}" /> 
+                            </div>                                
+                        </fieldset>
+                    </div>                    
+                </div>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

@@ -1,0 +1,45 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		07 Mar 2018
+@description 	Record list title with icon component
+				for usage example see GlAp_RelatedRecordList
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+		controller="GlAp_RecordListTitleWithIconCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+	<!-- Attributes -->
+    <aura:attribute access="public" type="String" name="objectName" description="object API name"/>
+    <aura:attribute access="public" type="Map" name="object" description="map of the object properties"/>
+    <aura:attribute access="public" type="Integer" name="numberOfRecords" description="number of records in the list"/>
+
+    <!-- Event handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+	<!-- Title with Icon -->
+	<div class="slds-media slds-media--center slds-has-flexi-truncate">
+		<aura:if isTrue="{!v.object.iconURL != null}">
+			<div class="slds-media__figure">
+				<div class="extraSmall forceEntityIcon" style="background-color: #7698f0">
+					<span class="uiImage" data-aura-class="uiImage">
+						<img src="{!v.object.iconURL}" class="icon" alt="{!v.object.labelPlural}" title="{!v.object.labelPlural}"/>
+					</span>
+				</div>
+			</div>
+		</aura:if>
+		<div class="slds-media__body">
+			<h2 id="header">
+				<a class="slds-card__header-link baseCard__header-title-container" href="javascript:void(0);">
+					<span class="slds-text-heading--small slds-truncate slds-m-right--xx-small" title="{!v.object.labelPlural}">
+						{!v.object.labelPlural}
+					</span>
+					<span class="slds-text-heading--small slds-shrink-none slds-m-right--xx-small" title="{!'Number of ' + v.object.labelPlural}">
+						({!v.numberOfRecords})
+					</span>
+				</a>
+			</h2>
+		</div>
+	</div>
+</aura:component>

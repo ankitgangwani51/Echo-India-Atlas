@@ -1,0 +1,84 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		17 July 2018
+@description 	Component to Add Locations to Stepped Tariff               
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes"
+                access="global"
+                extends="c:GlAp_LightningComponentBase"
+                controller="BlAp_SteppedTariffLocationsCtrlr"> 
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK --> 
+    
+    <aura:attribute access="private" 	type="List" 	name="steppedTariffFields"/>
+    <aura:attribute access="private" 	type="object" 	name="objSteppedTariff"/>
+    <aura:attribute access="private" 	type="object" 	name="fieldList"/>
+    <aura:attribute access="private" 	type="object" 	name="recordList"/>
+    <aura:attribute access="private" 	type="object" 	name="steppedTariffService"/>
+    <aura:attribute access="private" 	type="String" 	name="serviceTypeName"/>
+    <aura:attribute access="public" 	type="boolean" 	name="isChecked"/>
+    
+    <aura:if isTrue="{!v.isActive}">        
+        <c:GlAp_Notifier aura:id="notifier"/>        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        <div class="slds-text-heading_small slds-text-align_center">
+            {!$Label.c.BlAp_SelectSTLocationsToInclude}<hr style="margin:0.5rem;"/>
+        </div>   
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>        
+        <div class="slds-container_fluid">
+            <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element">                    
+                    <div class="slds-form-element__group">                        
+                        <aura:iteration items="{!v.steppedTariffFields}" var="SteppedTariffFields">
+                            <div class="slds-form-element__row">          
+                                <aura:iteration items="{!SteppedTariffFields}" var="SteppedTariffField">
+                                    <div class="slds-form-element slds-size_1-of-2 slds-col slds-p-horizontal_medium slds-form-element__label">                                        
+                                        <c:GlAp_GenericField aura:id="{!SteppedTariffField.fieldLabel}"                                                              
+                                                             object="{!v.objSteppedTariff}"
+                                                             objectName="{!SteppedTariffField.parentObject}" 
+                                                             fieldType="{!SteppedTariffField.fieldType}" 
+                                                             fieldName="{!SteppedTariffField.fieldName}" 
+                                                             listView="{!SteppedTariffField.showLabel}"
+                                                             showLabel="{!SteppedTariffField.showLabel}"
+                                                             editMode="{!SteppedTariffField.isEditable}"                                                                         
+                                                             changeEvent="{!SteppedTariffField.changeEvent}"
+                                                             required="{!SteppedTariffField.isRequired}" 
+                                                             isEditable="{!SteppedTariffField.isEditable}" 
+                                                             picklistValues="{!SteppedTariffField.pickListValues}"
+                                                             label="{!SteppedTariffField.fieldLabel}" />                                                    
+                                    </div>
+                                </aura:iteration>
+                            </div>
+                        </aura:iteration>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        
+        <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+            <div class="slds-card__body slds-scrollable_y medium_height">
+                <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                    <c:GlAp_GenericTable aura:id="Services" tableName="Services" fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" 
+                                         showSelectButton="true" isChecked="{!v.isChecked}"/>                        
+                </div>
+                <aura:if isTrue="{!v.recordList.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+            </div>
+        </article>
+    </aura:if>
+</aura:component>

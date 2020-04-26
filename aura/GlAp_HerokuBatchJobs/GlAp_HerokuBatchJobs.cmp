@@ -1,0 +1,175 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		21 August 2018
+@description 	Manage Heroke Batch Schedules
+@param			
+*******************************************************************************/
+-->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                extends="c:GlAp_LightningComponentBase"
+                controller="GlAp_HerokuBatchJobsCtrlr">
+    
+    <!-- Manage Heroku Batch Jobs -->
+    <aura:attribute access="private" type="List" name="manageFieldList"/>
+    <aura:attribute access="private" type="List" name="manageRecordList"/>
+    <aura:attribute access="public" type="Boolean" name="manageTrue" default="false"/>
+    <aura:attribute access="public" type="Boolean" name="isDelete" default="false"/>
+    <aura:attribute access="public" type="Integer" name="deleteId"/>
+    <aura:attribute access="public" type="Boolean" name="openAddHeroku" default="false"/>
+    <aura:attribute access="private" type="String" name="cronExpression"/>
+    <aura:attribute access="public" type="sObject" name="herokuBatchRecord"/>
+    
+    <!-- Heroku Batch Job Status -->
+    <aura:attribute access="public" type="Date" name="FromDate"/>
+    <aura:attribute access="public" type="Date" name="ToDate"/>
+    <aura:attribute access="private" type="List" name="statusFieldList"/>
+    <aura:attribute access="private" type="List" name="statusRecordList"/>
+    <aura:attribute access="public" type="Boolean" name="statusTrue" default="false"/>
+    <aura:attribute access="private" type="String" name="sfdcBaseUrl"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="refreshHerokuJobs" event="c:CmAp_RefreshEvent" action="{!c.handleManage}"/>
+    
+    <!--Page specific handlers -->
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/>
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <c:GlAp_NotificationComponent aura:id="notification"/>
+    <lightning:tabset variant="scoped"> 
+        <lightning:tab onactive="{!c.handleManage}" label="{!$Label.c.GlAp_Manage}" id="{!$Label.c.GlAp_Manage}">              
+            <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.GlAp_ManageHerokuLabel}</b></div>
+            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+            <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+                <div class="slds-card__body slds-scrollable_y medium_height">
+                    <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                        <c:GlAp_GenericTable aura:id="{!$Label.c.GlAp_ManageHerokuLabel}"  
+                                             tableName="{!$Label.c.GlAp_ManageHerokuLabel}" 
+                                             fieldList="{!v.manageFieldList}" 
+                                             recordList="{!v.manageRecordList}" 
+                                             showSelect="false"/>                        
+                    </div>
+                    <aura:if isTrue="{!v.manageRecordList.length == 0}">
+                        <div class="slds-align_absolute-center">
+                            {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                        </div>
+                    </aura:if>
+                </div>
+            </article>
+            <aura:if isTrue="{!v.manageTrue}">
+                <div>
+                    <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" 
+                             aria-describedby="modal-content-id-1" 
+                             class="slds-modal slds-fade-in-open slds-modal_large">
+                        <div class="modal-container slds-modal__container">
+                            <div class="slds-modal__container">
+                                <header class="slds-modal__header">
+                                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancelQuestion}">
+                                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                                    </button>                                    
+                                    <div class="slds-text-heading_small slds-text-align_center"><b>{!$Label.c.GlAp_UpdateLabel}</b></div>
+                                    <!-- section -->                                    
+                                </header>
+                                <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">                                    
+                                    <c:GlAp_AddHerokuJobs aura:id = "addHerokuJobs"
+                                                          manageTrue="{!v.manageTrue}" 
+                                                          cronExpression="{!v.cronExpression}"
+                                                          herokuBatchRecord="{!v.herokuBatchRecord}"
+                                                          callBy="update"/>
+                                </div>                                
+                            </div>
+                        </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </div>
+            </aura:if>
+        </lightning:tab>
+        <lightning:tab onactive="{!c.handleAdd}" label="{!$Label.c.GlAp_Add}" id="{!$Label.c.GlAp_Add}">
+            <aura:if isTrue="{!v.openAddHeroku}">
+                <c:GlAp_AddHerokuJobs/>
+            </aura:if>
+        </lightning:tab>
+        <lightning:tab onactive="{!c.handleStatus}" label="{!$Label.c.GlAp_Status}" id="{!$Label.c.GlAp_Status}">                        
+            <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.GlAp_HerokuBatchJobStatus}</b></div>            
+            <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element slds-size_1-of-1">
+                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                    <div class="slds-form-element__group">
+                        <div class="slds-form-element__row">
+                            <div class="slds-form-element slds-size_1-of-3">
+                                <c:GlAp_InputField value="{!v.FromDate}" 
+                                                   type="date" 
+                                                   label="From Date"
+                                                   required="true"/>
+                            </div>
+                            <div class="slds-form-element slds-size_1-of-3">
+                                <c:GlAp_InputField value="{!v.ToDate}" 
+                                                   type="date" 
+                                                   label="To Date"
+                                                   required="true"/>   
+                            </div>  
+                            <div class="slds-form-element slds-size_1-of-3">
+                                <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                                <lightning:button variant="brand" label="Search" title="Search" onclick="{!c.handleSearch}"/>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>            
+            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+            <aura:if isTrue="{!v.statusTrue}">                                
+                <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+                    <div class="slds-card__body slds-scrollable_y medium_height">
+                        <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                            <c:GlAp_GenericTable aura:id="{!$Label.c.GlAp_HerokuBatchJobStatus}"  
+                                                 tableName="{!$Label.c.GlAp_HerokuBatchJobStatus}" 
+                                                 fieldList="{!v.statusFieldList}" 
+                                                 recordList="{!v.statusRecordList}" 
+                                                 showSelect="false"/> 
+                        </div>
+                        <aura:if isTrue="{!v.statusRecordList.length == 0}">
+                            <div class="slds-align_absolute-center">
+                                {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                            </div>
+                        </aura:if>
+                    </div>
+            </article>       
+            </aura:if>
+        </lightning:tab>        
+    </lightning:tabset>  
+    <aura:if isTrue="{!v.isDelete}">
+        <div>                       
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" 
+                     class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="modal-container slds-modal__container" style="width:30%;">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancelQuestion}">
+                                <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                            xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                            </button>
+                            <section>                                
+                                <label>
+                                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate"><b>{!$Label.c.GlAp_DeleteHeader}</b></h2>
+                                </label>
+                            </section>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">                            
+                            
+                            <b><h2>{!$Label.c.GlAp_DeleteJobAlert}</h2></b>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancelQuestion}">{!$Label.c.GlAp_CancelButton}</button>
+                            <button type="button" class="slds-button slds-button--brand" onclick="{!c.doDeleteQuestion}">{!$Label.c.CuAp_PPDeleteLabel}</button>
+                        </footer>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-backdrop slds-backdrop_open"></div>
+        </div>
+    </aura:if>
+</aura:component>

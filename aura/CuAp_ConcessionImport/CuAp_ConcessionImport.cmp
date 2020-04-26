@@ -1,0 +1,34 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		24 Dec 2018
+@description 	Concession Import Lightning Component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes,force:lightningQuickAction" 
+                access="global"  extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute name="mapBRQFieldSet" 			type="Map" 		access="public"/>
+    <aura:attribute name="mapTabObject"				type="Map" 		access="public"/>
+    <aura:attribute name="mapObjectFields" 			type="Map" 		access="public"/>    
+    <aura:attribute name="showNewConcessionImport" 	type="boolean" 	access="public"	default="false"/>
+   
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:if isTrue="{!v.mapBRQFieldSet != null}">
+        <div class="slds-grid slds-modal__content  slds-wrap slds-p-bottom_medium slds-p-top_medium slds-p-left_medium slds-p-right_medium">
+            <div class="slds-text-heading_small slds-size_1-of-2 slds-text-align_left">
+                <b>{!$Label.c.CuAp_ConcessionImport}</b>
+            </div>
+            <div class="slds-size_1-of-2 slds-text-align_right" >
+                <lightning:button variant="brand" label="New Request" name="New Request"  onclick="{!c.showNewConcessionImport}" />
+            </div>            
+            <div class="slds-grid slds-modal__content  slds-wrap"></div>
+            <div class="slds-p-top_x-small">
+        		<c:GlAp_BatchRequestQueue BatchProcess="{!$Label.c.CuBt_ConcessionImportLabel}" mapBRQFieldSet="{!v.mapBRQFieldSet}" mapTabObject="{!v.mapTabObject}" mapObjectFields="{!v.mapObjectFields}"/>
+            </div>
+        </div>        
+    </aura:if>
+    <aura:if isTrue="{!v.showNewConcessionImport}">
+        <c:CuAp_NewConcessionResponseImport isActive="True"  showNewConcessionImport="{!v.showNewConcessionImport}" /> 
+    </aura:if>
+</aura:component>

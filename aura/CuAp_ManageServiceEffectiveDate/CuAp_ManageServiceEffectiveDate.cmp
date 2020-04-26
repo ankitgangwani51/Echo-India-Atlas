@@ -1,0 +1,46 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		02 August 2018
+@description 	Component to Select Effective Date on Contract              
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes"
+                access="global"
+                extends="c:GlAp_LightningComponentBase"
+                controller="CuAp_ManageServiceEffectiveDateCtrlr"> 
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>    
+    <!-- END: REQUIRED BY FRAMEWORK -->  
+    
+    <!-- Local Variables -->     
+    <aura:attribute name="effectiveDate" type="date" access="public"/>
+    <aura:attribute name="servicesFromAvailableServices" type="List" access="public"/>
+    <aura:attribute name="servicesRemove" type="List"  access="public"   />
+
+    <aura:if isTrue="{!v.isActive}">        
+        <c:GlAp_Notifier aura:id="notifier"/>        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        
+        <div class="slds-form-element__group">
+            <div class="slds-form-element__row">
+                <div class="slds-form-element slds-size_1-of-3">
+                    <c:GlAp_InputField value="{!v.effectiveDate}" 
+                                       type="date" 
+                                       required="true"
+                                       label="Effective Date"/>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+    </aura:if>
+</aura:component>

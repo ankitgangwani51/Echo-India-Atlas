@@ -1,0 +1,36 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Luke Emberton
+@date      		Aug 2017
+@description 	Component for wizard buttons (part of the wizard framework)
+@revision(s)	07 Dec 2017, Gopal Gupta - added finish button label (in place of next) for last step
+				21 Dec 2017, P Dixon - added cancelStep attribute
+				15 Feb 2018, P Dixon - added Save button for single step wizard
+*******************************************************************************/
+ -->
+<aura:component >
+    <aura:attribute access="public" type="boolean" name="cancelStep" default="true" description="true if a cancel button is to be shown"/>
+    <aura:attribute access="public" type="boolean" name="startStep" default="true" description="true if this is the first step in a wizard"/>
+    <aura:attribute access="public" type="boolean" name="endStep" default="false" description="true if this is the final step in a wizard"/>
+    
+    <aura:registerEvent name="wizEvent" type="c:GlAp_WizardEvent"/>
+    <footer class="slds-modal__footer">
+        <aura:if isTrue="{!v.startStep == false}">
+            <button type="button" class="slds-button slds-button--brand" onclick="{!c.doBack}">{!$Label.c.GlAp_BackButton}</button>
+        </aura:if>
+        <aura:if isTrue="{!v.cancelStep == true}">
+        	<button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+        </aura:if>
+        <aura:if isTrue="{!v.endStep == false}">
+            <button type="button" class="slds-button slds-button--brand" onclick="{!c.doNext}">{!$Label.c.GlAp_NextButton}</button>
+            <aura:set attribute="else">                
+        		<aura:if isTrue="{!v.startStep == false}">
+                	<button type="button" class="slds-button slds-button--brand" onclick="{!c.doNext}">{!$Label.c.GlAp_FinishButton}</button>
+                	<aura:set attribute="else">
+                		<button type="button" class="slds-button slds-button--brand" onclick="{!c.doNext}">{!$Label.c.CuAp_SaveButton}</button>
+                	</aura:set>
+                </aura:if>
+            </aura:set>
+        </aura:if>
+    </footer>
+</aura:component>

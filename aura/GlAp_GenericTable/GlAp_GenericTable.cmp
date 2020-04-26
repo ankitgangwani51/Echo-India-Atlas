@@ -1,0 +1,52 @@
+<aura:component >
+    <aura:attribute name="fieldList" type="List" access="public"/>
+    <aura:attribute name="recordList" type="List" access="public"/>
+    <aura:attribute name="forceEditMode" type="boolean" access="public" default="false"/>
+    <aura:attribute name="showSelect"  type="boolean" default="true"/>
+    <aura:attribute name="selectHeader" type="string" default="Select"/> 
+    <aura:attribute name="tableName"  type="string" default="DefaultTable"/>
+    <aura:attribute name="showSelectButton"  type="boolean" default="false"/>
+    <aura:attribute name="isChecked"  type="boolean" default="false" access="public"/>
+    
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    <!--aura:handler name="init" value="{!this}" action="{!c.doInit}"/-->
+    <table class="slds-table slds-table--bordered" style="table-layout: fixed; width:100%;">
+        <thead>
+            <tr class="slds-text-title--caps" >
+                <aura:if isTrue="{!v.showSelect}"> 
+                    <!-- When showSelectButton is true then Select All Button will be displayed instead of Select Text-->
+                    <!-- This button is used to check and uncheck all the table records -->
+                    <!-- Ankit Gangwani, 19 July 2018 -->
+                    <aura:if isTrue="{!and(v.showSelectButton,v.recordList.length > 0)}">
+                        <td role="gridcell" tabindex="0" class="slds-text-align_right" style="width: 3.75rem;">
+                            <div class="slds-checkbox_add-button" onclick="{!c.doEdit}">
+                                <ui:inputCheckbox class="slds-assistive-text" aura:id="selectAll" value="{!v.isChecked}"/>
+                                <label for="selectAll" class="slds-checkbox_faux">
+                                    <span class="slds-assistive-text"></span>
+                                </label>
+                            </div>
+                        </td>
+                        <aura:set attribute="else">
+                            <th scope="col" style="width: 4.5rem;">
+                                <div class="slds-truncate slds-cell-wrap" title="{!v.selectHeader}" ><b>{!v.selectHeader}</b></div>
+                            </th>
+                        </aura:set>
+                    </aura:if>
+                </aura:if>
+                <aura:iteration items="{!v.fieldList}" var="fldItem" indexVar="Idx" >
+                    <th scope="col" class="{!'column' + Idx}" >
+		                <aura:if isTrue="{!!fldItem.buttonField}">
+                        	<div class="slds-truncate slds-cell-wrap" title="{!fldItem.fieldLabel}" ><b>{!fldItem.fieldLabel}</b></div>
+                        </aura:if>
+                    </th>
+                </aura:iteration>
+            </tr>
+        </thead>  
+        <tbody>
+            <aura:iteration items="{!v.recordList}" var="record" >
+                <c:GlAp_GenericListRow aura:id="GenericRowItem" fieldList="{!v.fieldList}" record="{!record}" showSelect="{!v.showSelect}" forceEditMode="{!v.forceEditMode}" tableName="{!v.tableName}" />
+            </aura:iteration>
+        </tbody>
+    </table>
+</aura:component>

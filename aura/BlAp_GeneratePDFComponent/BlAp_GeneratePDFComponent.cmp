@@ -1,0 +1,33 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		11 Sep 2017
+@description 	Component to implement pdf generation from a button
+				requires bill Id from parent component/page
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId" 
+		extensible="true" access="global" 
+		controller="BlAp_GeneratePDFComponentCtrlr">
+
+    <!-- component attributes -->
+    <aura:attribute name="isShowComponent" access="public" type="boolean" />
+    <aura:attribute name="attachmentId" access="private" type="String" description="The Id of the bill pdf attachment"/>
+    <aura:attribute name="validationMessage" access="private" type="String" description="validation Message"/>
+    <aura:handler name="init" value="{!this}" action="{!c.initialise}"/>
+	<!-- HTML markup -->
+    <div class="slds-container_fluid">
+        <c:GlAp_Notifier aura:id="notifier"/>
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        <aura:if isTrue="{!v.isShowComponent}">
+            <aura:if isTrue="{!empty(v.attachmentId)}">
+                <lightning:button variant="brand" label="{!$Label.c.BlAp_GeneratePDFButton}" onclick="{!c.generatePDF}" />
+                <aura:set attribute="else">
+                    <lightning:button variant="brand" label="{!$Label.c.BlAp_ViewPDFButton}" onclick="{!c.view }" />
+                </aura:set>
+            </aura:if>
+        </aura:if>    
+        
+    </div>
+    
+</aura:component>

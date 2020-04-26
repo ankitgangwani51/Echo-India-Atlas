@@ -1,0 +1,158 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		21 August 2018
+@description 	Manage Heroke Batch Schedules
+@param			
+*******************************************************************************/
+-->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId"
+                extends="c:GlAp_LightningComponentBase"
+                controller="GlAp_AddHerokuJobsCtrlr">
+    
+    <aura:attribute access="public" type="String" 	name="recordBy"/>
+    <aura:attribute access="private" type="String[]" name="options"/>
+    <aura:attribute access="private" type="Date" name="toDate"/>
+    
+    <!-- Passing Parameters -->
+    <aura:attribute access="public" type="String" name="callBy" default="Add"/>
+    <aura:attribute access="public" type="String" name="cronExpression"/> 
+    <aura:attribute access="public" type="Boolean" name="manageTrue"/>
+    <aura:attribute access="public" type="sObject" name="herokuBatchRecord"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <!-- Schedule Variables -->
+    <aura:attribute access="private" type="String" name="activeTab" default="{!$Label.c.VmDr_ImmediateLabel}"/>
+    <aura:attribute access="private" type="List" name="tabNames"/>		<!-- initialised in doInit -->
+    <aura:attribute access="private" type="String" name="timeInput"/>
+    <aura:attribute access="private" type="List" name="listOfWeekDays"/>		<!-- initialised in doInit -->
+    <aura:attribute access="private" type="List" name="dateOptions"/>		<!-- initialised in doInit -->
+    <aura:attribute access="private" type="String" name="dateInput"/> 
+    <aura:handler name="change" value="{!v.recordBy}" action="{!c.handleRecordBy}"/>
+    <aura:handler name="change" value="{!v.activeTab}" action="{!c.handleTab}"/>
+    
+    <aura:registerEvent name="refreshHerokuJobs" type="c:CmAp_RefreshEvent" />
+    
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_NotificationComponent aura:id="notification"/>
+    
+    <aura:if isTrue="{!v.callBy == 'Add'}">
+        <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.GlAp_AddLabel}</b></div>
+    </aura:if>
+    
+    <div class="slds-form slds-form_compound slds-p-top_medium">
+        <fieldset class="slds-form-element slds-size_1-of-1">
+            <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+            <div class="slds-form-element__group">
+                <div class="slds-form-element__row">
+                    <div class="slds-form-element slds-size_1-of-3">
+                        <c:GlAp_InputField value="{!v.recordBy}" 
+                                           type="select" 
+                                           label="{!$Label.c.GlAp_SelectJobType}"
+                                           picklistValues="{!v.options}"
+                                           required="true"/>
+                    </div>
+                    <div class="slds-form-element slds-size_1-of-3">
+                        <aura:if isTrue="{!v.recordBy == $Label.c.GlAp_AccrualsLabel}">
+                            <c:GlAp_InputField value="{!v.toDate}" 
+                                               type="date" 
+                                               label="{!$Label.c.GlAp_ToDate}"
+                                               required="true"/>   
+                        </aura:if>
+                    </div>  
+                    <div class="slds-form-element slds-size_1-of-3"/>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+    
+    <aura:if isTrue="{!and(v.recordBy != $Label.c.GlAp_AccrualsLabel, v.recordBy != $Label.c.GlAp_AnnualAccrualsLabel)}">
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.VmDr_Schedule}</b></div>
+        
+        <!-- Schedule Section -->
+    
+        <lightning:tabset variant="scoped" onselect="{!c.handleTab}" selectedTabId="{!v.activeTab}">            
+            <aura:iteration indexVar="index" items="{!v.tabNames}" var="tabName">
+                <lightning:tab id="{!tabName}" label="{!tabName}">
+                    
+                    <!-- All Tabs -->                
+                    <div class="slds-form slds-form_compound">                    
+                        <aura:if isTrue="{!v.activeTab != $Label.c.VmDr_ImmediateLabel}">
+                            <div class="slds-form-element">
+                                <lightning:layoutItem size="4">
+                                    <lightning:input aura:id="timeInput" type="time" name="timeInput" required="true" label="Time" value="{!v.timeInput}"/>
+                                </lightning:layoutItem>
+                            </div>
+                        </aura:if>
+                        
+                        <!-- Weekly Tab -->
+                        <aura:if isTrue="{!tabName == $Label.c.GlAp_ScheduleTypeWeekly}">
+                            <div class="slds-form slds-form_compound slds-p-top_medium"/>                        
+                            <fieldset class="slds-form-element">
+                                <legend class="slds-form-element__legend slds-form-element__label">{!$Label.c.GlAp_Day}</legend>
+                                <div class="slds-form-element__control">
+                                    <div class="slds-checkbox_button-group">
+                                        <aura:iteration indexVar="key" items="{!v.listOfWeekDays}" var="daysOfWeek">    
+                                            <span class="slds-button slds-checkbox_button">
+                                                <input type="checkbox" 
+                                                       id="{!daysOfWeek.key}" 
+                                                       name="{!daysOfWeek.key}" 
+                                                       checked="{!daysOfWeek.value}" 
+                                                       value="on"
+                                                       onclick="{!c.handleDaysOfWeek}"/>
+                                                <label class="slds-checkbox_button__label" for="{!daysOfWeek.key}">
+                                                    <span class="slds-checkbox_faux">{!daysOfWeek.key}</span>
+                                                </label>
+                                            </span>
+                                        </aura:iteration>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </aura:if>
+                        
+                        <!-- Monthly Tab -->
+                        <aura:if isTrue="{!tabName == $Label.c.GlAp_ScheduleTypeMonthly}">
+                            <div class="slds-p-top_medium">
+                                <div class="slds-form-element">
+                                    
+                                    
+                                    <div class="slds-form-element__group">
+                                        <div class="slds-form-element__row">
+                                            <div class="slds-form-element slds-size_1-of-3">
+                                                <c:GlAp_InputField value="{!v.dateInput}" 
+                                                                   type="select" 
+                                                                   label="Day of Month"
+                                                                   picklistValues="{!v.dateOptions}"
+                                                                   required="true"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!--<lightning:layoutItem size="4">
+                                        <lightning:select aura:id="dateInput" name="Day of Month" label="Day of Month" required="true" value="{!v.dateInput}">
+                                            <aura:iteration items="{!v.dateOptions}" var="date">
+                                                <option text="{!date}" value="{!date}"/>
+                                            </aura:iteration>
+                                            <option text="Last" value="last"/>     
+                                        </lightning:select>
+                                    </lightning:layoutItem>-->
+                                </div>
+                            </div>
+                        </aura:if>
+                    </div>                    
+                </lightning:tab>
+            </aura:iteration>             
+        </lightning:tabset>
+    </aura:if> 
+    <!-- Save and Cancel button -->
+    <div class="slds-clearfix">
+        <div class="slds-float_right slds-p-top_medium">
+            <lightning:button variant="neutral" label="Cancel" title="Cancel" onclick="{!c.handleCancel}"/>
+            <lightning:button variant="brand" label="Save" title="Cancel" onclick="{!c.handleSave}"/>
+        </div>                        
+    </div>
+    
+</aura:component>

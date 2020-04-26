@@ -1,0 +1,47 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Sudhir Kumar
+@date      		02 Apr 2019
+@description 	CLB-28: Component to implement the AU Manage Services process using the Wizard framework - CuAp_AUManageServicesWizard.cmp	
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="CuAp_AUManageServicesWizardCtrlr"
+                extends="c:GlAp_WizardTemplate">
+    <!-- set Wizard variables -->
+    <aura:set attribute="title" value="{!$Label.c.CuAp_ManageServices}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.CuAp_ManageServices}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+    <aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method --> 
+    
+    <aura:attribute name="servicesRemove" type="List"  access="public"   />
+    <aura:attribute name="recordId" type="Id"  access="public"   />
+    <aura:attribute name="wizardType" type="string" access="public" description="Add/Remove AU Manage Contract Wizard"/>
+    
+    <!-- event handlers -->
+    <!-- have to be here as we can't override an inherited helper method from the parent -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    
+    <!-- local variables -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <!-- Wizard pages -->
+    <!-- WS1 - Manage Service Search --> 
+    <c:CuAp_AUManageServiceSearch aura:id="serviceSearch" recordId="{!v.recordId}" isActive="{!v.stepName == $Label.c.CuAp_ManageServices1}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!-- WS2 - Manage Effective Date -->
+    <c:CuAp_ManageServiceEffectiveDate aura:id="effectiveDate" isActive="{!v.stepName == $Label.c.CuAp_ManageServices2}" servicesRemove="{!v.servicesRemove}" wizardprop="{!v.wizardprop}"/>
+
+    <!-- Navigation -->
+    <!-- If the wizard Type is "Remove" then the wizard will behave as a single stand alone component -->
+    <div class="slds-container_fluid">
+        <aura:if isTrue="{!v.wizardType == $Label.c.CuAp_AddLabel}">
+                 <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+            <aura:set attribute="else">
+                <c:GlAp_WizardButtons startStep="true" endStep="true"/>
+            </aura:set>
+        </aura:if>
+    </div> 
+</aura:component>

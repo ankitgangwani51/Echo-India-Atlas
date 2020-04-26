@@ -1,0 +1,33 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Vivek Chauhan
+@date      		05 Sep 2017
+@description 	Component to show suppression status on an account or contract record page
+@revision		07 Dev 2017, P Dixon - Unified two components, MP2 updates and fixed naming etc
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+		controller="CuAp_SuppressionIndicatorComponentCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+
+    <aura:attribute access="public" type="String" name="recordId" description="the Id of the account or contract record"/>
+    <aura:attribute access="private" type="String" name="suppressionStatus" default="NO" description="the suppression status of the account or contract"/>
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+	<div class="{!v.suppressionStatus == 'NO' ? 'containerComponent emptyContainer' : 'containerComponent'}">
+		<aura:if isTrue="{!v.suppressionStatus == 'YES'}">   
+			<div class="slds-notify slds-notify_alert slds-theme_error" role="alert">
+				<h2>Suppressed</h2>
+			</div>
+			<aura:set attribute="else">
+				<aura:if isTrue="{!v.suppressionStatus == 'PARTIALLY'}">  
+					<div class="slds-notify slds-notify_alert slds-theme_warning" role="alert">
+						<h2>Contract(s) Suppressed</h2>
+					</div>
+				</aura:if>
+			</aura:set>
+		</aura:if>
+    </div>
+</aura:component>

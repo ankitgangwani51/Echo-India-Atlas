@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE BatchResponse004 SYSTEM "BatchResponse004.dtd">
+<BatchResponse004>
+   <header>
+      <system>CCS</system>
+      <timestamp>20070915200000</timestamp>
+      <userId>ANZ-001</userId>
+      <senderOrgCrn>123456789A</senderOrgCrn>
+      <recverOrgCrn>999999999T</recverOrgCrn>
+      <senderAbn>29468422437</senderAbn>
+      <recverAbn>12345678999</recverAbn>
+   </header>
+   <statusResp id="1">
+      <crn>123456789</crn>
+      <cnfrmDate>2017-01-01</cnfrmDate>
+      <mtchCode>2</mtchCode>
+      <numChild>2</numChild>
+      <pcode>UC</pcode>
+      <lic>N</lic>
+      <pcc>N</pcc>
+      <shc>UC</shc>
+      <hcc>Y</hcc>
+      <entStartDate>2017-01-01</entStartDate>
+      <entEndDate>2017-01-02</entEndDate>
+      <deceased>false</deceased>
+      <blind>false</blind>
+      <over70>false</over70>
+      <war>test</war>
+      <inst>test</inst>
+      <scndryCrn>1231231231</scndryCrn>
+      <maxRate>100.00</maxRate>
+      <rateThold>50.00</rateThold>
+      <rateRatio>23</rateRatio>
+      <pymt>
+         <type>AGE</type>
+         <status>CUR</status>
+         <startDate>20050101</startDate>
+         <endDate>NA</endDate>
+         <datePaidTo>20070918</datePaidTo>
+      </pymt>
+      <otherPayments>
+         <type>CDA</type>
+         <status>CUR</status>
+         <startDate>20070101</startDate>
+         <endDate>NA</endDate>
+         <datePaidTo>20070918</datePaidTo>
+      </otherPayments>
+   </statusResp>
+   <statusResp id="2">
+      <crn>234567896</crn>
+      <cnfrmDate>01/01/2017</cnfrmDate>
+      <mtchCode>2</mtchCode>
+      <numChild>2</numChild>
+      <pcode>UC</pcode>
+      <lic>N</lic>
+      <pcc>N</pcc>
+      <shc>UC</shc>
+      <hcc>Y</hcc>
+      <entStartDate>2017-01-01</entStartDate>
+      <entEndDate>2017-01-02</entEndDate>
+      <deceased>false</deceased>
+      <blind>false</blind>
+      <over70>false</over70>
+      <war>test</war>
+      <inst>test</inst>
+      <scndryCrn>1231231231</scndryCrn>
+      <maxRate>100.00</maxRate>
+      <rateThold>50.00</rateThold>
+      <rateRatio>23</rateRatio>
+      <pymt>
+         <type>AGE</type>
+         <status>CUR</status>
+         <startDate>20050101</startDate>
+         <endDate>NA</endDate>
+         <datePaidTo>20070918</datePaidTo>
+      </pymt>
+      <otherPayments>
+         <type>CDA</type>
+         <status>CUR</status>
+         <startDate>20070101</startDate>
+         <endDate>NA</endDate>
+         <datePaidTo>20070918</datePaidTo>
+      </otherPayments>
+   </statusResp>
+   <statusResp id="3">
+      <crn>0401202218</crn>
+      <cnfrmDate>2018-01-01</cnfrmDate>
+      <mtchCode>5</mtchCode>
+   </statusResp>
+   <statusResp id="4">
+      <mtchCode>10</mtchCode>
+   </statusResp>
+   <statusResp id="5">
+      <crn>2255998877</crn>
+      <cnfrmDate>2017-01-01</cnfrmDate>
+      <mtchCode>2</mtchCode>
+      <pcode>Yes</pcode>
+   </statusResp>
+   <statusResp id="6">
+      <crn>2255998877</crn>
+      <cnfrmDate>2017-01-01</cnfrmDate>
+      <mtchCode>2</mtchCode>
+      <pcc>Yes</pcc>
+   </statusResp>
+   <statusResp id="7">
+      <crn>2255998877</crn>
+      <cnfrmDate>2017-01-01</cnfrmDate>
+      <mtchCode>2</mtchCode>
+      <hcc>Yes</hcc>
+   </statusResp>
+   <statusResp id="8">
+      <crn>2255998877</crn>
+      <cnfrmDate>2017-01-01</cnfrmDate>
+      <mtchCode>2</mtchCode>
+      <shc>Yes</shc>
+   </statusResp>
+   <statusResp id="9">
+      <crn>2255998877</crn>
+      <cnfrmDate>2017-01-01</cnfrmDate>
+      <mtchCode>2</mtchCode>
+      <lic>Yes</lic>
+   </statusResp>
+   <trailer>
+      <numRecords>4</numRecords>
+   </trailer>
+</BatchResponse004>

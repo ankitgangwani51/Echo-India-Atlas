@@ -1,0 +1,84 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Swati Mathur
+@date      		09 May 2018
+@description 	Displays ReadTimetableMaintenance Component
+@revesion       Changes by Dependra Singh - Security Review - 14-09-2018
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="LoAp_ReadTimetableMaintenanceCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+    
+    <aura:attribute access="public" 	type="List" 	name="fieldList"/>
+    <aura:attribute access="public" 	type="List" 	name="recordList"/>
+    <aura:attribute access="public" 	type="List" 	name="areaRecordList"/>
+    <aura:attribute access="public" 	type="List" 	name="depotRecordList"/>
+    <aura:attribute access="public" 	type="List" 	name="bookRecordList"/>     
+    <aura:attribute access="public" 	type="object" 	name="resultContainer"/> 
+    <aura:attribute access="public" 	type="Boolean"  name="disabled" default="true"/>
+    <aura:attribute access="public" 	type="String" 	name="selTabId"/> 
+    <aura:attribute access="public" 	type="List" 	name="sections"/>
+    <aura:attribute access="public" 	type="Id" 		name="selReadPeriodId"/>
+    <aura:attribute access="private" 	type="Id" 		name="selReadingModeId"/>    
+    <aura:attribute access="private"    type="Integer"  name="tempRowIdCount"/>  
+    <aura:attribute access="private"    type="object"   name="readPeriodObject"/>
+    <aura:attribute access="private" 	type="List" 	name="existingAreaRecordList"/>     <!-- AT-4065 -->
+    <aura:attribute access="private" 	type="List" 	name="existingDepotRecordList"/>	<!-- AT-4065 -->
+    <aura:attribute access="private" 	type="List" 	name="existingBookRecordList"/>  	<!-- AT-4065 -->
+    
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+        <c:GlAp_NotificationComponent aura:id="notification"/>	
+        <div class="slds-text-heading_small slds-text-align_center">
+            <b>{!$Label.c.LoAp_ReadTimetableMaintenanceHeading}  
+                <div class="slds-border_bottom slds-m-top_x-small slds-m-bottom_x-small"></div>
+            </b><!--Need To change -->
+        </div> 
+        <c:GlAp_ReadTimetableReadPeriod />
+        <div class="slds-p-top_medium">
+        <lightning:tabset variant="scoped" onselect="{!c.tabSelected}" selectedTabId="{!v.selTabId}">            
+            <aura:iteration items="{!v.sections}" var="item">
+                <lightning:tab label="{!item}" id="{!item}">
+                    <div class="slds-clearfix">
+                        <div class="slds-float_right">
+                            <lightning:button variant="brand" disabled="{!v.disabled}" label="{!$Label.c.LoAp_DeleteRowButton}" onclick="{!c.DeleteRow}" />
+                            <lightning:button variant="brand" disabled="{!v.disabled}" label="{!$Label.c.LoAp_AddRowButton}" onclick="{!c.AddRow}" />
+                        </div>
+                    </div>
+                    <div class="slds-p-top_x-small">
+                    <article class="slds-card slds-card_boundary forceRelatedListCardDesktop"> 
+                        <div class="slds-card__body slds-scrollable_y" style="max-height: 200px;">
+                            <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                                <c:GlAp_GenericTable aura:id="DisplaySectionTable" 
+                                                     tableName="{!$Label.c.LoAp_DisplaySectionObject}" 
+                                                     fieldList="{!v.fieldList}" 
+                                                     recordList="{!v.recordList}"
+                                                     showSelect="false" forceEditMode="true"/>                      
+                            </div>
+                            <aura:if isTrue="{!v.recordList.length == 0}">
+                                <div class="slds-align_absolute-center">
+                                    {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                                </div>
+                            </aura:if>
+                        </div>
+                    </article> 
+                    </div>
+                </lightning:tab>
+            </aura:iteration>             
+        </lightning:tabset>
+        </div>
+        <div class="slds-p-top_small">
+        <div class="slds-form-element slds-size_1-of-2 slds-p-right--xx-large slds-align_absolute-center" >
+            <lightning:button variant="brand"  label="Save" onclick="{!c.save}" />
+            <lightning:button variant="brand"  label="Cancel" onclick="{!c.close}" />
+        </div>
+        </div>
+    </div>
+    
+</aura:component>

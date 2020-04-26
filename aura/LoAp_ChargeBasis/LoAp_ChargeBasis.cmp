@@ -1,0 +1,38 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		19 Sept 2018
+@description 	Displays a list of the Charge Basis based on Location 
+    Location >> Supply Point >> Available Service >> Charge Basis
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="LoAp_ChargeBasisCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="public" 	type="object" 	name="fieldList"/>
+    <aura:attribute access="public" 	type="object" 	name="recordList"/>
+    <aura:attribute access="public" 	type="Id" 		name="recordId" description="parent record Id"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <div class="slds-container_fluid">        
+        <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+            <div class="slds-card__body slds-scrollable_y medium_height">
+                <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                    <c:GlAp_GenericTable aura:id="ChargeBasis" 
+                                         tableName="ChargeBasis" 
+                                         fieldList="{!v.fieldList}" 
+                                         recordList="{!v.recordList}" 
+                                         showSelect="false"/>
+                </div>
+                <aura:if isTrue="{!v.recordList.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+            </div>
+        </article>
+    </div>    
+</aura:component>

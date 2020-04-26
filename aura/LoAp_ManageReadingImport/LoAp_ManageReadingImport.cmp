@@ -1,0 +1,193 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		22-May-2018
+@description 	Manage Reading Import Error Component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="LoAp_ManageReadingImportCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <aura:attribute access="global"  	type="Id" 		name="recordId" description="the parent record Id"/>
+    <aura:attribute access="private" 	type="List" 	name="readingUploadFieldsForGeneric"/>
+    <aura:attribute access="private" 	type="object" 	name="objReadingUpload" /> 
+    <aura:attribute access="private" 	type="object" 	name="objLocation" />
+    <aura:attribute access="private" 	type="object" 	name="objReading" />
+    <aura:attribute access="private" 	type="Boolean" 	name="editOverrideReading" />    
+    <aura:attribute access="private" 	type="Boolean" 	name="editRequestReading" />    
+    <aura:attribute access="public" 	type="List" 	name="ListOfTabName" default="['Billable Readings','All Readings']"/>
+    <aura:attribute access="private" 	type="Boolean" 	name="manageReadingImportScreen" default="false"/>
+    <aura:attribute access="public" 	type="String" 	name="activeTab"/>    
+    <aura:attribute access="private" 	type="Id" 		name="deviceId"/>
+    <aura:attribute access="private" 	type="String"	name="deviceDigit"/>    
+    <aura:attribute access="private" 	type="Id" 		name="supplyPointId"/>
+    <aura:attribute access="private"    type="Integer"   name="lastReading"/>
+    
+    <!-- AT-3855  High Reading -->
+    <aura:attribute access="private" 	type="Boolean" 	name="highReading" default="false"/>
+    <aura:attribute access="private" 	type="Id" 		name="supplyPointDeviceId"/>
+    <!-- AT-3855-->
+    
+    <!-- Generic Table attributes -->
+    <aura:attribute access="public" 	type="String" 	name="objectName" 		description="related object API name"/>
+    <aura:attribute access="public" 	type="String" 	name="detailListFields" description="name of the detail list fieldset"/>    
+    <aura:attribute access="private" 	type="Object" 	name="selectedRecord" 	description="this is the selected record"/>
+    <aura:attribute access="public" 	type="String" 	name="activeFieldName" 	description="the name of a field that indicates that the record is active 
+                                                                                             and related records can be added (should be boolean/checkbox)"/>
+    <aura:attribute access="public" 	type="String"	name="parentField" 		description="API name of the field on the object 
+                                                                                             (corresponds to the id which is passed in as the record id so that related records can be retrieved)"/>
+    
+    <!-- Bill Calculations Attributes -->
+    <aura:attribute access="private" type="Id" name="newRecordId" description="this is the new record Id"/>
+    <aura:attribute access="private" type="Id" name="billId" description="this is the new Bill Id"/>
+    <aura:attribute access="public" type="Boolean" name="isActive" default="false" description="true if the component is active"/>
+    
+    <aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+			description="handler for bill calculation complete events"/>
+    <!--<aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleNavigationEvent}" description="handler for navigation button events"/>-->
+    
+	<!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    
+    <!-- Event handlers -->
+    <aura:handler name="change" value="{!v.activeTab}" action="{!c.handleTab}"/>
+    <aura:handler name="inputFieldEvent" event="c:GlAp_GenericInputEvent" action="{!c.handleInputChangeEvent}"/>
+    
+    <aura:if isTrue="{!v.manageReadingImportScreen}">        
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding">
+                
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.hideManageReadingComponent}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate"><b>{!$Label.c.LoAp_ManageReadingImportError}</b></h2>                    
+                </header>
+                
+                <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">  
+                    <!-- Notifications -->                    
+                    <c:GlAp_NotificationComponent aura:id="notification"/>                    
+                    <!-- Calculate Bill Component -->
+                    <aura:if isTrue="{!v.isActive}">
+                        <c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" recordId="{!v.newRecordId}" sObjectName="{!v.objectName}" showButton="false" 
+                                                       calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+                    </aura:if>
+                </div>
+                
+                <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">        
+                    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                    <div class="slds-container_fluid">
+                        <div class="slds-form slds-form_compound slds-p-top_medium">
+                            <fieldset class="slds-form-element">                    
+                                <div class="slds-form-element__group">       
+                                    <aura:iteration items="{!v.readingUploadFieldsForGeneric}" var="ReadingUploadFields">
+                                        <div class="slds-form-element__row">          
+                                            <aura:iteration items="{!ReadingUploadFields}" var="ReadingUploadField">
+                                                <div class="slds-form-element slds-size_1-of-2 slds-col slds-p-horizontal_medium slds-form-element__label">                                        
+                        
+                                                    <c:GlAp_GenericField aura:id="{!ReadingUploadField.fieldLabel}"                                                              
+                                                                         object="{!(ReadingUploadField.parentObject == v.namespace + 'ReadingUpload__c' 
+                                                                                 ? v.objReadingUpload
+                                                                                 : ReadingUploadField.parentObject == v.namespace + 'Location__c'
+                                                                                 ? v.objLocation
+                                                                                 : v.objReading)}"
+                                                                         objectName="{!ReadingUploadField.parentObject}" 
+                                                                         fieldType="{!ReadingUploadField.fieldType}" 
+                                                                         fieldName="{!ReadingUploadField.fieldName}" 
+                                                                         listView="{!ReadingUploadField.showLabel}"
+                                                                         showLabel="{!ReadingUploadField.showLabel}"
+                                                                         editMode="{!ReadingUploadField.isEditable}"                                                                         
+                                                                         changeEvent="{!ReadingUploadField.changeEvent}"
+                                                                         required="{!ReadingUploadField.isRequired}" 
+                                                                         isEditable="{!ReadingUploadField.fieldName == 'Override_Value'
+                                                                                     ? v.editOverrideReading
+                                                                                     : ReadingUploadField.fieldName == 'Requested_Date'
+                                                                                     ? v.editRequestReading
+                                                                                     : ReadingUploadField.isEditable}"                                                             
+                                                                         label="{!ReadingUploadField.fieldLabel}" />                                                    
+                                                </div>
+                                            </aura:iteration>
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>   
+                    
+                    <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+                        <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                            
+                            <div class="slds-text-heading_small slds-text-align_left">
+                                <b>{!$Label.c.LoAp_PreviousReading}</b>
+                            </div> 
+                        </div>
+                        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                        
+                        <lightning:tabset variant="scoped" onselect="{!c.handleTab}" selectedTabId="{!v.activeTab}">            
+                            <aura:iteration items="{!v.ListOfTabName}" var="item"> 
+                                <lightning:tab label="{!item}" id="{!item}"> 
+                                    <aura:if isTrue="{!v.deviceId}">  
+                                        <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">                        
+                                            <div class="slds-card__body slds-scrollable_y medium_height">
+                                                <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                                                    <aura:if isTrue="{!v.activeTab == $Label.c.LoAp_BillableReadings}"> 
+                                                        <!-- AT-3174 -->
+                                                        <c:GlAp_RelatedRecordList aura:id="relatedList1" 
+                                                                                  objectName="{!v.namespace + 'Reading__c'}" 
+                                                                                  selectedRecord="{!v.selectedRecord}" 
+                                                                                  detailListFields="{!v.namespace + $Label.c.LoAp_BillablePreviousReading}"
+                                                                                  filter="{!v.namespace + 'BillableType__c' + '= \'Billable\''}"
+                                                                                  recordId="{!v.deviceId}" 
+                                                                                  parentField="{!v.namespace + 'Device__c'}" 		
+                                                                                  showNew="false" 
+                                                                                  forAmendments="true"/> 
+                                                        <aura:set attribute="else">
+                                                            <c:GlAp_RelatedRecordList aura:id="relatedList2" 
+                                                                                      objectName="{!v.namespace + 'Reading__c'}" 
+                                                                                      selectedRecord="{!v.selectedRecord}" 
+                                                                                      detailListFields="{!v.namespace  + $Label.c.LoAp_BillablePreviousReading}"
+                                                                                      filter="{!v.namespace + 'BillableType__c' + '!= \'Invalid\''}"
+                                                                                      recordId="{!v.deviceId}" 
+                                                                                      parentField="{!v.namespace + 'Device__c'}" 
+                                                                                      showNew="false" 
+                                                                                      forAmendments="true"/> 
+                                                        </aura:set> 
+                                                    </aura:if>
+                                                </div>                                            
+                                            </div>
+                                        </article> 
+                                        <aura:set attribute="else">
+                                            <div class="slds-align_absolute-center">
+                                                {!$Label.c.LoAp_NoDeviceFound}
+                                            </div>
+                                        </aura:set>                                        
+                                    </aura:if>
+                                </lightning:tab>
+                            </aura:iteration>             
+                        </lightning:tabset>                    
+                    </article>
+                </div>   
+                <footer class="slds-modal__footer">                    
+                    <lightning:button variant="brand" label="{!$Label.c.LoAp_Accept}" 			onclick="{!c.handleAccept}"/>
+                    <lightning:button variant="brand" label="{!$Label.c.LoAp_AmendPrevious}"	onclick="{!c.handleAmendPrevious}"/>
+                    <lightning:button variant="brand" label="{!$Label.c.LoAp_Override}" 		onclick="{!c.handleOverride}"/>
+                    <lightning:button variant="brand" label="{!$Label.c.LoAp_RequestRead}" 		onclick="{!c.handleRequestRead}"/>                    
+                    <lightning:button variant="brand" label="{!$Label.c.GlAp_CancelButton}" 	onclick="{!c.hideManageReadingComponent}" />                    
+                </footer> 
+            </div>            
+        </section>
+        
+        <div class="slds-backdrop slds-backdrop_open"></div>
+        <aura:set attribute="else">
+            <lightning:button variant="brand" label="{!$Label.c.LoAp_ManageReadingImport}" name="{!$Label.c.LoAp_ManageReadingImport}" disabled="false" onclick="{!c.showManageReadingComponent}"/>
+        </aura:set>
+    </aura:if>    
+</aura:component>

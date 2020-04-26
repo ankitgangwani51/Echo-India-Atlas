@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Show a Notification message on a component in the hierachy" >
+    <aura:attribute type="String" name="type" required="false" description="message type" />
+    <aura:attribute type="String[]" name="message" required="true" description="message body" />
+</aura:event>

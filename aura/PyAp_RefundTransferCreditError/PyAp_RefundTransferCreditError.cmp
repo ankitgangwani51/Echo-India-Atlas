@@ -1,0 +1,41 @@
+<!--
+**********************************************************************************************
+@author			Echo : Neha Rajput
+@date			20-Jan-201
+@description	Display Refund/Transfer Credit Error
+@param			isActive - Boolean
+				PageTitle - String
+				ErrorMsg - String
+@return			none
+@revision(s)	Changed by Dependra Singh- 05-JAN 2018. Making it for wizard compatible.
+**********************************************************************************************
+-->
+<aura:component >    
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    <!--<aura:attribute access="public" type="String" name="PageTitle" description="Page title of model"/>
+    <aura:attribute access="public" type="String" name="ErrorMsg"  description="Error message to display in model"/>-->
+       
+        <aura:if isTrue="{!v.isActive}">
+          			<!-- MODAL BOX BODY -->
+          			<div class="slds-modal__content slds-p-around--medium">
+              			<div class="slds-box slds-theme--error">
+            				<p>
+                                <b>{!$Label.c.PyAp_RefundTransferCreditError}</b>
+                               <!-- <b> {!$Label.c.PyAp_RefundTransferCreditError}</b> -->
+                  			</p>
+                        </div>
+          			</div>
+               <!-- MODAL BOX END -->  
+ 		</aura:if>
+</aura:component>

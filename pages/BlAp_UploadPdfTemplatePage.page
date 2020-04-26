@@ -1,0 +1,90 @@
+<!--/******************************************************************************
+@author              Echo: Dependra Singh
+@date                25 May 2018
+@description         This page contains input select tag which we are calling from BlAp_UploadPdfLightning.cmp.
+					 Used to upload pdf document in Heroku                              
+*******************************************************************************/
+-->
+<apex:page showHeader="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" lightningStylesheets="true" controller="BlAp_UploadPdfTemplateCtrlr">
+    <apex:stylesheet value="{!$Resource.DocumentUploadStyleResource}"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script>
+        // receive message from LC
+        window.addEventListener("message", function(event) {
+            debugger;
+            data = event.data ;
+             if(event.data.xsltTemplateName) {
+                $('[id$=idHiddenXsltTemplateName]').val(event.data.xsltTemplateName);
+            }
+            if(typeof(event.data.uploadFile) != 'undefined' && (event.data.uploadFile == true)) {
+                $('[id$=idHiddenFileName]').val(event.data.fileName);
+                document.getElementById('{!$Component.uploadFormId.uploadFileButton}').click() ;
+            }
+        }  , false) ;
+      var lexOrigin = 'https://{!JSENCODE($CurrentPage.parameters.lcHost)}' ; //Sudhir-Checkmarx: XSS
+    // send message to LC
+    function sendToLC(message) {
+         if(typeof(lexOrigin) != 'undefined') {
+            parent.postMessage(message,lexOrigin) ;
+           }
+    }
+    $(document).ready(function() {
+        debugger;
+        $(".fileUpload").change(function(event) {
+            debugger;
+            var file = this.files[0];
+            document.getElementById('txtFileName').value = file.name;
+            if(file.name.substring(file.name.lastIndexOf(".") + 1, file.name.length) == 'zip'){
+                // check the selected file size, if select file size greter then MAX_FILE_SIZE,
+                if (file.size > 4500000) {
+                    sendToLC({'state' : btoa('invalidFileSize'),'eventType': btoa('custom')}) ;
+                }
+            }else{
+                sendToLC({'state' : btoa('invalidFileType'),'eventType':btoa('custom')}) ;
+            }
+             sendToLC({'state' :btoa('uploadFileSelected'),'eventType':btoa('custom')}) ;
+        });
+    });
+    sendToLC({'state':btoa('LOADED'), 'vfHost': btoa("{!LEFT($CurrentPage.URL,FIND('/',$CurrentPage.URL,9))}"), 'eventType':btoa('custom')}); //AT-4889 Code Check marx Changes Starts/Ends here
+    </script>
+        <meta charset="utf-8" /> 
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />   
+    <meta name="viewport" content="width=device-width, initial-scale=1" /> 
+    <!-- Import the Design System style sheet --> 
+    <apex:slds /> 
+    <apex:form id="uploadFormId">
+         <apex:inputHidden value="{!fileName}" id="idHiddenFileName"/>
+         <apex:inputHidden value="{!xsltTemplateName}" id="idHiddenXsltTemplateName"/>
+        <apex:commandButton value="Save" action="{!uploadFile}" id="uploadFileButton" style="display:none;"/>
+        <div class="slds-scope"> 
+            <div class="slds-box slds-p-bottom_medium">
+                <div class="demo-only demo-only--sizing slds-grid slds-wrap ">
+                    <div class="slds-size_1-of-2 slds-p-left_medium">
+                        <div class="slds-form-element">
+                            <div class="slds-form-element__control">
+                                <input type="text" id="txtFileName" class="slds-input" placeholder="Selected File Name" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-size_1-of-2 slds-p-left_medium">
+                        <div class="upload-btn-wrapper">
+                            <button class=" btn slds-button slds-button--neutral">{!$Label.LoAp_SelectFile}</button>
+                            <apex:inputFile id="fileSelectedForUpload"  value="{!objAttachment.body}" accept=".zip" fileName="{!objAttachment.Name}" size="{!objAttachment.BodyLength}"  styleClass="fileUpload"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <apex:pageBlock rendered="{!fileUploadProcessed == true}" id="pageBlockId">
+            <script>
+            //Hide pageBlock as we just need it to run
+            var pb = document.getElementById('{!$Component.pageBlockId}') ;
+            pb.style.border = 'none' ;
+            pb.style.display = 'none' ;
+            debugger;
+            // send file uploaded message
+            sendToLC({'state' : btoa('fileUploadprocessed'), 'message' : btoa('{!message}') , 'messageType' : btoa('{!messageType}'), 'eventType':btoa('custom')}) ; //AT-4889 Code Check marx Changes Starts/Ends here
+            </script>
+        </apex:pageBlock>
+    </apex:form>
+</apex:page>

@@ -1,0 +1,7 @@
+<aura:documentation>
+	<aura:description>
+        <strong>CuAp_SelectServicePage</strong> is fourth component for the Customer Move In Wizard. It displays all the available services linked to all Supply points on a location.
+        It is designed to be added to the customer move in Wizard . It expects the location id as an attribute and sets list of all selected services in Wizardprop.
+    </aura:description>
+	
+</aura:documentation>

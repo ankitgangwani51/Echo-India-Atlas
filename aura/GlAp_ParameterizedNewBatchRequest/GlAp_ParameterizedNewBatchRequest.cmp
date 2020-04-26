@@ -1,0 +1,85 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Vivek Sethi
+@date      		30 Nov 2018
+@description 	New Batch Request component with Parameters as Discount Type
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="GlAp_ParameterizedNewBatchRequestCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="public" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="public" type="String" name="batchRequestFields" default="RelatedListDetails" description="name of the batch request queue fieldset"/>
+    <aura:attribute access="private" type="List" name="recordList" />
+    <aura:attribute access="private" type="List" name="fieldList" />
+    <aura:attribute access="private" type="String" name="discountTypeId"   description="Discount TypeId "/>
+    <aura:attribute name="lcHost" type="String"  />
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+    <aura:registerEvent name="refreshEvent" type="c:GlAp_AppRefreshEvent"/> 
+    
+    <div class="slds-container_fluid">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        
+        <!-- Related Batch Request Queues -->
+        <article class="slds-card slds-card_boundary">
+            <div class="slds-modal__header ">
+                <!-- Title with Icon -->
+                <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <div class="slds-media__figure">
+                                <div class="extraSmall forceEntityIcon" style="background-color: #7698f0">
+                                    <span class="uiImage" data-aura-class="uiImage">
+                                         <img src= "{!v.lcHost}" class="icon" alt="{!$Label.c.LoAp_BookExportRequestNewReqBtn}" title="{!$Label.c.LoAp_BookExportRequestNewReqBtn}"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-media__body">
+                                <h2 id="header">
+                                    <div class="slds-card__header-link baseCard__header-title-container" href="javascript:void(0);">
+                                        <span class="slds-text-heading--small slds-truncate slds-m-right--xx-small" title="{!$Label.c.LoAp_BookExportRequestNewReqBtn}">
+                                            {!$Label.c.LoAp_BookExportRequestNewReqBtn} - {!$Label.c.GlAp_DiscountTypeLabel} ({!v.recordList.length})
+                                        </span>
+                                    </div>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Notifications -->
+            <c:GlAp_NotificationComponent aura:id="notification"/>
+            <!-- Table of records -->
+            <div class="slds-card__body slds-scrollable_y medium_height">
+                <div class="slds-modal__content slds-p-around--medium">	
+                    <form class="slds-form slds-form_compound "> 
+                   
+                        <div class="slds-card__body slds-scrollable_y medium_height" style="height: 10rem">
+                            <div class="slds-form-element slds-p-left_x-small">
+                                <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" />
+                            </div> 
+                            <aura:if isTrue="{!v.recordList.length == 0}">
+                                <div class="slds-align_absolute-center">
+                                    {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                                </div>
+                            </aura:if>
+                        </div>
+                        
+                    </form>
+                </div>  
+                
+                <!-- New Request Button -->
+                <div class="slds-grid slds-float_right slds-p-top_small slds-p-right_xx-small"  >
+                    <lightning:button variant="brand" label="{!$Label.c.DrUI_RunLabel}" name="new_Request" onclick="{!c.newRequest}" />
+                </div>
+            </div>
+        </article>
+    </div>
+        
+</aura:component>

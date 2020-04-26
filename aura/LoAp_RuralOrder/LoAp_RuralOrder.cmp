@@ -1,0 +1,70 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Neha R.
+@date      		14 Dec 2018
+@description 	New Rural Order Component 
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes,force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName,lightning:actionOverride" 
+                controller="LoAp_RuralOrderCtrlr" 
+                access="global" 
+                extends="c:GlAp_LightningComponentBase">
+       
+    <aura:attribute name="resultContainer" type="object" access="private" description="Wrapper container for field and record List"/>
+    <aura:attribute name="isOpen" type="Boolean" default="False" />
+    <aura:attribute name="isMSG1" type="Boolean" default="False" />
+    <aura:attribute name="isMSG2" type="Boolean" default="False" />
+    <aura:attribute name="confirmMSG1" type="String" default="" />
+    <aura:attribute name="confirmMSG2" type="String" default="" />      
+    
+    <lightning:card iconName="custom:custom19" title="{!$Label.c.LoAp_RuralOrderTitle}">
+        <div class="slds-p-left_large slds-p-right_medium">	
+            <lightning:recordForm aura:id="recordViewForm" 
+                                  objectApiName="{!v.namespace + 'RuralOrder__c'}"                                                                   
+                                  columns="2"
+                                  mode="Edit"
+                                  layoutType="Full"                                 
+                                  onsubmit="{!c.onSubmit}" 
+                                  onsuccess="{!c.handleSuccess}"   
+                                  /> 
+            
+            <!--Use aura:if tag to display Model Box, on the bese of conditions. [isOpen boolean attribute] -->   
+            <aura:if isTrue="{!v.isOpen}">                
+                <!--###### MODAL BOX Start######--> 
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <!-- ###### MODAL BOX HEADER Start ######-->
+                        <header class="slds-modal__header">
+                            <lightning:buttonIcon iconName="utility:close"
+                                                  onclick="{! c.closeModel }"
+                                                  alternativeText="close"
+                                                  variant="bare-inverse"
+                                                  class="slds-modal__close"/>
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.LoAp_ConfirmationMessages}</h2>
+                        </header>
+                        <!--###### MODAL BOX BODY Part Start######-->
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content-id-1">                                                        
+                            <ul class="slds-list--dotted">
+                                <aura:if isTrue="{!v.isMSG1}"><li><b>{!v.confirmMSG1}</b></li></aura:if>
+                                <aura:if isTrue="{!v.isMSG2}"><li><b>{!v.confirmMSG2}</b></li></aura:if>                                
+                            </ul>
+                        </div>
+                        <!--###### MODAL BOX FOOTER Part Start ######-->
+                        <footer class="slds-modal__footer">
+                            <lightning:button variant="neutral" 
+                                              label="{!$Label.c.CuAp_CancelButton}"
+                                              title="{!$Label.c.CuAp_CancelButton}"
+                                              onclick="{!c.closeModel}"/>
+                            <lightning:button variant="brand" 
+                                              label="{!$Label.c.LoAp_ConfirmButton}"
+                                              title="{!$Label.c.LoAp_ConfirmButton}"
+                                              onclick="{!c.onConfirmed }"/>
+                        </footer>
+                    </div>
+                </section>
+                <div class="slds-backdrop slds-backdrop_open"></div>
+                <!--###### MODAL BOX Part END Here ######-->                
+            </aura:if>            
+        </div>
+    </lightning:card>
+</aura:component>

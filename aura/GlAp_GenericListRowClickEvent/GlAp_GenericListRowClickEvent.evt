@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Grid Row Record Has Been Clicked">
+	<aura:attribute name="RowId" type="String"/>
+    <aura:attribute name="Source" type="String"/>
+</aura:event>

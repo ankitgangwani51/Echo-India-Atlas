@@ -1,0 +1,114 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Sudhir Kumar
+@date      		28-March-2018
+@description 	My Meter Details Lightning Component
+       			For Viewing Devices Details and Submitting a Reading
+				This is used for community
+@param			None
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,forceCommunity:availableForAllPageTypes" 
+                controller="CmAp_MyMeterDetailsCtlr"
+                extends="c:GlAp_LightningComponentBase">
+    <!-- Component Variables -->
+    <aura:attribute name="readingFieldList" type="List" access="private"/>
+    <aura:attribute name="readingRecordList" type="List" access="private"/>
+    <aura:attribute name="deviceFieldList" type="List" access="private"/>
+    <aura:attribute name="deviceRecordList" type="List" access="private"/>
+    <aura:attribute access="public" type="boolean" name="showSubmitReading" default="false" />
+    <aura:attribute access="private" type="object" name="deviceObject" />
+    <aura:attribute name="deviceRef" type="String" access="public"/>
+    <aura:attribute name="deviceDigit" type="String" access="public"/>
+    <aura:attribute access="public" name="lastActualReading" type="String"/> 
+    <aura:attribute access="private" name="deviceType" type="object"/>  
+    <aura:attribute access="private" name="serialNumber" type="object"/>
+    <aura:attribute access="private" name="readingFound" type="Boolean" default="false"/>
+    <!-- Handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="refreshMyPayments" event="c:CmAp_RefreshEvent" action="{!c.doInit}"/>
+    
+    
+    <!-- Spinner Component -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div class="slds-grid  slds-grid_vertical slds-modal__content slds-p-around_medium">
+        
+        <!-- HEADING AREA -->
+        <div class="slds-media slds-no-space slds-grow">
+            <div class="slds-media__figure">
+                <span class="slds-avatar slds-avatar_large">
+                    <img src="{!$Resource.myMeterLogo}" title="{!$Label.c.CmAp_MyReadingHeader}" />  
+                </span>
+            </div>
+            <div class="slds-media__body">
+                <p class="slds-text-title--caps slds-line-height--reset">{!$Label.c.CmAp_MyMeterDetailsTitle}</p>
+                <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="My Meter Details">{!$Label.c.CmAp_MyReadingHeader}</h1>
+            </div>
+        </div>
+        <div class="slds-modal__header">
+            <div class="slds-float_right">
+                <lightning:button variant="brand" label="{!$Label.c.CmAp_SubmitReadingButtonLabel}" onclick="{!c.submitReading}" />
+            </div>
+        </div>
+        <!-- / HEADING AREA -->
+        <!-- Device table -->
+        <div class="slds-container_fluid"> 
+            <div class="slds-form slds-form_compound slds-p-top_large">
+                <aura:if isTrue="{!v.showSubmitReading}">
+                    <div class="slds-p-bottom_medium">
+                        <c:CmAp_SubmitMyReading showSubmitReading="{!v.showSubmitReading}" 
+                                                deviceRef="{!v.deviceRef}" 
+                                                deviceDigit="{!v.deviceDigit}" 
+                                                lastActualReading="{!v.lastActualReading}" />
+                    </div>
+                    <aura:set attribute="else">
+                        <div class="slds-box--x-small slds-theme--inverse">
+                            {!$Label.c.CmAp_MyReadingSubHeader}
+                        </div>
+                        <aura:if isTrue="{!v.readingFound}"> 
+                            <div class="slds-form-element__group">
+                                <aura:iteration items="{!v.deviceFieldList}" var="deviceFields">
+                                    <div class="slds-form-element__row">
+                                        <aura:iteration items="{!deviceFields}" var="deviceField">
+                                            <div class="slds-form-element slds-size_1-of-2">   <div class="slds-m-top--small"> </div>                                            
+                                                <c:GlAp_GenericField aura:id="{!deviceField.fieldLabel}" 
+                                                                     object="{!(deviceField.parentObject == v.namespace + 'Device__c' 
+                                                                             ?  v.serialNumber 
+                                                                             : v.deviceType)}" 
+                                                                     objectName="{!deviceField.parentObject}" 
+                                                                     fieldType="{!deviceField.fieldType}" 
+                                                                     fieldName="{!deviceField.fieldName}"
+                                                                     listView="{!deviceField.showLabel}"
+                                                                     showLabel="{!deviceField.showLabel}"
+                                                                     editMode="{!deviceField.isEditable}" 
+                                                                     isEditable="{!deviceField.isEditable}"
+                                                                     picklistValues="" 
+                                                                     value="{!(deviceField.parentObject == v.namespace + 'Device__c' 
+                                                                            ?  v.serialNumber 
+                                                                            : v.deviceType)}"
+                                                                     label="{!deviceField.fieldLabel}" 
+                                                                     />
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </aura:iteration>
+                            </div>
+                        </aura:if>
+                    </aura:set>
+                </aura:if>
+            </div>
+        </div>
+        <div class="slds-m-top--large"> </div>
+        <!-- Reading table -->
+        <div class="slds-grid  slds-grid_vertical slds-modal__content">
+            <aura:if isTrue="{!v.readingFound}">
+                <div class="slds-container_fluid">
+                    <c:GlAp_GenericTable tableName="{!$Label.c.CmAp_MyReadingHeader}" fieldList="{!v.readingFieldList}" recordList="{!v.readingRecordList}" showSelect="false" forceEditMode="false"/>
+                </div>
+            </aura:if>
+        </div>
+        
+    </div>
+</aura:component>

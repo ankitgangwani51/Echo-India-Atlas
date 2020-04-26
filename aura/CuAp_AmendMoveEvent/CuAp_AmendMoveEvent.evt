@@ -1,0 +1,10 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		12 Sept 2018
+@description 	Event to update wizard screens in Customer Move Amendment process using the Wizard framework
+*******************************************************************************/
+ -->
+<aura:event type="COMPONENT" description="Component Event To indicate input event">
+	<aura:attribute name="deleteLocOcc" type="String"/>
+</aura:event>

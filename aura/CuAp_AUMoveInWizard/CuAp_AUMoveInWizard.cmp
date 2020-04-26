@@ -1,0 +1,82 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		22 Oct 2018
+@description 	Component to implement the AU Move In process using the Wizard framework
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="CuAp_AUMoveInWizardCtrlr" 
+		extends="c:GlAp_WizardTemplate">
+		    
+    <!-- set wizard template variables -->
+    <aura:set attribute="title" value="{!$Label.c.CuAp_AUMoveInWizardTitle}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.CuAp_AUMoveInWizardButton}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+	<aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->
+	<aura:set attribute="isCommitted" value="false"/>
+    <aura:attribute access="private" type="Id" name="newRecordId" description="this is the new record Id"/>
+    <aura:attribute access="public" name="newListOfContractId" type="String[]" description="this is the list of contract record Id to pass to Heroku for Bill Calculation"/>
+    
+    <aura:attribute access="private" type="string" name="selectedOccType"/>
+	<!-- event handlers -->
+	<!-- have to be here as we can't override an inherited helper method from the parent -->
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+
+    <aura:handler name="passValueEvent" event="c:CuAp_AUMoveInWizardEvent" action="{!c.handleOccTypeChangeEvent}"/>
+    
+	<aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+			description="handler for bill calculation complete events"/>
+                            
+	<!-- local variables -->
+    <aura:attribute access="private" type="Map" name="status" description="Wizard status map"/>
+    <aura:attribute access="private" type="Map" name="wizardResponse" description="Wizard response map"/>
+
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+	<!-- Wizard pages -->    
+	<!-- WS1 - Select Location -->
+	<c:CuAp_SelectLocationPage aura:id="selectLocationPage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardSelectLocationStep}" wizardprop="{!v.wizardprop}"/>
+	
+	<!-- WS2 - Enter Move In Date -->
+    <c:CuAp_MoveInDatePage aura:id="moveInDatePage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardEnterMoveInDateStep}" wizardprop="{!v.wizardprop}"/> 
+	
+	<!-- WS3 - Additional Occupants -->
+	<c:CuAp_AdditionalBillerPage aura:id="additionalOccupantsPage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardAdditionalOccupantsStep}" wizardprop="{!v.wizardprop}"/>
+	
+	<!-- WS4 - Select Services -->
+	<c:CuAp_SelectServicePage aura:id="selectServicePage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardSelectServicesStep}" wizardprop="{!v.wizardprop}"/>
+	
+	<!-- WS5 - Select Bundles/Service Items -->
+	<c:CuAp_SelectBundlePage aura:id="selectBundlePage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardSelectBundlesStep}" wizardprop="{!v.wizardprop}"/>
+	
+	<!-- WS6 - Enter Readings -->
+	<c:CuAp_MoveInReadingsPage aura:id="moveInReadingsPage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardEnterReadingsStep}" wizardprop="{!v.wizardprop}"/>
+	
+	<!-- WS7 - Select Contract -->
+	<!-- skip this step if there are no contracts associated with the account -->
+    <c:CuAp_SelectContractPage aura:id="selectContractPage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardSelectContractStep}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS8 - Display Welcome Letter // AT-3157 Core7b-->
+	<c:CuAp_WelcomeLetterPage aura:id="welcomeLetterPage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardWelcomeLetterStep}" wizardprop="{!v.wizardprop}" fieldLabel="{!$Label.c.CuAp_sendWelcomeLetter}"/>	
+    
+    <!-- WS9 - Transfer Debt/Credit screen -->
+	<c:CuAp_AUTransferCreditOrDebit aura:id="transferDebtCredit" isActive="{!v.stepName == $Label.c.CuAp_AUMoveInWizardDebtCreditTransfer}" wizardprop="{!v.wizardprop}" />	
+    
+	<!-- Calculate Bill Component -->
+	<aura:if isTrue="{!(v.stepName == $Label.c.CuAp_MoveInWizardDisplayBillStep)}"> 
+		<c:BlAp_CalculateBillComponent aura:id="calculateBillComponent" recordId="{!v.newRecordId}" listOfContractId="{!v.newListOfContractId}" sObjectName="{!v.namespace + 'BillingContract__c'}" showButton="false" 
+				calculationType="{!$Label.c.BlIn_BillCalculationTypeBillable}"/>
+    </aura:if>    
+   
+	<!-- WS9 - Display Move In Bill -->
+	<c:CuAp_DisplayBillPage aura:id="displayBillPage" isActive="{!v.stepName == $Label.c.CuAp_MoveInWizardDisplayBillStep}" recordId="{!v.wizardprop.billId}"/>
+	
+	<!-- Navigation -->
+	<div class="slds-container_fluid">
+	    <c:GlAp_WizardButtons startStep="{!v.startStep || v.isCommitted}" cancelStep="{!!v.isCommitted}" endStep="{!v.endStep}"/>
+	</div>
+	
+</aura:component>

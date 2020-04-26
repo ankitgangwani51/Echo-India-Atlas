@@ -1,0 +1,91 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		09 May 2018
+@description 	Estimation Scheduling Lightning Component
+@param			
+*******************************************************************************/
+-->
+
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                controller="LoAp_EstimationSchedulingCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute name="LastRun1" type="String" access="public"/>
+    <aura:attribute name="NextRun1" type="String" access="public"/>
+    <aura:attribute name="LastRun2" type="String" access="public"/>
+    <aura:attribute name="NextRun2" type="String" access="public"/>
+    <aura:attribute name="ScheduleTime1" type="time" default="10:00" access="public"/>
+    <aura:attribute name="ScheduleTime2" type="time" default="10:00" access="public"/>
+    <aura:attribute name="StartSchedule" type="boolean" default="false" access="public"/>
+    <aura:attribute name="BatchProcess" type="String" access="public"/>
+    <aura:attribute name="showComponent" type="Boolean" access="private" default="false"/>
+    
+    <aura:attribute name="mapBRQFieldSet" type="Map" access="public"/>
+    <aura:attribute name="mapTabObject"	type="Map" access="public"/>
+    <aura:attribute name="mapObjectFields" type="Map" access="public"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_NotificationComponent aura:id="notification"/>
+    <aura:if isTrue="{!v.showComponent}">
+        <c:LoAp_NewSweepUpEstimateRequest />
+        <aura:set attribute="else">
+            <lightning:tabset variant="scoped">
+                <lightning:tab onactive="{!c.handleScheduleEstimate}" label="{!$Label.c.LoAp_ScheduleEstimate}" id="{!$Label.c.LoAp_ScheduleEstimate}">
+                    
+                    <aura:if isTrue="{!v.StartSchedule}">                         
+                        <div class="slds-grid ">
+                            <div class="slds-size_1-of-7"> 
+                                <lightning:input type="time" label="{!$Label.c.LoAp_ScheduleTime}" name="scheduleTime1" value="{!v.ScheduleTime1}" disabled="false"/>
+                            </div>
+                        </div>
+                        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                        <lightning:button variant="brand" label="{!$Label.c.LoAp_StartSchedule}" name="Schedule Estimate" disabled="false" onclick="{!c.handleStartSchedule}"/>
+                        
+                        <aura:set attribute="else"> 
+                            <lightning:input type="datetime-local" label="{!$Label.c.LoAp_LastRun}" name="lastRun1" value="{!v.LastRun1}" disabled="true"/>
+                            <br/>
+                            <lightning:input type="datetime-local" label="{!$Label.c.LoAp_NextRun}" name="nextRun1" value="{!v.NextRun1}" disabled="true"/>
+                            <br/>
+                            <lightning:button variant="brand" label="{!$Label.c.LoAp_StopSchedule}" name="Schedule Estimate" disabled="false" onclick="{!c.handleStopSchedule}" />
+                        </aura:set>                 
+                    </aura:if>
+                    <br/>            
+                    <br/>
+                    <aura:if isTrue="{!v.mapBRQFieldSet != null}">
+                        <c:GlAp_BatchRequestQueue BatchProcess="{!$Label.c.LoBt_ScheduledEstimatesLabel}" BRQHeading="Batch Request Queue" mapBRQFieldSet="{!v.mapBRQFieldSet}" mapTabObject="{!v.mapTabObject}" mapObjectFields="{!v.mapObjectFields}"/>
+                    </aura:if>
+                    
+                </lightning:tab>
+                <lightning:tab onactive="{!c.handleSweepUpEstimate}" label="{!$Label.c.LoAp_SweepUpEstimate}" id="{!$Label.c.LoAp_SweepUpEstimate}">
+                    <aura:if isTrue="{!v.StartSchedule}"> 
+                        <div class="slds-grid ">
+                            <div class="slds-size_1-of-7"> 
+                                <lightning:input type="time" label="{!$Label.c.LoAp_ScheduleTime}" name="scheduleTime2" value="{!v.ScheduleTime2}" disabled="false"/>
+                            </div>
+                        </div>
+                        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+                        <lightning:button variant="brand" label="{!$Label.c.LoAp_StartSchedule}" name="Sweep Up Estimate" disabled="false" onclick="{!c.handleStartSchedule}"/>
+                        
+                        <aura:set attribute="else"> 
+                            <lightning:input type="datetime-local" label="{!$Label.c.LoAp_LastRun}" name="lastRun2" value="{!v.LastRun2}" disabled="true"/>
+                            <br/>
+                            <lightning:input type="datetime-local" label="{!$Label.c.LoAp_NextRun}" name="nextRun2" value="{!v.NextRun2}" disabled="true"/>
+                            <br/>
+                            <lightning:button variant="brand" label="{!$Label.c.LoAp_StopSchedule}" name="Sweep Up Estimate" disabled="false" onclick="{!c.handleStopSchedule}" />
+                        </aura:set>                 
+                    </aura:if>
+                    <lightning:button variant="brand" label="{!$Label.c.LoAp_BookExportRequestNewReqBtn}" name="new_Request" onclick="{!c.newRequest}"/>
+                    <br/>
+                    <br/>                        
+                    <aura:if isTrue="{!v.mapBRQFieldSet != null}">
+                        <c:GlAp_BatchRequestQueue BatchProcess="{!$Label.c.LoBt_SweepUpEstimatesLabel}" BRQHeading="Batch Request Queue" mapBRQFieldSet="{!v.mapBRQFieldSet}" mapTabObject="{!v.mapTabObject}" mapObjectFields="{!v.mapObjectFields}"/>
+                    </aura:if>
+                </lightning:tab>
+            </lightning:tabset>
+        </aura:set>
+    </aura:if>
+</aura:component>

@@ -1,0 +1,94 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		16 Nov 2017
+@description 	Component to show notifications.
+				Notifications can be triggered by directly calling the encapsulated methods
+				or by firing the GlAp_NotificationEvent component event from a component 
+				somewhere in the component hierarchy. 
+
+	USAGE:	Include:
+				<c:GlAp_NotificationComponent aura:id="notification"/>
+			in the component markup.
+			
+			Include the following methods in the component helper:
+				
+			    // call the notification component method to show a notification
+			    showNotification: function(component, message, type) {
+			    	var notificationCmp = component.find('notification');
+			    	notificationCmp.showNotification(message, type);
+			    },
+			
+			    // call the notification component method to clear a notification
+			    clearNotification: function(component) {
+			    	var notificationCmp = component.find('notification');
+			    	notificationCmp.clearNotification();
+			    }
+
+			Calling the helper methods will show/clear a message in the Notification component.
+			
+			Or use the GlAp_Notifier component to fire an application event to show/clear the message 
+			from child components in the component hierarchy.
+
+*******************************************************************************/
+ -->
+<aura:component >
+	
+    <aura:attribute access="private" type="Map" name="notification" description="Notification object"/>
+
+	<aura:handler name="init" value="{!this}" action="{!c.clearNotification}"/>
+
+    <aura:method name="showNotification" description="shows a notification message">
+        <aura:attribute type="String[]" name="message" default="" required="true" description="message body" />
+        <aura:attribute type="String" name="type" default="error" required="false" description="message type [error: warn: etc]" />
+    </aura:method>
+
+    <aura:method name="clearNotification" description="clears a notification message"/>
+
+	<div class="container">
+
+		<aura:if isTrue="{!not(empty(v.notification.message))}">
+			<aura:if isTrue="{!v.notification.type != 'text'}">
+				<div class="slds-notify_container slds-is-relative slds-p-bottom_x-small">
+					<div class="{!v.notification.class}" role="alert">
+						<span class="slds-assistive-text">
+							{!v.notification.type == 'info' ? $Label.c.GlAp_NotificationTypeInfo : 
+									v.notification.type == 'warn' ? $Label.c.GlAp_NotificationTypeWarning :
+									v.notification.type == 'offline' ? $Label.c.GlAp_NotificationTypeOffline : $Label.c.GlAp_NotificationTypeError}
+						</span>
+						<button class="slds-button slds-button_icon-inverse slds-notify__close" title="Close" onclick="{!c.clearNotification}">
+							<c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+									xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+							<span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+						</button>
+						<div class="slds-notify__content slds-grid">
+							<c:GlAp_Svg class="slds-icon slds-icon_small slds-m-right_small slds-col slds-no-flex" aria-hidden="true" 
+									xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#' + v.notification.type}" />
+							<div class="slds-col slds-align-middle slds-p-right_medium">
+								<h2 class="slds-text-heading_small">
+									<ul class="slds-text-align_left">
+										<aura:iteration items="{!v.notification.message}" var="message">
+											<li>{!message}</li>
+										</aura:iteration>
+									</ul>
+								</h2>
+							</div>
+						</div>
+					</div>
+				</div>
+				<aura:set attribute="else">
+					<div class="slds-grid">
+						<div class="slds-col slds-align-middle slds-p-right_medium slds-p-bottom_medium">
+							<ul class="slds-text-align_left">
+								<aura:iteration items="{!v.notification.message}" var="message">
+									<li>{!message}</li>
+								</aura:iteration>
+							</ul>
+						</div>
+					</div>
+				</aura:set>
+			</aura:if>
+		</aura:if>
+	</div>
+
+</aura:component>

@@ -1,0 +1,60 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		30 Jan 2018
+@description 	Displays a list of the devices related to a location
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="LoAp_DeviceRelatedListCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+		                                
+    <aura:attribute access="public" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="public" type="String" name="sObjectName" 
+    		default="{!v.namespace + 'Device__c'}" description="parent record object type"/>
+    <aura:attribute access="private" type="Map" name="object"/>
+    <aura:attribute access="private" type="String" name="selectedId"/>		<!-- this is the selected record Id -->
+    <aura:attribute access="private" type="Boolean" name="recordIsActive" default="false"/>
+    <aura:attribute access="public" type="List" name="recordFields"/>
+    <aura:attribute access="public" type="List" name="records"/>
+	<aura:attribute access="private" type="String" name="screenIdentifier" default="{!$Label.c.LoAp_LocationDeviceScreen}"/>  <!-- AT-3852 -->
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+   	
+	<div class="slds-container_fluid">
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+		<!-- Devices -->
+		<article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+			<div class="slds-card__header">
+				<header class="slds-grid slds-grid_align-spread">
+					<div class="slds-media slds-media--center">
+				
+						<!-- Title with Icon -->
+						<c:GlAp_RecordListTitleWithIcon objectName="{!v.sObjectName}" object="{!v.object}" numberOfRecords="{!v.records.length}"/>
+					</div>
+				</header>
+			</div>
+
+			<div class="slds-card__body slds-scrollable_y medium_height">
+				<div class="useHeaderBarFix forceRelatedListPreviewGrid">
+					<c:GlAp_GenericTable tableName="{!v.object.labelPlural + 'Table'}" fieldList="{!v.recordFields}" recordList="{!v.records}" showSelect="false"/>
+				</div>
+				<aura:if isTrue="{!v.records.length == 0}">
+					<div class="slds-align_absolute-center">
+						{!$Label.c.GlAp_NoItemsToDisplayMsg}
+					</div>
+				</aura:if>
+			</div>
+		</article>
+    </div>     
+    <!-- AT-3174 -->
+    <c:GlAp_Amendments recordId="{!v.selectedId}" sObjectName="{!v.sObjectName}" objectName="Reading__c" parentField="Device__c" 		
+                       detailListFields="RelatedListDetails" 
+                       activeFieldName="{!v.namespace + 'Active__c'}" 
+                       newRecordFields="{!v.namespace + 'NewRecord'}" selfLookupField="AmendedByReading__c" amendAllAfter="true" screenIdentifier="{!v.screenIdentifier}" />
+                     <!--  rowClick="{!v.rowClick}"/>   AT-3852 remove under AT-3028 -->
+
+</aura:component>

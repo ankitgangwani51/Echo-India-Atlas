@@ -1,0 +1,141 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		27 Jun 2018
+@description 	Batch Process Scheduled Jobs component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="CuAp_ScheduledJobsComponentCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+    <!-- Component Variables -->
+    <aura:attribute access="public" type="Id" name="recordId"/>
+    
+    <aura:attribute access="private" type="Boolean" name="initialised" default="false"/>
+    <aura:attribute access="private" type="SObject" name="schedule"/>
+    <aura:attribute access="private" type="String" name="timeInput"/>
+    <aura:attribute access="private" type="String" name="dayOfWeekInput"/>
+    <aura:attribute access="private" type="String" name="dateInput"/>    
+    
+    <aura:attribute access="private" type="List" name="tabNames"/>		<!-- initialised in doInit -->
+    <aura:attribute access="private" type="String" name="activeTab" default="{!$Label.c.GlAp_ScheduleTypeDaily}"/>
+																			
+    <aura:attribute access="private" type="List" name="daysOfWeek"/>		<!-- initialised in doInit -->
+    <aura:attribute access="private" type="List" name="dateOptions"/>		<!-- initialised in doInit -->
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+
+    <div class="slds-container_fluid">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+		<article class="slds-card slds-card_boundary">
+			<div class="tabset slds-tabs_card slds-p-vertical_small">
+
+				<div class="slds-card__header">
+					<h2 class="slds-text-heading--small">{!$Label.c.VmDr_Schedule}</h2>
+				</div>
+				
+				<!-- Notifications -->
+				<c:GlAp_NotificationComponent aura:id="notification"/>
+	
+				<div class="slds-card__body">
+					<aura:if isTrue="{!v.initialised}">
+
+						<!-- Start Schedule -->
+						<aura:if isTrue="{!empty(v.schedule)}">
+							<lightning:tabset variant="scoped" onselect="{!c.handleTab}" selectedTabId="{!v.activeTab}">            
+								<aura:iteration indexVar="index" items="{!v.tabNames}" var="tabName">
+									<lightning:tab id="{!tabName}" label="{!tabName}">
+				 
+										<!-- All Tabs -->
+										<div class="slds-form slds-form_compound">
+											<div class="slds-form-element">
+												<lightning:input aura:id="timeInput" type="time" name="timeInput" label="Time" value="{!v.timeInput}"/>
+											</div>
+										
+											<!-- Weekly Tab -->
+											<aura:if isTrue="{!v.activeTab == $Label.c.GlAp_ScheduleTypeWeekly}">
+												<div class="slds-p-top_medium">
+													<div class="slds-form-element">
+							                            <label class="slds-form-element__label">
+							                            	{!$Label.c.GlAp_Day}
+							                            </label>
+													</div>
+													
+													<lightning:buttonGroup>
+														<aura:iteration indexVar="index" items="{!v.daysOfWeek}" var="dayOfWeek">
+															<lightning:button aura:id="dayOfWeekInput" label="{!dayOfWeek}" 
+																	variant="{!v.dayOfWeekInput == dayOfWeek ? 'brand' : 'neutral'}" onclick="{!c.selectDayOfWeek}"/>
+														</aura:iteration>
+													</lightning:buttonGroup>
+												</div>
+											</aura:if>
+					 
+											<!-- Monthly Tab -->
+											<aura:if isTrue="{!v.activeTab == $Label.c.GlAp_ScheduleTypeMonthly}">
+												<div class="slds-p-top_medium">
+													<div class="slds-form-element">
+														<lightning:select aura:id="dateInput" name="Day of Month" label="Day of Month" value="{!v.dateInput}">
+															<aura:iteration items="{!v.dateOptions}" var="date">
+																<option text="{!date}"/>
+															</aura:iteration>
+														</lightning:select>
+													</div>
+												</div>
+											</aura:if>
+					
+											<!-- Start button -->
+											<div class="slds-clearfix">
+												<div class="slds-float_right slds-p-top_medium">
+													<lightning:button variant="brand" label="Start Schedule" title="Start Schedule" onclick="{!c.startSchedule}"/>
+												</div>
+											</div>
+										</div>
+										
+									</lightning:tab>
+								</aura:iteration>             
+							</lightning:tabset>
+							
+							<!-- Stop Schedule -->
+							<aura:set attribute="else">
+							
+								<div class="slds-form slds-form_compound">
+									<fieldset class="slds-form-element slds-p-top_medium">
+										<label class="slds-form-element__label" for="previousFireTime">
+											{!$Label.c.CuAp_ScheduleLastRun}
+										</label>
+		                                <div class="slds-form-element__control slds-input">
+											<lightning:formattedDateTime name="previousFireTime" value="{!v.schedule.PreviousFireTime}"
+													year="numeric" month="numeric" day="numeric" hour="2-digit" minute="2-digit" timeZoneName="short"/>
+										</div>
+									</fieldset>
+	
+									<fieldset class="slds-form-element slds-p-top_medium">
+										<label class="slds-form-element__label" for="nextFireTime">
+											{!$Label.c.CuAp_ScheduleNextRun}
+										</label>
+		                                <div class="slds-form-element__control slds-input">
+											<lightning:formattedDateTime name="nextFireTime" value="{!v.schedule.NextFireTime}"
+													year="numeric" month="numeric" day="numeric" hour="2-digit" minute="2-digit" timeZoneName="short"/>
+										</div>
+									</fieldset>
+	
+									<!-- Stop button -->
+									<div class="slds-clearfix">
+										<div class="slds-float_right slds-p-top_medium">
+											<lightning:button variant="brand" label="Stop Schedule" title="Stop Schedule" onclick="{!c.stopSchedule}"/>
+										</div>
+									</div>
+								</div>
+										
+							</aura:set>
+						</aura:if>
+					</aura:if>
+				</div>
+			</div>
+		</article>
+	</div>
+
+</aura:component>

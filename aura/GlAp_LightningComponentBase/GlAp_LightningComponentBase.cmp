@@ -1,0 +1,30 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Luke Emberton
+@date      		XX XXX 2017
+@description 	Base component for the Wizard framework
+
+Revision(s)		23 Mar 2018, P Dixon - added namespace attribute for object/field prefixes
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" 
+		extensible="true" 
+		access="global" 
+		controller="GlAp_LightningDataAccess">
+
+    <aura:attribute access="public" type="String" name="fieldSet"/>
+    <aura:attribute access="public" type="String" name="objectType" default="Account"/>
+    <aura:attribute access="public" type="sObject" name="client" />
+    <aura:attribute access="public" type="GlAp_FieldProps[]" name="fieldSetResults" /> 
+    <aura:attribute access="public" type="GlAp_FieldProps" name="fieldSetResultsList" />   
+    <aura:attribute access="public" type="List" name="listOfFields"/>    
+    <aura:attribute access="public" type="String" name="whereClause"/>
+
+    <aura:attribute access="public" type="String" name="namespace" description="Namespace Prefix" 
+    		default="{!(($Label.c.GlUt_NSPrefix == 'BLANK') ? '' : $Label.c.GlUt_NSPrefix)}"/>
+    
+	<!-- aura currently won't let you access this from a component that extends this one, so you need to add it to the component where it's used -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <div>{!v.body}</div>
+    
+</aura:component>

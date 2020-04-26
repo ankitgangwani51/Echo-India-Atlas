@@ -1,0 +1,59 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		11 March 2019
+@description 	Component to implement the Site Supply process using the Wizard framework
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="LoAp_SiteSupplyWizardCtrlr"
+                extends="c:GlAp_WizardTemplate">
+    
+    <aura:attribute access="public" type="boolean" name="isSpd" default="false" description="true if this is the active page"/>
+    <!-- set Wizard variables -->    
+    <aura:set attribute="title" value="{!$Label.c.LoAp_ManageSiteSupply}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.LoAp_ManageSiteSupply}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+    <aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->    
+    
+    
+    <!-- Event handlers -->
+    <!-- have to be here as we can't override an inherited helper method from the parent -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    <aura:handler name="refreshEvent" event="c:CmAp_RefreshEvent" action="{!c.callChecksOnEntryForDisplayBill}" description="handler for wizard button events"/>
+   
+    <aura:attribute access="public" name="newListOfContractId" type="String[]" description="this is the list of contract record Id to pass to Heroku for Bill Calculation"/>
+    
+    <aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+                  description="handler for bill calculation complete events"/>
+    <aura:set attribute="isCommitted" value="false"/>
+    <!-- local variables -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    
+    <!-- Wizard pages -->
+    <!-- WS1 - Site Supply Operation --> 
+    <c:LoAp_SiteSupplyOperation aura:id="siteSupplyOperation" isActive="{!v.stepName == $Label.c.LoAp_SiteSupplyPage1}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!-- WS2 - Select Site Supply -->
+    <c:LoAp_SelectSiteSupply aura:id="selectSiteSupply" isActive="{!v.stepName == $Label.c.LoAp_SiteSupplyPage2}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS3 - Manage Site Supply -->
+    <c:LoAp_ManageSiteSupply aura:id="manageSiteSupply" isActive="{!v.stepName == $Label.c.LoAp_SiteSupplyPage3}" wizardprop="{!v.wizardprop}"/>
+    
+    <aura:if isTrue="{!(v.stepName == $Label.c.LoAp_SiteSupplyWizardDisplayBill)}"> 
+		<c:BlAp_CalculateBillComponent aura:id="calculateBillComponent" recordId="{!v.newRecordId}" listOfContractId="{!v.newListOfContractId}" sObjectName="{!v.namespace + 'BillingContract__c'}" showButton="false" 
+				calculationType="{!$Label.c.BlIn_BillCalculationTypeBillable}"/>
+    </aura:if>    
+    
+    <!-- WS4 - Display Bill -->
+    <c:CuAp_DisplayBillPage aura:id="displayBillPage" isActive="{!v.stepName == $Label.c.LoAp_SiteSupplyWizardDisplayBill}" recordId="{!v.wizardprop.billId}"/>
+    
+    <!-- Navigation -->
+    <div class="slds-container_fluid">
+        <!--<c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>-->
+        <c:GlAp_WizardButtons startStep="{!v.startStep || v.isCommitted}" cancelStep="{!!v.isCommitted}" endStep="{!v.endStep}"/>
+    </div>     
+</aura:component>

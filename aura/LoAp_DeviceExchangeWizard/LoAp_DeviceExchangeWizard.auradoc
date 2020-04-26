@@ -1,0 +1,6 @@
+<aura:documentation>
+    <aura:description>
+        <strong>LoAp_DeviceExchangeWizard</strong> is Top level component for the Device Exchange Wizard, displays as button which launches the Device exchange wizard when clicked.
+        Designed to be added to the location object page and expects the location id as an attribute.        
+    </aura:description>
+</aura:documentation>

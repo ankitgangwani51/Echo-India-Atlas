@@ -1,0 +1,31 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Swati 
+@date      		21 June 2018
+@description 	Component to implement pdf generation from a button
+				requires bill Id from parent component/page
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global"
+        controller="CuAp_NewPaymentCardRequestCtrlr"
+        extends="c:GlAp_LightningComponentBase">
+
+	<!-- component attributes -->
+    <aura:attribute access="public" type="object" name="resultContainer"/> 
+    <aura:attribute name="isShow" access="private" type="Boolean" default= "false"/>    
+    <aura:attribute name="paymentPlanIdList" access="public" type="List"/>
+    <aura:attribute name="recordId" access="global" type="Id"/>
+    
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+	<!-- HTML markup -->
+	<div class="slds-container_fluid">
+		<c:GlAp_Notifier aura:id="notifier"/>
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>
+    	<aura:if isTrue="{!v.isShow}">
+			<lightning:button variant="brand" label="{!$Label.c.CuAp_LabelRequestNewPaymentCard}" onclick="{!c.changeRequestedOnDate}" />	
+        </aura:if> 
+	</div>
+
+</aura:component>

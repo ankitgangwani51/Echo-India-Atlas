@@ -1,0 +1,88 @@
+<!-- 
+/******************************************************************************
+@author              Echo: Dependra Singh
+@date                06/11/2017
+@description         WS13:   Will Populate the current Billing Address from the Contract record. 
+		            The Agent can enter a new forwarding address if the Customer would like to receive their Final Bill on a different address.
+		            The value entered by the use will overwrite the Billing Address on the Contract.                                       
+@inputparam         wizardprop.contractId (Contract object with contact id), 
+@return             wizardprop.newBillingAddress (Updated Contract with all address fields.),  
+@Revision			AT-5303
+*******************************************************************************/
+-->
+<aura:component access="global" controller="CuAp_NewBillingAddressPageCtrlr" implements="force:appHostable" extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop"  description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+
+	<!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<c:GlAp_Notifier aura:id="notifier"/>
+	<!-- END: REQUIRED BY FRAMEWORK -->
+	
+    <!--Page specific attributes -->
+    <aura:attribute access="private" type="List" name="billingAddressFields"/>
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="locationId"/>
+    <aura:attribute access="private" type="Boolean" name="isEnterNewAddress" default="false"/>
+   <!-- <aura:attribute access="private" type="Contract__c" name="updatedContract" default="{ sobjectType: 'Contract__c' }"/>
+    <aura:attribute access="private" type="Contract__c" name="objContract" default="{ sobjectType: 'Contract__c' }"/>-->
+    <aura:attribute access="private" type="object" name="updatedContract"/>
+    <aura:attribute access="private" type="object" name="objContract"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+			<div class="slds-tile__detail slds-p-bottom_small">
+				<dl class="slds-dl_inline slds-p-bottom_x-small">
+					<dt class="slds-dl_inline__label slds-text-heading_small">{!$Label.c.CuAp_CurrentBillingAddress}</dt>
+					<dd class="slds-dl_inline__detail">	{!v.objContract.BillingAddress__c}</dd>
+				</dl>
+			</div>
+			<div class="slds-p-bottom_medium">
+                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_BillingAddressNeedsToUpdatedQuestion}</legend>
+            </div>
+			<div class="slds-grid">
+				<div class="slds-text-heading_small slds-text-align_left slds-p-right_medium">
+					{!$Label.c.CuAp_EnterNewBillingAddress}
+				</div> 
+				<c:GlAp_InputField value="{!v.isEnterNewAddress}" type="checkbox" label="" />   
+			</div>
+			<!-- START: ADDRESS INPUT FIELD-->
+			<aura:if isTrue="{!v.isEnterNewAddress}">
+	           <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element slds-size_1-of-1">
+                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                    <div class="slds-form-element__group">
+                        <aura:iteration items="{!v.billingAddressFields}" var="billingFields">
+                            <div class="slds-form-element__row">          
+                                <aura:iteration items="{!billingFields}" var="billingField">
+                                    <div class="slds-form-element slds-size_1-of-2">
+                                        <c:GlAp_GenericField aura:id="{!billingField.fieldLabel}" 
+	                                                             object="{!v.updatedContract}" 
+	                                                             objectName="{!billingField.parentObject}" 
+	                                                             fieldType="text" 
+	                                                             fieldName="{!billingField.fieldName}" 
+	                                                             editMode="true" 
+	                                                             isEditable="{!billingField.isEditable}" 
+                                                                 required="{!billingField.isRequired}"
+	                                                             picklistValues="" 
+	                                                             label="{!billingField.fieldLabel}" 
+	                                                             />
+	                                    </div>
+	                                </aura:iteration>
+	                            </div>
+	                        </aura:iteration>
+	                    </div>
+	                </fieldset>
+	            </div>      
+			</aura:if>	   
+			<!-- END: ADDRESS INPUT FIELD--> 
+        </div>
+    </aura:if>	
+</aura:component>

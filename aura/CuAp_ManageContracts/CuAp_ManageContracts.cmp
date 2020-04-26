@@ -1,0 +1,98 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		01 Aug 2018
+@description 	Manage Contract Lightning Component		
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- Component variables -->
+    <aura:attribute name="objectName"            type="string"   access="public"       default="{!v.namespace + 'BillingContract__c'}"/>
+    <aura:attribute name="object"                type="Map"      access="private"                             description="map of the object properties"/>
+    <aura:attribute name="isActive" 			 type="Boolean"  access="private"      default="false"        description="Hide/Show Manage Contract Component"/>
+    <aura:attribute name="isWizardActive" 		 type="Boolean"  access="private"      default="false"        description="Hide/Show Manage Contract Wizard"/>
+    <aura:attribute name="servicesRemove" 		 type="List"     access="public"                              description="List of selected services removed from Contract"/>
+    <aura:attribute name="showSelectAll"         type="boolean"  access="public"       default ="false"       description="Select All checkbox false"/>
+    <aura:attribute name="recordId"		         type="Id"       access="global"                              description="Contract Record Id"/>
+    <aura:attribute name="wizardType" 		 	 type="string"   access="public"                              description="Add/Remove Manage Contract Wizard"/>
+    <aura:attribute name="lcHost" 				 type="String"  />
+
+    
+    <!-- Change Event methods -->
+    <aura:handler name="change" value="{!v.isWizardActive}" action="{!c.doisWizardCancel}"/>
+    <!-- Manage Contract Component -->
+    <aura:if isTrue="{!and(v.isActive,not(v.isWizardActive))}">        
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate"><b>{!$Label.c.CuAp_ManageContract}</b></h2>                
+                </header>
+                <div class="slds-container_fluid">
+                    <!-- Page Heading -->
+                    <div class="flexipageComponent slds-page-header">
+                        <div class="slds-grid slds-p-around_medium">
+                            <div class="slds-grid slds-col slds-has-flexi-truncate slds-media--center">
+                                <!-- Icon -->
+                                <div class="slds-media__figure slds-icon forceEntityIcon" style="background-color: #8c89f2">
+                                    <span class="uiImage">
+                                        <img src="{!v.lcHost}" class="icon" />
+                                    </span>
+                                </div>
+                                <!-- Title -->
+                                <div class="slds-media__body">
+                                    <h1 class="slds-page-header__title slds-m-right--small slds-truncate slds-align-middle">
+                                        <c:GlAp_GenericFormComponent aura:id="newComponent" recordId="{!v.recordId}" 
+                                                                     objectType="{!v.objectName}" fieldSet="{!v.namespace + 'CuAp_ManageContract'}" 
+                                                                     editMode="false" readOnly ="true"/>
+                                    </h1>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Manage Contract Help Text -->
+                        <div class="slds-text-heading_small slds-text-align_center">
+                            {!$Label.c.CuAp_ManageContractHelpText}<hr style="margin:0.5rem;"/>
+                        </div>
+                        
+                        <div aura:id="detail" class="slds-modal__content slds-p-around--medium">
+                            <!-- Notifications -->
+                            <c:GlAp_NotificationComponent aura:id="notification"/>
+                            <div class="slds-box slds-theme--default slds-container">
+                                <!-- Form Section -->
+                                <div aura:id="formSect" class="slds-section slds-is-open">
+                                    <!-- Content -->
+                                    <div class="slds-section__content">
+                                        <!-- Generic component for service related information -->
+                                        <c:GlAp_ServiceInformation aura:id="getServiceRelatedInfo"  servicesRemove="{!v.servicesRemove}" showSelectAll="{v.showSelectAll}"/>
+                                    </div>
+                                </div>
+                                <!-- Navigation -->
+                                <footer class="slds-modal__footer">                    
+                                    <lightning:button variant="brand" label="{!$Label.c.CuAp_TransferService}" 		onclick="{!c.doAdd}"/>
+                                    <lightning:button variant="brand" label="{!$Label.c.CuAp_RemoveService}"	    onclick="{!c.doRemove}"/>
+                                    <lightning:button variant="brand" label="{!$Label.c.GlAp_CancelButton}"	        onclick="{!c.doCancel}"/>
+                                </footer> 
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+        <!--  Manage Contract Button on Billing Screen  -->
+        <aura:set attribute="else">
+            <lightning:button variant="brand" label="{!$Label.c.CuAp_ManageContract}" name="{!$Label.c.CuAp_ManageContract}" disabled="false" onclick="{!c.showManageContractComponent}"/>
+        </aura:set>
+    </aura:if>
+    <!--Manage Contract Wizard Active -->
+    <aura:if isTrue="{!v.isWizardActive}">
+    <c:CuAp_ManageServicesWizard isWizardActive="{!v.isWizardActive}" wizardType="{!v.wizardType}" recordId="{!v.recordId}" servicesRemove="{!v.servicesRemove}"></c:CuAp_ManageServicesWizard></aura:if>
+</aura:component>

@@ -1,0 +1,7 @@
+.THIS {
+}
+
+.THIS .slds-badge.badge_min_width {
+    min-width: 120px; 
+    text-align: center;
+}

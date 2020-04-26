@@ -1,0 +1,54 @@
+<!--
+/******************************************************************************
+@author              Accenture: Vivek Chauhan
+@date                15/11/2017
+@description          WS2 :This component is used to add new agreed rate or update existing one for agreed rate wizard.                                  
+@param               none
+@return              none
+*******************************************************************************/
+-->
+<aura:component access="global" controller="CuAp_AgreedRatePageCtrlr" extends="c:GlAp_LightningComponentBase">
+
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>    
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <aura:attribute name="fieldList" type="List" access="private"/>
+    <aura:attribute name="recordList" type="List" access="private"/>
+    
+    <aura:attribute access="private" name="conStartDate" type="Date"/>
+    <aura:attribute access="private" name="conEndDate" type="Date"/>
+
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+
+    <aura:if isTrue="{!v.isActive}">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        <c:GlAp_Notifier aura:id="notifier"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+	    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+	        
+	        <div class="slds-tile__detail">
+	            <dl class="slds-dl_inline">
+	                  <dt class="slds-dl_inline__label">{!$Label.c.CuAp_AgreedRate_ContractStartDateLabel}</dt>
+	                  <dd class="slds-dl_inline__detail"><ui:outputDate value="{!v.conStartDate}" /></dd>
+	                  <dt class="slds-dl_inline__label">{!$Label.c.CuAp_AgreedRate_ContractEndDateLabel}</dt>
+	                  <dd class="slds-dl_inline__detail"><ui:outputDate value="{!v.conEndDate}" /></dd>
+	            </dl>
+	        </div>
+	        <br />
+	        <div>
+	            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_AgreedRate_AddAgreedRatesLabel}</legend>
+	        </div>
+	        <br />
+	        <div class="slds-container_fluid">
+	            <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" />                             
+	        </div>
+	    </div>
+    </aura:if>
+
+</aura:component>

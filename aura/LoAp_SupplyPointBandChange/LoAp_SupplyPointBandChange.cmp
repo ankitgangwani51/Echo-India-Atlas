@@ -1,0 +1,141 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Swati Mathur
+@date      		12 Jul 2018
+@description 	Displays SupplyPointBandChange Component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                access="global"
+                controller="LoAp_SupplyPointBandChangeCtrlr" 
+                extends="c:GlAp_LightningComponentBase"> 
+   
+    <aura:attribute access="private" type="Id"      name="newSPBandId" />   
+    <aura:attribute access="public"  type="String"  name="buttonName"  default="Supply Point Band"  description="The button name to start the Wizard"/>
+    <aura:attribute access="public"  type="String"  name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public"  type="Boolean" name="disabled"    default="false" description="true if the button is disabled"/>
+    <aura:attribute access="public"  type="Boolean" name="isActive"    default="false" description="true if the component is active"/>   
+    <aura:attribute access="public"  type="String"  name="objectName"  description="related object API name"/>
+    <aura:attribute access="public"  type="boolean" name="showBandChangeComponent" default="false" description="To show BandChange Component" />
+    <aura:attribute access="private" type="object"  name="objNewSPBand" />
+    <aura:attribute access="private" type="object"  name="objSPBand" />
+    <aura:attribute access="private" type="List"    name="spbFields"/>
+    
+    <!--Init handler-->    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>    
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    <aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" description="handler for bill calculation complete events"/>
+    
+    
+    <aura:if isTrue="{!v.showBandChangeComponent}">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-modal="true" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_medium">
+            <div class="slds-modal__container">
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button> 
+                    <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.LoAp_SupplyPointBandHeading}</h2>
+                </header>
+                
+                <!-- Notifications and Spinner Component-->            
+                <div class="slds-modal__content slds-p-around--medium">	
+                    <c:GlAp_NotificationComponent aura:id="notification"/>
+                    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                </div>           
+                <div class="slds-modal__content slds-p-around--medium">        
+                    <!-- Current Band Details -->
+                    <aura:if isTrue="{!v.objSPBand != null}">
+                    <div class="slds-box slds-theme--default slds-container">                            
+                        <div class="slds-section slds-is-open">
+                            <h3 class="slds-section__title slds-button slds-section__title-action">
+                                {!$Label.c.LoAp_CurrentBandSection}
+                            </h3>                            
+                            <div class="slds-section__content">
+                                <fieldset class="slds-form--compound">
+                                    <div class="slds-form-element__group">                                         
+                                        <aura:iteration items="{!v.spbFields}" var="spbFields">
+                                            <div class="slds-form-element__row slds-size--1-of-1">
+                                                <aura:iteration items="{!spbFields}" var="spbField">
+                                                    <div class="slds-form-element slds-size_1-of-2"> 
+                                                        <c:GlAp_GenericField aura:id="{!spbField.fieldLabel}" 
+                                                                             object="{!v.objSPBand}" 
+                                                                             objectName="{!spbField.parentObject}" 
+                                                                             fieldType="{!spbField.fieldType}" 
+                                                                             fieldName="{!spbField.fieldName}" 
+                                                                             listView="{!spbField.showLabel}"
+                                                                             showLabel="{!spbField.showLabel}"
+                                                                             editMode="true"
+                                                                             changeEvent="{!spbField.changeEvent}"
+                                                                             isEditable="{!spbField.isEditable}"
+                                                                             picklistValues="{!spbField.pickListValues}" 
+                                                                             label="{!spbField.fieldLabel}" 
+                                                                             /> 
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>  
+                    </aura:if>
+                    <!-- New Band Section -->                    
+                    <div class="slds-box slds-theme--default slds-container">
+                        <div class="slds-section slds-is-open">
+                            <h3 class="slds-section__title slds-button slds-section__title-action">
+                                {!$Label.c.LoAp_NewBandSection}
+                            </h3>
+                            <div class="slds-section__content">
+                                <fieldset class="slds-form--compound">
+                                    <div class="slds-form-element__group"> 
+                                        <aura:iteration items="{!v.spbFields}" var="spbFields">
+                                            <div class="slds-form-element__row slds-size--1-of-1">
+                                                <aura:iteration items="{!spbFields}" var="spbField">
+                                                    <div class="slds-form-element slds-size_1-of-2">                                                        
+                                                        <c:GlAp_GenericField aura:id="{!spbField.fieldLabel}" 
+                                                                             object="{!v.objNewSPBand}" 
+                                                                             objectName="{!spbField.parentObject}" 
+                                                                             fieldType="{!spbField.fieldType}" 
+                                                                             fieldName="{!spbField.fieldName}" 
+                                                                             listView="{!spbField.showLabel}"
+                                                                             showLabel="{!spbField.showLabel}"
+                                                                             editMode="true"
+                                                                             changeEvent="{!spbField.changeEvent}"
+                                                                             isEditable="true"
+                                                                             picklistValues="{!spbField.pickListValues}" 
+                                                                             label="{!spbField.fieldLabel}" 
+                                                                             />                                                           
+                                                    </div>
+                                                </aura:iteration>
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </fieldset>
+                                <aura:if isTrue="{!v.isActive}">
+                                    <c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" recordId= "{!v.newSPBandId}" sObjectName="{!v.objectName}" showButton= "false"
+                                                                   calculationType= "{!$Label.c.BlIn_BillCalculationTypePending}"/>
+                                </aura:if>
+                                </div>
+                        </div>
+                    </div> 
+                </div>        
+                <!--Component footer Buttons-->            
+                <footer class="slds-modal__footer">
+                    <button class="slds-button slds-button_neutral" onclick="{!c.doCancel}">{!$Label.c.GlUt_Cancel}</button>
+                    <button class="slds-button slds-button_brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                </footer>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+        
+        <!--Displays button when component is inactive-->        
+        <aura:set attribute="else">
+            <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doOpenBandChangeComponent}" />
+        </aura:set>
+    </aura:if>
+    
+</aura:component>

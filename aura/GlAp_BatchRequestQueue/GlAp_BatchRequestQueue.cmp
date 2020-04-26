@@ -1,0 +1,101 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		11 May 2018
+@description 	Displays Batch Request Queue records
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 		
+                controller="GlAp_BatchRequestQueueCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="public" type="List" 	name="BatchReqQueueFieldList"/>
+    <aura:attribute access="public" type="List" 	name="BatchReqQueueRecordList"/>
+    <aura:attribute access="public" type="List" 	name="fieldList"/>
+    <aura:attribute access="public" type="List" 	name="recordList"/>
+    <aura:attribute access="public" type="String" 	name="BatchProcess"/>  
+    <aura:attribute access="public" type="List" 	name="ListOfTabName"/> 
+    <aura:attribute access="private" type="String" 	name="activeTab"/>
+    <aura:attribute access="private" type="ID" 		name="rowId"/>
+    <aura:attribute access="private" type="List"     name="fieldListBRQ"/>
+    <aura:attribute access="public" type="Map" 		name="mapBRQFieldSet"/>    
+    <aura:attribute access="public" type="Map" 		name="mapTabObject"/>
+    <aura:attribute access="public" type="Map" 		name="mapObjectFields"/>
+    <aura:attribute access="public" type="String"	name="BRQHeading"/>
+    <aura:attribute access="private" type="String[]"	name="arrayBatchReqQueue"/>
+    <aura:attribute access="private" name="questionMessage" type="Boolean" default="false"/>
+    
+    <aura:handler name="change" value="{!v.activeTab}" action="{!c.handleTab}"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" 	action="{!c.handleRowButtonPressEvent}"/>
+    <aura:handler name="rowClickEvent" 	event="c:GlAp_GenericListRowClickEvent" 	action="{!c.handleRowClickEvent}"/>
+    
+    <div class="slds-container_fluid">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        <!-- Batch Request Queue -->        
+        <div class="slds-text-heading_small slds-text-align_left"><b>{!v.BRQHeading}</b></div>
+        
+        <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+            <div class="slds-card__body slds-scrollable_y medium_height">
+                <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                    <c:GlAp_GenericTable aura:id="Batch Request Queue" tableName="Batch Request Queue" fieldList="{!v.BatchReqQueueFieldList}" recordList="{!v.BatchReqQueueRecordList}" showSelect="false"/>                        
+                </div>
+                <aura:if isTrue="{!v.BatchReqQueueRecordList.length == 0}">
+                    <div class="slds-align_absolute-center">
+                        {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                    </div>
+                </aura:if>
+            </div>
+        </article>
+        <br/>
+        <lightning:tabset variant="scoped" onselect="{!c.handleTab}" selectedTabId="{!v.activeTab}">            
+            <aura:iteration items="{!v.ListOfTabName}" var="item"> 
+                <lightning:tab label="{!item}" id="{!item}">
+                    <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">                        
+                        <div class="slds-card__body slds-scrollable_y medium_height">
+                            <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                                <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/>                       
+                            </div>
+                            <aura:if isTrue="{!v.recordList.length == 0}">
+                                <div class="slds-align_absolute-center">
+                                    {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                                </div>
+                            </aura:if>
+                        </div>
+                    </article>                    
+                </lightning:tab>
+            </aura:iteration>             
+        </lightning:tabset>
+    </div>
+    
+    <aura:if isTrue="{!v.questionMessage}">
+        <div>
+            <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_small">
+                <div class="modal-container slds-modal__container">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancelQuestion}">
+                                <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                            xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                                <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                            </button>                                
+                            <section>
+                                <lightning:icon iconName="action:close"/>
+                            </section>
+                            <br/>
+                            <label>
+                                <h3 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate slds-required">{!$Label.c.GlAp_CannotCancelBatch}</h3>
+                            </label>
+                        </header>
+                        <footer class="slds-modal__footer">
+                            <lightning:button variant="brand" label="Ok" name="Ok" disabled="false" onclick="{!c.doCancelQuestion}" />
+                        </footer>
+                    </div>
+                </div>
+            </section>
+            <div class="slds-modal-backdrop slds-modal-backdrop--open"></div>
+        </div>
+    </aura:if>
+</aura:component>

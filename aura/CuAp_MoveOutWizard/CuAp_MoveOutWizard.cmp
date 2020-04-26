@@ -1,0 +1,74 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		10 Nov 2017
+@description 	Component to implement the Move Out process using the Wizard framework
+
+    Hides 'Select Occupants' step for non-HH Accounts
+    Hides 'Enter Readings' step if no measured Supply Points
+
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="CuAp_MoveOutWizardComponentCtrlr" 
+		extends="c:GlAp_WizardTemplate">
+   
+    <!-- set wizard template variables -->
+    <aura:set attribute="title" value="{!$Label.c.CuAp_MoveOutWizardTitle}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.CuAp_MoveOutWizardButton}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+    <aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->
+	<aura:set attribute="isCommitted" value="false"/>
+    
+    <!-- Event handlers -->
+    <!-- have to be here as we can't override an inherited helper method from the parent -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    
+	<aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+			description="handler for bill calculation complete events"/>
+                            
+    <aura:attribute access="global" name="listOfContractId" type="String[]" description="this is the list of contract record Id to pass to Heroku for Bill Calculation"/>
+    
+    <!-- local variables -->
+    <aura:attribute access="private" type="Map" name="status" description="Wizard status map"/>
+    
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+    <!-- Wizard pages -->
+    <!-- WS11 - Select Location -->
+	<c:CuAp_SelectAccountLocationPage aura:id="selectAccountLocationPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardSelectLocationStep}" wizardprop="{!v.wizardprop}"/> 
+
+    <!-- WS14 - Select Occupants -->
+	<!-- skip this step if it's a NHH Account -->
+    <c:CuAp_SelectOccupantsPage aura:id="selectOccupantsPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardSelectOccupantsStep}" wizardprop="{!v.wizardprop}"/>
+
+    <!-- WS12 - Enter Readings -->
+	<!-- skip this step if there are no measured supply points at the location -->
+    <c:CuAp_MoveOutReadingsPage aura:id="moveOutReadingsPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardEnterReadingsStep}" wizardprop="{!v.wizardprop}"/>
+
+    <!-- WS13 - New Billing Address -->
+    <c:CuAp_NewBillingAddressPage aura:id="newBillingAddressPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardNewBillingAddressStep}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS14 - Display Occupation Form AT-3158 Core7b-->
+	<c:CuAp_WelcomeLetterPage aura:id="sendOccupationFormPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardSendOccupationFormStep}" wizardprop="{!v.wizardprop}" fieldLabel="{!$Label.c.CuAp_SendOccupationForm}"/>	    
+
+	<!-- Calculate Bill Component -->
+	<aura:if isTrue="{!v.stepName == $Label.c.CuAp_MoveOutWizardDisplayBillStep}">
+		<c:BlAp_CalculateBillComponent aura:id="calculateBillComponent" recordId="{!v.wizardprop.contractId}" sObjectName="{!v.namespace + 'BillingContract__c'}" showButton="false" 
+				calculationType="{!$Label.c.BlIn_BillCalculationTypeBillable}" listOfContractId="{!v.listOfContractId}"/>
+    </aura:if>
+
+    <!-- WS8 - Display Move Out Bill -->
+	<c:CuAp_DisplayBillPage aura:id="displayBillPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardDisplayBillStep}" recordId="{!v.wizardprop.billId}"/>
+
+    <!-- WS9 - Payment Plan -->
+    <!-- c:CuAp_PaymentPlanPage aura:id="paymentPlanPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardPaymentPlanStep}" wizardprop="{!v.wizardprop}"/-->
+
+    <!-- Navigation -->
+    <div class="slds-container_fluid">
+	    <c:GlAp_WizardButtons startStep="{!v.startStep || v.isCommitted}" cancelStep="{!!v.isCommitted}" endStep="{!v.endStep}"/>
+    </div>
+    
+</aura:component>

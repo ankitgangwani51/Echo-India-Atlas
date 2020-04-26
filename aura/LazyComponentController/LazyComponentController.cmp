@@ -1,0 +1,49 @@
+<aura:component controller="ApexControllerLazyComponent" implements="flexipage:availableForAllPageTypes,force:appHostable">
+    <!--handler-->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <!--handler-->
+    <!--attribute-->
+    <aura:attribute name="columns" type="List" />
+    <aura:attribute name="Opplist" type="object" />
+    <aura:attribute name="initRows" type="Integer" default="10"/>
+    <aura:attribute name="Count" type="Integer" default="10"/>
+    <aura:attribute name="Offset" type="Integer" default="0"/>
+    <aura:attribute name="totalResult" type="Integer" default="0"/>
+    <aura:attribute name="locallimit" type="Integer" default="0"/>
+    <!--attribute-->    
+    
+    <lightning:layout>
+        <lightning:layoutItem flexibility="auto">
+            <div class="slds-notify_container slds-is-relative">
+                <div class="slds-theme_error" role="status">
+                    <span class="slds-assistive-text">error</span>
+                    <div class="slds-notify__content">
+                        <h2 class="slds-text-heading_small">26 potential duplicate leads were found. <a href="javascript:void(0);">Select Leads to Merge</a></h2>
+                    </div>
+                    <button class="slds-button slds-button_icon-inverse slds-notify__close" title="Close" onclick="{!c.clearNotification}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>
+                    <div class="slds-notify__close">
+                        
+                    </div>
+                </div>
+            </div>
+        </lightning:layoutItem>
+    </lightning:layout>
+    
+    <div class="slds-m-around_xx-small" style="height: 500px">
+        <lightning:datatable columns="{!v.columns}"
+                             data="{!v.Opplist}"
+                             keyField="Id"
+                             showRowNumberColumn="true"
+                             rowNumberOffset="0"
+                             onrowaction="{!c.RowAction}"
+                             onrowselection="{!c.handleSelectedRow}"
+                             enableInfiniteLoading="true"
+                             loadMoreOffset="{!v.loadMoreOffset}"
+                             onloadmore="{!c.LoadMore}"/>
+    </div>
+    <!--Component-->
+</aura:component>

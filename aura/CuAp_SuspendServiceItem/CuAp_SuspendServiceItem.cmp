@@ -1,0 +1,102 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Neha R
+@date      		10 Jan 2019
+@description 	New Component on Service Item View Page to suspend the selected
+				Service Item
+@param			
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:lightningQuickAction"
+                access="global"                
+                extends="c:GlAp_LightningComponentBase"
+                controller="CuAp_SuspendServiceItemCtrlr">    
+    
+    <!-- Component variables -->
+    <aura:attribute access="private" type="Boolean" name="isActive"       default="false"/>  
+    <aura:attribute access="public"  type="String"  name="sObjectName"/>    
+    <aura:attribute access="public"  type="String"  name="buttonName"     default="Suspend" description="The button name to start the Wizard"/>
+    <aura:attribute access="public"  type="String"  name="buttonStyle"    default="brand"   description="The start button css style"/>
+    <aura:attribute access="public"  type="Boolean" name="disabled"       default="false"   description="true if the button is disabled"/> 
+    <aura:attribute access="public"  type="object"  name="objWrapper"                       description="object that holds all the wizard properties" required="false"/>     
+    <aura:attribute access="public"  type="List"    name="serviceItemFields"/>
+    <aura:attribute access="public"  type="object"  name="serviceItem"/>    
+    <aura:attribute access="public"  type="String"  name="siSuspendStartDate"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>  
+    
+    <aura:if isTrue="{!v.isActive}">
+        <section class="slds-modal slds-slide-up-open slds-modal_large" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container modal_top_padding">                 
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>                    
+                    <h2 id="modalHeading" class="slds-text-heading_medium slds-hyphenate">{!$Label.c.CuAp_SuspendServiceItem}</h2>
+                </header>                
+                <!-- Spinner Component -->
+                <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">                    
+                    <div class="slds-grid slds-grid_vertical slds-modal__content ">
+                        <!-- Notification Component -->
+                        <c:GlAp_NotificationComponent aura:id="notification"/>
+                        <!-- Using this division showing location field in read only mode -->
+                        <div class="slds-form slds-form_compound slds-p-top_medium slds-p-around--medium">
+                            <fieldset class="slds-form-element slds-size_1-of-1">                                
+                                <div class="slds-form-element__group slds-p-top_medium">
+                                    <aura:iteration items="{!v.serviceItemFields}" var="serviceItemFields">
+                                        <div class="slds-form-element__row">          
+                                            <aura:iteration items="{!serviceItemFields}" var="serviceItemField">
+                                                <div class="slds-form-element slds-size_1-of-2">
+                                                    <aura:if isTrue = "{!serviceItemField.fieldLabel == $Label.c.CuAp_SuspendStartDate}">   
+                                                            <c:GlAp_GenericField aura:id="{!serviceItemField.fieldLabel}"                                                                                                                                  
+                                                                                 fieldType="{!serviceItemField.fieldType}" 
+                                                                                 fieldName="{!serviceItemField.fieldName}" 
+                                                                                 editMode="{!serviceItemField.isEditable}" 
+                                                                                 isEditable="{!serviceItemField.isEditable}"
+                                                                                 showLabel="{!serviceItemField.showLabel}"
+                                                                                 listView="{!serviceItemField.showLabel}"
+                                                                                 label="{!serviceItemField.fieldLabel}" 
+                                                                                 value="{!v.siSuspendStartDate}"
+                                                                                 />                                                                                                 
+                                                        <aura:set attribute="else">
+                                                            <c:GlAp_GenericField aura:id="{!serviceItemField.fieldLabel}" 
+                                                                                 object="{!v.serviceItem}" 
+                                                                                 objectName="{!serviceItemField.parentObject}" 
+                                                                                 fieldType="{!serviceItemField.fieldType}" 
+                                                                                 fieldName="{!serviceItemField.fieldName}" 
+                                                                                 editMode="{!serviceItemField.isEditable}" 
+                                                                                 isEditable="{!serviceItemField.isEditable}"
+                                                                                 showLabel="{!serviceItemField.showLabel}"
+                                                                                 listView="{!serviceItemField.showLabel}"
+                                                                                 label="{!serviceItemField.fieldLabel}"                                                                                 
+                                                                                 />
+                                                       </aura:set>
+                                                    </aura:if>
+                                                </div>
+                                            </aura:iteration>
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                    <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                </footer>       
+            </div>
+        </section>
+        
+        <div class="slds-backdrop slds-backdrop--open"></div> 
+        
+        <aura:set attribute="else">
+            <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doActive}" />        	
+        </aura:set>
+        
+    </aura:if>
+</aura:component>

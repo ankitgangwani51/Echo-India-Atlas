@@ -1,0 +1,33 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		21 Mar 2018
+@description 	Reading estimate component
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+		controller="CuAp_ReadingEstimateCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+	<!-- Attributes -->
+    <aura:attribute access="public" type="Boolean" name="showButton" default="true" description="shows the estinmate reading button"/>
+    <aura:attribute access="public" type="Object" name="reading" description="new reading record to be estimated"/>
+    
+    <aura:method name="getEstimate" description="calculates an estimated reading">
+    	<aura:attribute type="Id" name="deviceId" required="true" description="device Id of estimated reading"/>
+    	<aura:attribute type="String" name="readingDate" description="date of estimated reading"/>
+    	<aura:attribute type="Function" name="callback"/>
+    </aura:method>
+
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+
+	<aura:if isTrue="{!v.showButton}">
+		<div class="slds-container_fluid">
+	    	<div class="slds-float_right">
+	        	<lightning:button variant="brand" label="Estimate" onclick="{!c.estimateReading}" />
+	        </div>
+		</div>
+	</aura:if>
+                                           
+</aura:component>

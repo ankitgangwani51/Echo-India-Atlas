@@ -1,0 +1,4 @@
+/* remove the extra spacing added by app builder if the container is empty */
+.THIS .emptyContainer {
+	margin-bottom: -12px;
+}

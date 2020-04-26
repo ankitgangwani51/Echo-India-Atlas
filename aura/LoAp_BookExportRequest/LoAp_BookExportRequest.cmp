@@ -1,0 +1,112 @@
+<!--
+**********************************************************************************************
+@author			ECHO : Mohit Tayal
+@date			28-May-2018
+@description	Component to display Book Export Requests and the related details
+Revision(s)		22 Jun 2018, P Dixon - formated page to replicate standard look and feel 
+				and fixed various issues	
+**********************************************************************************************
+-->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" 
+                access="global"
+                controller="LoAp_BookExportRequestCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    
+    <aura:attribute access="private" type="String" name="objectName" default="{!v.namespace + 'BatchRequestQueue__c'}"/>
+    <aura:attribute access="private" type="Map" name="object" description="map of the object properties"/> 
+    
+    <aura:attribute access="private" type="Map" name="tabFields"/>
+    <aura:attribute access="private" type="Map" name="tabRecords"/>
+    <aura:attribute access="private" type="String" name="activeTab"/>
+    <aura:attribute access="private" type="Integer" name="rowId"/>
+    <aura:attribute access="private" type="Boolean" name="showTabs" default="false"/> 
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/>
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/>
+
+    <div class="slds-container_fluid">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        
+		<!-- Page Heading -->
+		<div class="flexipageComponent slds-page-header">
+			<div class="slds-grid slds-p-around_medium">
+               	<div class="slds-grid slds-col slds-has-flexi-truncate slds-media--center">
+                    <!-- Icon -->
+					 <div class="slds-media__figure slds-icon forceEntityIcon" style="background-color: #8c89f2">
+						<span class="uiImage">
+							<img src="https://atlas-dev001-dev-ed.my.salesforce.com/img/icon/t4v35/custom/custom25_120.png" class="icon " 
+									alt="{!$Label.c.LoAp_BookExportRequestTitle}" title="{!$Label.c.LoAp_BookExportRequestTitle}"/>
+						</span>
+					</div> 
+
+					<!-- Title -->
+               		 <div class="slds-media__body">
+               			<h1 class="slds-page-header__title slds-m-right--small slds-truncate slds-align-middle">
+               				{!$Label.c.LoAp_BookExportRequestTitle}
+               			</h1>
+               		</div>					
+               	</div>
+
+				<!-- New Request Component -->
+				<c:LoAp_NewBookExportRequest/>
+			</div>
+		</div>
+		
+		<!-- Notifications -->
+		<c:GlAp_NotificationComponent aura:id="notification"/>
+
+		<!-- Related Batch Request Queues -->
+		<article class="slds-card slds-card_boundary">
+
+			<!-- Heading -->
+			<div class="slds-card__header">
+				<header class="slds-grid slds-grid_align-spread">
+					<c:GlAp_RecordListTitleWithIcon objectName="{!v.objectName}" object="{!v.object}" numberOfRecords="{!v.recordList.length}"/>
+				</header>
+			</div>
+			
+			<!-- Table of records -->
+			<div class="slds-card__body slds-scrollable_y medium_height">
+			    <div class="slds-p-horizontal_small">
+			        <c:GlAp_GenericTable aura:id="brq" tableName="Batch_Request_Queue" fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/> 
+			    </div>
+			    <aura:if isTrue="{!v.recordList.length == 0}">
+			        <div class="slds-align_absolute-center">
+			            {!$Label.c.GlAp_NoItemsToDisplayMsg}
+			        </div>
+			    </aura:if>
+			</div>
+                      
+           	<!-- Tabs -->
+			<aura:if isTrue="{!v.showTabs}">
+				<div class="slds-tabs_card slds-p-vertical_small">
+
+					<div class="slds-card__header">
+						<h2 class="slds-text-heading--small">{!$Label.c.GlAp_RelatedRecords}</h2>
+					</div>
+               	
+					<div class="slds-card__body">
+	                    <lightning:tabset variant="scoped" onselect="{!c.handleTab}" selectedTabId="{!v.activeTab}">            
+	                        <aura:iteration indexVar="index" items="{!v.tabRecords}" var="tab">
+	                            <lightning:tab id="{!tab.tabName}" label="{!tab.tabName + ' (' + tab.numberOfRecords + ')'}">
+	                                <c:GlAp_GenericTable aura:id="Tab + {!index}" tableName="{!v.activeTab}" fieldList="{!tab.fields}" recordList="{!tab.records}" showSelect="false"/>
+									<aura:if isTrue="{!tab.numberOfRecords == 0}">
+										<div class="slds-align_absolute-center">
+											{!$Label.c.GlAp_NoItemsToDisplayMsg}
+										</div>
+									</aura:if>
+	                            </lightning:tab>
+	                        </aura:iteration>             
+	                    </lightning:tabset>
+	            	</div>
+   				</div>
+			</aura:if>
+		</article>
+	    	
+	</div>
+        
+</aura:component>

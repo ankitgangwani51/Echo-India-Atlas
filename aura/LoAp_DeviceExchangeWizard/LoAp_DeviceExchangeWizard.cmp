@@ -1,0 +1,73 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Andrew Edge
+				Echo: Gopal Gupta
+                Echo: Amit K.
+@date      		08-Nov-2017
+                13-Feb-2018
+@description 	Component to implement the Device Management process using the Wizard framework
+				Display error message if no active device is found on the location			
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="LoAp_DeviceExchangeWizardCmpCtrlr"
+                extends="c:GlAp_WizardTemplate">
+    
+    <!-- set Wizard variables -->
+    <aura:set attribute="title" value="{!$Label.c.LoAp_DeviceExchangeWizardHeader}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.LoAp_DeviceExchangeButton}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+	<aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->
+
+	<!-- event handlers -->
+	<!-- have to be here as we can't override an inherited helper method from the parent -->
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+
+	<aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+			description="handler for bill calculation complete events"/>
+        
+    <!-- local variables -->
+    <aura:attribute access="private" type="Id" name="finalReadingId" description="Id of the final reading for bill calculation"/>
+
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+    <!-- Wizard pages -->
+    
+    <!--WS0 Select Action -->
+    <c:LoAp_DeviceManagementSelectAction aura:id="selectActionPage" isActive="{!v.stepName == $Label.c.LoAp_DeviceManagementPath0}" wizardprop="{!v.wizardprop}"/> 
+    
+    <!--WS1 Select Device -->
+    <c:LoAp_SelectLocationDevicePage aura:id="selectDevicePage" isActive="{!v.stepName == $Label.c.LoAp_DeviceManagementPath1}" wizardprop="{!v.wizardprop}"/>
+    
+    <!--WS2 Enter final Reading -->
+    <c:BlAp_CreateNewReadingPage aura:id="finalReadingPage" isActive="{!v.stepName == $Label.c.LoAp_DeviceManagementPath2}" wizardprop="{!v.wizardprop}" 
+    		readingType="{!$Label.c.BlAp_ReadingScreenFinal}"/>
+    
+    <!--WS3 Search for Device to Add -->
+    <c:LoAp_SearchDevicePage aura:id="searchDevicePage" isActive="{!v.stepName == $Label.c.LoAp_DeviceManagementPath3}" wizardprop="{!v.wizardprop}"/>
+    
+    <!--WS4 Enter Initial Reading -->
+    <c:BlAp_CreateNewReadingPage aura:id="initialReadingPage" isActive="{!v.stepName == $Label.c.LoAp_DeviceManagementPath4}" wizardprop="{!v.wizardprop}" 
+    		readingType="{!$Label.c.BlAp_ReadingScreenInstall}"/>
+    
+     <!--WS6 Select Supply Point -->
+    <c:LoAp_SelectSupplyPointPage aura:id="selectSupplyPointPage" isActive="{!v.stepName == $Label.c.LoAp_DeviceManagementPath6}" wizardprop="{!v.wizardprop}"/>
+    
+    <!--WS7 Select Bundles -->
+    <c:LoAp_SelectDefaultBundle aura:id="selectBundlePage" isActive="{!v.stepName == $Label.c.LoAp_DeviceManagementPath7}" wizardprop="{!v.wizardprop}"/>
+    
+	<!-- Calculate Bill Component -->
+	<aura:if isTrue="{!v.wizardprop.amendReadings.length > 0}"> 
+    	<c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" 
+    								recordId="{!v.finalReadingId}" sObjectName="{!v.namespace + 'Reading__c'}" 
+    								showButton="false" calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+    </aura:if>
+    
+    <!-- Navigation -->
+	<div class="slds-container_fluid">
+	    <c:GlAp_WizardButtons startStep="{!v.startStep}" endStep="{!v.endStep}"/>
+	</div> 
+    
+</aura:component>

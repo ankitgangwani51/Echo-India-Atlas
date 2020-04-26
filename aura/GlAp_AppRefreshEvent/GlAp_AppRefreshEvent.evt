@@ -1,0 +1,11 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Vivek Sethi
+@date      		30 Nov 2018
+@description 	Application event to refresh one component from another component without any relatioship
+*******************************************************************************/
+ -->
+
+<aura:event type="APPLICATION">
+    <aura:attribute type="Boolean" name="refreshFlag"/>
+</aura:event>

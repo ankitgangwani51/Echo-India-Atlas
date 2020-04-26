@@ -1,0 +1,66 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		12 Sept 2018
+@description 	Component to implement the Customer Move Amendment process using the Wizard framework
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+		access="global" 
+		controller="CuAp_CustMoveAmendWizardComponentCtrlr" 
+		extends="c:GlAp_WizardTemplate">
+		    
+    <!-- set wizard template variables -->
+    <aura:set attribute="title" value="{!$Label.c.CuAp_MoveInWizardTitle}"/>
+    <aura:set attribute="buttonName" value="{!$Label.c.CuAp_MoveAmendWizardButton}"/>
+    <aura:set attribute="buttonStyle" value="brand"/>
+	<aura:set attribute="stepNames" value="[]"/>		<!-- populate in initialisation method -->
+	<aura:set attribute="isCommitted" value="false"/>
+    
+    <aura:attribute access="private" type="Id" name="newRecordId" description="this is the new record Id"/>
+    <aura:attribute access="public" type="String" name="objectName" description="related object API name"/>
+
+    
+    <aura:attribute access="public" name="newListOfContractId" type="String[]" description="this is the list of contract record Id to pass to Heroku for Bill Calculation"/>
+    
+	<!-- event handlers -->
+	<!-- have to be here as we can't override an inherited helper method from the parent -->
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+
+	<aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+			description="handler for bill calculation complete events"/>
+    
+    <aura:handler name="passValueEvent" event="c:CuAp_AmendMoveEvent" action="{!c.handleDeleteLocOccEvent}"/>
+                            
+	<!-- local variables -->
+    <aura:attribute access="private" type="Map" name="status" description="Wizard status map"/>
+
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <!-- Calculate Bill Component -->
+    	<c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" recordId="{!v.newRecordId}" listOfContractId="{!v.newListOfContractId}" sObjectName="{!v.objectName}" showButton="false" 
+    			calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+
+	<!-- Wizard pages -->    
+	<!-- WS1 - Select Location Occupant-->
+    <c:CuAp_SelectLocationOccupantToAmend aura:id="selectLocationOccPage" isActive="{!v.stepName == $Label.c.CuAp_AmendMoveWizardSelectLocationOccStep}" wizardprop="{!v.wizardprop}" recordId="{!v.recordId}"/>
+	
+	<!-- WS2 - Amend Move Dates -->
+    <c:CuAp_MoveAmendmentDetailsPage aura:id="amendMoveDetails" isActive="{!v.stepName == $Label.c.CuAp_AmendMoveWizardDetailsPageStep}" wizardprop="{!v.wizardprop}"/> 
+	
+	<!-- WS3 - Enter Readings -->
+	<c:CuAp_CustMoveAmendEnterReadingPage aura:id="enterReadingForLocation" isActive="{!v.stepName == $Label.c.CuAp_AmendMoveWizardReadingPage}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS4 - New Billing Address -->
+    <c:CuAp_NewBillingAddressPage aura:id="newBillingAddressPage" isActive="{!v.stepName == $Label.c.CuAp_MoveOutWizardNewBillingAddressStep}" wizardprop="{!v.wizardprop}"/>
+    
+    <!-- WS5 - Review Changes -->
+	<c:CuAp_CustMoveAmendReviewPage aura:id="reviewChanges" isActive="{!v.stepName == $Label.c.CuAp_AmendMoveReviewChanges}" wizardprop="{!v.wizardprop}"/>
+	
+	<!-- Navigation -->
+	<div class="slds-container_fluid">
+	    <c:GlAp_WizardButtons startStep="{!v.startStep || v.isCommitted}" cancelStep="{!!v.isCommitted}" endStep="{!v.endStep}"/>
+	</div>
+	
+</aura:component>

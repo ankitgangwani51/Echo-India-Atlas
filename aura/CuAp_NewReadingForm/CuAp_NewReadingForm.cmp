@@ -1,0 +1,109 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		22 Mar 2018
+@description 	Component to enter a new Reading
+@revision       Mt - 17/05/2018 AT-2650 added inputfieldevent handler and also the
+                changed the changevent parameter of the generic field.
+                Functionally - If the reading is system estimated than the actual 
+                device reading field should be non editable. 
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+		extends="c:GlAp_LightningComponentBase">
+		
+    <aura:attribute access="public" type="Id" name="recordId" description="the Id of the parent record"/>
+	<aura:attribute access="public" type="Object" name="reading" description="pre-populated reading record"/>
+    <aura:attribute access="public" type="String" name="sObjectName" description="the object type of the parent record"/>
+    <aura:attribute access="public" type="String" name="headerLabel" />
+    <aura:attribute access="public" type="Boolean" name="readOnly" default="false"/>
+    <aura:attribute access="public" type="Boolean" name="editMode" default="false"/>
+    <aura:attribute access="public" type="String" name="currencyCode"/>
+    <aura:attribute access="public" type="Boolean" name="allowSectionToggle" default="false"/>
+    <aura:attribute access="public" type="Boolean" name="isPicklistPrePopulated" default="false"/> <!--AT-3084 Starts/Ends Here-->
+	<aura:attribute access="public" type="Boolean" name="isExchangeInitialReading" default="false"/> <!--AT-2198 Core 8b-->
+    
+    <!-- Component Methods -->
+	<aura:method name="validate" action="{!c.validateForm}"/>
+	<aura:method name="save" action="{!c.doSave}"/>
+	<aura:method name="cancel" action="{!c.doCancel}"/>
+	
+    <!--Event Handlers-->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.recordId}" action="{!c.doInit}"/>		<!-- required if record Id gets set after initialisation -->
+    <aura:handler name="editModeEvent" event="c:GlAp_SwitchToEditEvent" action="{!c.doEdit}"/>
+
+    <!-- MT - 17/05/2018 AT-2650 start--> 
+    <aura:handler name="inputFieldEvent" event="c:GlAp_GenericInputEvent" action="{!c.handleInputChangeEvent}"/>
+    <!-- AT-2650 start-->
+    
+	<!-- Markup -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<div aura:id="detail">
+	
+		<!-- Notifications -->
+		<c:GlAp_NotificationComponent aura:id="notification"/>
+	            
+		<fieldset class="slds-box slds-theme--default slds-container">
+
+			<!-- Form Section -->
+			<div class="slds-section slds-is-open" aura:id="formSect">
+			 
+				<!-- Title -->
+				<h3 class="slds-section__title">
+					<button class="slds-button slds-section__title-action" onclick="{!c.doToggleSection}">
+			      		<aura:if isTrue="allowSectionToggle">
+							<lightning:icon aura:id="DownIcon" iconName="utility:switch" size="x-small" alternativeText="{!$Label.c.GlUt_Close}"/>
+							<lightning:icon aura:id="RightIcon" iconName="utility:chevronright" size="x-small" alternativeText="{!$Label.c.GlUt_Expand}" class="slds-hide"/>
+						</aura:if>
+						<div>
+							{!v.headerLabel}
+						</div>
+					</button>
+				</h3>
+			      
+				<!-- Content -->
+				<div class="slds-section__content">
+	        		<fieldset class="slds-form--compound">
+						<div class="slds-form-element__group">
+						
+						    <aura:iteration items="{!v.fieldSetResults}" var="FSREntry">								    	
+						    	<div class="slds-form-element__row slds-size--1-of-1">
+						    		<aura:iteration items="{!FSREntry}" var="FSR">	      
+								      	<div class="slds-form-element slds-size--1-of-2"> 
+                                            <!--AT-3084 Starts Here-->
+											<c:GlAp_GenericField aura:id="{!FSR.label}" 
+											                     recordId="{!v.recordId}"
+											                     object="{!v.client}" 
+											                     objectName="{!v.objectType}" 
+											                     fieldType="{!FSR.fieldType}" 
+											                     fieldName="{!FSR.fieldName}" 
+											                     editMode="{!v.editMode}" 
+                                                                 changeEvent="{!or(and(FSR.fieldName == v.namespace + 'ReadingMethod__c',v.isPicklistPrePopulated == false),(FSR.fieldName == v.namespace + 'ReadingType__c')) ? true : false}"
+											                     isEditable="{!and(FSR.isEditable, !v.readOnly)}" 
+											                     picklistValues="{!FSR.pickListValues}" 
+											                     label="{!FSR.fieldLabel}" 
+											                     required="{!FSR.isRequired}" 
+											                     currencyCode="{!v.currencyCode}"
+											                     helpText="{!FSR.fldHelpText}"
+											                     />
+                                             <!--AT-3084 Ends Here-->
+											<!-- Estimate Reading Component -->
+									      	<!--<aura:if isTrue="{!v.objectType == v.namespace + 'Reading__c' 
+									      			&amp;&amp; FSR.fieldName == v.namespace + 'ActualDeviceReading__c' &amp;&amp; !(v.isExchangeInitialReading)}">   -->
+                                            <aura:if isTrue="{!and(and(v.objectType == v.namespace + 'Reading__c',FSR.fieldName == v.namespace + 'ActualDeviceReading__c'),!(v.isExchangeInitialReading))}">
+												<c:CuAp_ReadingEstimate aura:id="readingEstimate" showButton="true" reading="{!v.client}"/>
+									      	</aura:if>								      	
+								      	</div>
+							      	</aura:iteration> 
+						  		</div>				  		
+						  	</aura:iteration>
+						 </div>
+					</fieldset>
+	    		</div>
+			</div>
+		</fieldset>
+	</div>
+
+</aura:component>

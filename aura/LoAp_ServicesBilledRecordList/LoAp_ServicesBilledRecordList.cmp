@@ -1,0 +1,53 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Neha Rajput
+@date      		12/10/2018
+@description 	Displays a list of the Service related to a Reading
+*******************************************************************************/
+ -->
+<aura:component implements= "force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+        controller="LoAp_ServicesBilledRecordListCtrlr"
+		extends="c:GlAp_LightningComponentBase">
+    
+    <!-- Attributes -->
+    <aura:attribute access="public" type="Id" name="recordId" description="parent record Id"/>    
+    <aura:attribute access="public" type="String" name="objectName" description="related object API name"/>    
+    
+    <aura:attribute access="public" type="String" name="parentField" description="API name of the field on the object 
+    																	(corresponds to the id which is passed in as the record id so that related records can be retrieved)"/>        
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList" description="name of the list fieldset"/>
+    <aura:attribute access="private" type="Map" name="object" description="map of the object properties"/>
+   
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="change" value="{!v.recordId}" action="{!c.doChange}"/>
+    
+    <div class="slds-container_fluid">
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+		<!-- Related Records --> 
+		<article class="slds-card slds-card_boundary">
+			<div class="slds-card__header">
+                <header class="slds-grid slds-grid_align-spread">
+                    <div class="slds-media slds-media--center">
+                        
+                        <!-- Title with Icon -->
+                        <c:GlAp_RecordListTitleWithIcon objectName="{!v.objectName}" object="{!v.object}" numberOfRecords="{!v.recordList.length}"/> 
+                    </div>
+                </header>
+			</div>
+
+			<div class="slds-card__body slds-scrollable_y medium_height">
+				<div class="useHeaderBarFix forceRelatedListPreviewGrid">
+					<c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/> 
+				</div>
+				<aura:if isTrue="{!v.records.length == 0}">
+					<div class="slds-align_absolute-center">
+						{!$Label.c.GlAp_NoItemsToDisplayMsg}
+					</div>
+				</aura:if>
+			</div>
+		</article>
+	</div>         
+</aura:component>

@@ -1,0 +1,73 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Vivek Sethi
+@date      		27 June 2018
+@description    Component for Direct Debit Request Export lightning component
+@revesion       Changes by Dependra Singh - Security Review - 14-09-2018
+@revesion       AT-4912, Ankit, 28/01/2018 - Modified the component to associated 
+				with Batch Request Queue Existing Framework
+*******************************************************************************/
+-->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId" 
+                access="global" 
+                controller="PyAp_DirectDebitRequestExportCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="public" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="private" type="Date" name="exportInstalmentUpto" />
+    <aura:attribute name="lcHost" type="String"  />
+   
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:registerEvent name="refreshEvent" type="c:GlAp_AppRefreshEvent"/> 
+    
+    <div class="slds-container_fluid">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        
+        <!-- Related Batch Request Queues -->
+        <article class="slds-card slds-card_boundary">
+            <div class="slds-modal__header ">
+                <!-- Title with Icon -->
+                <div class="slds-media slds-media--center slds-has-flexi-truncate">
+                    <div class="slds-grid">
+                        <div class="slds-col">
+                            <div class="slds-media__figure">
+                                <div class="extraSmall forceEntityIcon" style="background-color: #7698f0">
+                                    <span class="uiImage" data-aura-class="uiImage">
+                                        <img src= "{!v.lcHost}"  class="icon" alt="{!$Label.c.LoAp_BookExportRequestNewReqBtn}" title="{!$Label.c.LoAp_BookExportRequestNewReqBtn}"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col">
+                            <div class="slds-media__body">
+                                <h2 id="header">
+                                    <div class="slds-card__header-link baseCard__header-title-container" href="javascript:void(0);">
+                                        <span class="slds-text-heading--small slds-truncate slds-m-right--xx-small" title="{!$Label.c.LoAp_BookExportRequestNewReqBtn}">
+                                            {!$Label.c.LoAp_BookExportRequestNewReqBtn} - {!$Label.c.PyAp_DirectDebitRequestExport} 
+                                        </span>
+                                    </div>
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Notifications -->
+            <c:GlAp_NotificationComponent aura:id="notification"/>
+            <!-- Table of records -->
+            <div class="slds-grid slds-wrap slds-p-top_medium slds-p-bottom_medium">
+                <div class="slds-size_1-of-3 slds-p-horizontal_medium">
+                    <c:GlAp_InputField type="date"
+                                       label= "{!$Label.c.PyAp_ExportIntalmentsUpto}"
+                                       required = "true"
+                                       value = "{!v.exportInstalmentUpto}"/>          
+                </div>                
+                <div class="slds-form slds-form_compound slds-p-top_medium"/>                
+                <!-- New Request Button -->
+                <div class=" slds-container_fluid slds-p-right_xx-small" align="right" >
+                    <lightning:button variant="brand" label="{!$Label.c.DrUI_RunLabel}" name="new_Request" onclick="{!c.newRequest}" />
+                </div>
+            </div>
+        </article>
+    </div>
+</aura:component>

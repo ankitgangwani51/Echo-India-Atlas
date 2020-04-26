@@ -1,0 +1,297 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		08 Dec 2017
+@description 	Component to group billing action components on a record page Action components are displayed according to the record type
+@Revisions - AT-3254 , Added new component CuAp_BillTransferPage
+@Revisions - AT-3359 , Tarun , Added new component CuAp_CustMoveAmendWizard
+@Revisions - Echo: Sudhir AT-4098(AU1) Generate PDF for Information Statement
+@Revisions - Echo: Sudhir AT-4125 (AU1) calculate Charges on Information Statement
+@Revisions - Echo: Tarun AT-4500 (AU1) Create License Transfer Component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName"
+                access="global"
+                controller="CuAp_BillingActionsCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <aura:attribute access="private" type="Boolean" name="isNHHAccount" default="false" description="True if host record is a NHH Account record"/>
+    <aura:attribute access="private" type="Boolean" name="isActiveRuralLicense" default="false" description="True if host record is has active rural license"/>
+    <aura:attribute access="private" type="Boolean" name="isActiveSPD" default="false" description="True if Supply Point has Device"/>
+    <aura:attribute access="private" type="Boolean" name="isNonVoidContract" default="true" description="True if Non Void Contract"/>
+    <aura:attribute access="global" name="newListOfContractId" type="String[]" description="this is the list of contract record Id to pass to Heroku for Bill Calculation"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+    
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    
+    <div class="containerComponent">
+        <div class="slds-card slds-card_boundary">
+            <div class="slds-card__header slds-grid">
+                <span class="slds-text-heading_small">{!$Label.c.CuAp_BillingActionsButtonGroupHeading}</span>
+            </div>
+            <div class="slds-card__body slds-card__body_inner">
+                
+                <!-- Notifications -->
+                <c:GlAp_NotificationComponent aura:id="notification"/>
+                
+                <!-- Actions -->
+                <div class="slds-grid slds-wrap">
+                    <!-- Move In Wizard -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:CuAp_MoveInWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Move Out Wizard -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:CuAp_MoveOutWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Agreed Rate Wizard -->
+                    <aura:if isTrue="{!v.isNHHAccount}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:CuAp_ManageAggRateWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Suppression Wizard -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:CuAp_SuppressionWizard recordId="{!v.recordId}"/> 
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Calculate Bill -->
+                    <aura:if isTrue="{!and(v.sObjectName == v.namespace + 'BillingContract__c',v.isNonVoidContract)}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:BlAp_CalculateBillComponent recordId="{!v.recordId}" sObjectName="{!v.sObjectName}" showButton="true" 
+                            		calculationType="{!$Label.c.BlIn_BillCalculationTypeBillable}"
+                                    listOfContractId="{!v.newListOfContractId}" />
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Calculate Pending Bill -->
+                    <aura:if isTrue="{!and(v.sObjectName == v.namespace + 'BillingContract__c',v.isNonVoidContract)}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:BlAp_CalculateBillComponent recordId="{!v.recordId}" sObjectName="{!v.sObjectName}" showButton="true" 
+                            		calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"
+                                    listOfContractId="{!v.newListOfContractId}" />
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Generate PDF -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Bill__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:BlAp_GeneratePDFComponent recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Device Exchange Wizard -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Location__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:LoAp_DeviceExchangeWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Show Supply Point Devices -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:CuAp_PaymentPlanWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Manage Discount Wizard -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:CuAp_DiscountWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    
+                    
+                    <!-- Payment Amendments -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Payment__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:PyAp_PaymentAmendmentsPage recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Payment__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:PyAp_SplitSuspensePayment recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Credit Refund Transfer Amendments -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Balance__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:PyAp_CreditRefundTransferWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Manage Reading Import Error, AT-2463 -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'ReadingUpload__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:LoAp_ManageReadingImport recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    <!-- Request New Payment Card -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:CuAp_NewPaymentCardRequest recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    <!-- Goodwill Payment: AT-2798 -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:PyAp_GoodwillPayment recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    <!-- Supply Point Band: AT-3061 -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'SupplyPoint__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:LoAp_SupplyPointBandChange recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- AT-5413,Ankit, 11/03/2019, Site Supply Wizard -->
+                    <aura:if isTrue="{!and(v.sObjectName == v.namespace + 'SupplyPoint__c',v.isActiveSPD)}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:LoAp_SiteSupplyWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Stepped Tariff Wizard: AT-3094 -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:BlAp_SteppedTariffWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Bill Message: AT- -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:CuAp_BillMessagesToContracts recordId="{!v.recordId}" sObjectName="{!v.sObjectName}"/>
+                        </div> 
+                    </aura:if>
+                    <!-- Manage Contract -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                             <c:CuAp_ManageContracts recordId="{!v.recordId}"/>
+                        </div>
+                        <!-- AU Manage Contract -->
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                             <c:CuAp_AUManageContracts recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Bill Message: AT- -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:CuAp_BillTransferPage recordId="{!v.recordId}" sObjectName="{!v.sObjectName}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- Move Amend Wizard AT-3359 -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:CuAp_CustMoveAmendWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- AU Move IN Wizard AT-4037 -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:CuAp_AUMoveInWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- AU Move IN Wizard AT-4027 -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:CuAp_AUMoveOutWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- AU Move IN Wizard AT-4025 -->
+                    <aura:if isTrue="{!v.sObjectName == 'Account'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:CuAp_AUCustMoveAmendWizard recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- AU Move IN Wizard AT-4037 -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Location__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                             <c:LoAp_DebtTransfer recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Location__c'}">
+                    	<div class="slds-p-bottom_x-small slds-p-right_xx-small">   
+                            <c:LoAp_SelectableMessages recordId="{!v.recordId}" sObjectName="{!v.sObjectName}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'InformationStatement__c'}">
+                        <!-- calculate Charges on Information Statement: AT-4125 (AU1) - Sudhir -->
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:LoAp_InfoStatementCalculateCharges recordId="{!v.recordId}" />
+                        </div>
+                        <!-- Update Balance on Information Statement: AT-4125 (AU1) - Sudhir -->
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:LoAp_InfoStatementUpdateBalance recordId="{!v.recordId}" />
+                        </div>
+                        <!--Information Statement Link Reading component AT-4136-->
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                            <c:LoAp_InfoStatementAddReadings recordId="{!v.recordId}"/>
+                        </div>
+                        <!-- AT-4134 -->
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">   
+                            <c:LoAp_SelectableMessages recordId="{!v.recordId}" sObjectName="{!v.sObjectName}"/>
+                        </div>
+                        <!-- Generate PDF on Information Statement: AT-4098(AU1) - Sudhir -->
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:BlAp_GeneratePDFComponent recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- AU Move IN Wizard AT-4500 -->
+                    <aura:if isTrue="{!and(v.sObjectName == v.namespace + 'RuralLicense__c', v.isActiveRuralLicense)}">    
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                             <c:BlAp_LicenseTransfer recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    <!-- AU3: Concession validation with Centrelink Interface => Added by Sudhir -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Concession__c'}">    
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                             <c:CuAp_ConcessionValidation recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    
+                    <!-- AU3: New Component on Service Item View Page -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'ServiceItem__c'}">    
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small">
+                             <c:CuAp_SuspendServiceItem recordId="{!v.recordId}" sObjectName="{!v.sObjectName}"/>
+                        </div>
+                    </aura:if>
+                    <!-- AU3: New Component on Billing Contract Page -->
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'BillingContract__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:PyAp_CardPayment recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                    <aura:if isTrue="{!v.sObjectName == v.namespace + 'Location__c'}">
+                        <div class="slds-p-bottom_x-small slds-p-right_xx-small ">
+                            <c:LoAp_ManageSupplyPoint recordId="{!v.recordId}"/>
+                        </div>
+                    </aura:if>
+                </div>			
+            </div>
+        </div>
+    </div>
+    
+</aura:component>

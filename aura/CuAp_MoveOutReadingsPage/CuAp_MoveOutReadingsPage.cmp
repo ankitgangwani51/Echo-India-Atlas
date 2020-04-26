@@ -1,0 +1,52 @@
+<!-- 
+/******************************************************************************
+@author          Accenture: Manish Singh
+@date            28-11-2017
+@description     WS12: Enter Move Out Reading
+                 Wizard screen to enter move in reading.                                       
+@param           : none
+@return			 :          
+@Output			 : wizardprop.moveOutReadings List<Reading__c> reading where device reading was present	 
+*******************************************************************************/
+-->
+<aura:component access="global" 
+		controller="CuAp_MoveOutReadingsPageCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+
+	<!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<c:GlAp_Notifier aura:id="notifier"/>
+	<!-- END: REQUIRED BY FRAMEWORK -->
+	
+    <!--Page specific attributes -->
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="locationId"/>
+    <aura:attribute access="private" type="String" name="moveOutDate"/>
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    
+    <!--Page specific handlers -->
+	<aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/>
+	
+    <aura:if isTrue="{!v.isActive}">
+		<c:CuAp_ReadingEstimate aura:id="readingEstimate" showButton="false"/>
+
+	   	<div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">        
+	        <div class="slds-p-bottom_medium">
+	            <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_MoveOutReading}</legend>
+	        </div>
+			<div class="slds-container_fluid">
+				<c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/>                             
+			</div>
+		</div>
+    </aura:if>
+</aura:component>

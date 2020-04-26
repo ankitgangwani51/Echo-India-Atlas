@@ -1,0 +1,39 @@
+<!--
+/**********************************************************************************************
+@author         Echo : Sudhir Kumar
+@date           02-Nov-2018
+@description:   AT-4125 (AU1) : Request Statement Action - call an API in Heroku to calculate the settlement debt
+**********************************************************************************************/
+-->
+
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName" 
+                access="global"
+                controller="LoAp_InfoStatementCalculateChargesCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!--Component Variables-->
+    <aura:attribute access="private" type="Boolean" name="displayButton" default="true" description="displays a button to calculate charges" />
+    <aura:attribute access="public" name="isActive" type="Boolean" default="false"/>  
+    <aura:attribute access="private" type="String" name="buttonName" default="Calculate Charges"  description="The button name to start "/>
+    <aura:attribute access="private" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="private" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <aura:attribute access="public" type="object" name="infoStatementObj" description="Information Statement Object" />
+    
+    <!--Child Components-->
+    <!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/> <!--Sudhir: AT-3738-->
+    
+    
+    <!--Component markup-->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div class="slds-container__fluid">
+        <c:GlAp_NotificationComponent aura:id="notification"/>
+        <!--Button to invoke heroku for Information Statement calculate charges-->
+        <aura:if isTrue="{!v.isActive}">
+            <aura:set attribute="else">
+                <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doCalculateCharges}" />        	
+            </aura:set>
+        </aura:if>
+    </div>
+</aura:component>

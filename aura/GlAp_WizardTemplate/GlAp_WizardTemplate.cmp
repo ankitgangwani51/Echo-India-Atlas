@@ -1,0 +1,87 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		10 Nov 2017
+@description 	Base Component for Wizard framework
+revisions		15 Feb 2015, P Dixon - added disabled attribute for button
+*******************************************************************************/
+ -->
+<aura:component abstract="true" 
+		extensible="true" 
+		access="global" 
+		extends="c:GlAp_LightningComponentBase">
+		
+
+	<!-- Wizard active/inactive -->
+    <aura:attribute access="public" type="Boolean" name="isWizardActive" default="false" description="Wizard is active"/>
+
+    <!-- Wizard navigation properties -->
+    <aura:attribute access="public" type="List" name="stageList" description="A list of step names/statuses used by the progress bar"/>
+    <aura:attribute access="public" type="String" name="stepName" description="The current wizard step name"/>
+    <aura:attribute access="public" type="Integer" name="stepNumber" default="1" description="The current wizard step"/>
+    <aura:attribute access="public" type="Boolean" name="startStep" default="true" description="The current step is the first wizard step"/>
+    <aura:attribute access="public" type="Boolean" name="endStep" default="false" description="The current step is the last wizard step"/>
+    
+    <!-- Wizard variables -->
+    <aura:attribute access="public" type="Object" name="wizardprop" description="A wrapper for all variables entered/selected/required by the wizard"/>
+
+	<!-- Set by sub-component -->
+    <aura:attribute access="public" type="List" name="stepNames" description="The names of the Wizard steps"/>
+    <aura:attribute access="public" type="Boolean" name="isCommitted" description="true once the server commit has occurred"/>
+    <aura:attribute access="public" type="String" name="title" description="The title heading for the Wizard"/>
+    <aura:attribute access="public" type="String" name="buttonName" description="The button name to start the Wizard"/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+
+	<!-- Disable button flag -->
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+
+	<!-- Notification event handler required for GlAp_NotificationComponent -->
+    <aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+
+	<!-- register the event handler so that we can access the notification component from here -->
+	<aura:registerEvent name="notificationEvent" type="c:GlAp_NotificationEvent"/>
+
+	<aura:if isTrue="{!v.isWizardActive}">   
+
+   		<!-- Wizard -->
+		<section class="slds-modal slds-slide-up-open slds-modal_large" role="dialog" tabindex="-1" aria-labelledby="wizardHeading">
+		   <div class="slds-modal__container modal_top_padding">
+		
+				<header class="slds-modal__header">
+					<button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+		               <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+		               		xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+		               <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+					</button>
+		           
+					<!-- Page Header -->
+					<h2 id="wizardHeading" class="slds-text-heading_medium slds-hyphenate">
+						{!v.title}
+					</h2>
+				</header>
+		
+				<div class="slds-modal__content slds-p-around_medium">
+					<div class="slds-grid slds-grid_vertical">
+			            
+		            	<!-- Progress bar -->
+		            	<aura:if isTrue="{!v.stageList.length > 1}">
+		                	<c:GlAp_ProgressPath aura:id="progressPath" stageList="{!v.stageList}"/>
+		                </aura:if>
+		                
+		                <!-- Notifications -->
+		                <c:GlAp_NotificationComponent aura:id="notification"/>
+		            
+						<!-- Wizard step pages -->
+						{!v.body}
+					</div>
+		        </div>               
+		    </div>                   
+		</section>
+		<div class="slds-backdrop slds-backdrop_open"></div>
+
+   		<!-- Wizard start button -->
+		<aura:set attribute="else">
+			<lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doStartWizard}" />
+		</aura:set>
+	</aura:if>
+</aura:component>

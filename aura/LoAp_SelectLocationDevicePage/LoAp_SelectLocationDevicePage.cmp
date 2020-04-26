@@ -1,0 +1,102 @@
+<!-- 
+/******************************************************************************
+@author    	 :	Echo: Swati Mathur
+                Echo: Amit K.
+			    Echo - Tarun Gupta
+				
+@Input       :  wizardprop.recordId,wizardprop.wizardType
+@Output		 :  For Remove Device: wizardprop.supplyPointDevice (object - SupplyPointDevice__c) ,wizardprop.selectedSupplyPointRemoved (object - SupplyPoint__c) 
+                For Exchange Device: wizardprop.supplyPointDevice (object - SupplyPointDevice__c) ,wizardprop.selectedSupplyPointRemoved (object - SupplyPoint__c)
+@date      	 :	21 Nov 2017
+                16 Feb 2018
+				06/03/2018 - Made changes to change the outfield to GlAp_GenericField to make sure namespace issue is resolved
+@description : 	WS(1) Wizard screen to select a device to be exchanged/removed as part of the Device Management Wizard
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+                controller="LoAp_SelectLocationDevicePageCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>    
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->
+    <!--<aura:attribute name="location" type="Location__c" default="{ sobjectType: 'Location__c' }" access="private"/>
+    <aura:attribute name="SelectedRecord" type="BlAp_CombinedRecord" default="" access="private"/>-->
+    <aura:attribute name="location" type="object" access="private"/>
+    <aura:attribute name="SelectedRecord" type="object" access="private"/>
+    <aura:attribute name="fieldList" type="List" access="public"/>
+    <aura:attribute name="recordList" type="List" access="public"/> 
+    <!--<aura:attribute name="resultContainer" type="LoAp_SelectLocationDevicePageCtrlr.ContainerWrapper" access="public"/> -->
+    <aura:attribute name="resultContainer" type="object" access="private"/>
+    <aura:attribute name="deviceExchangeActive" access="public" type="boolean"  default="True" />
+    
+    <aura:attribute access="private" type="List" name="locationFields"/>
+    
+    <!-- Row Event methods -->
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        <c:GlAp_Notifier aura:id="notifier"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        
+        <div class="slds-container_fluid slds-p-top_medium">            
+            <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">        
+                <div class="slds-container_fluid">
+                    <div class="slds-form slds-form_compound slds-p-top_medium">
+                        <fieldset class="slds-form-element">
+                            <div class="slds-form-element__group">
+                                
+                                <aura:iteration items="{!v.locationFields}" var="locFields">
+                                    <div class="slds-form-element__row">          
+                                        <aura:iteration items="{!locFields}" var="locField">
+                                            <div class="slds-form-element slds-size_1-of-2">
+                                                
+                                                <c:GlAp_GenericField aura:id="{!locField.fieldLabel}" 
+                                                                     object="{!v.location}" 
+                                                                     objectName="{!locField.parentObject}" 
+                                                                     fieldType="{!locField.fieldType}" 
+                                                                     fieldName="{!locField.fieldName}"
+                                                                     listView="{!locField.showLabel}"
+                                                                     showLabel="{!locField.showLabel}"
+                                                                     editMode="{!locField.isEditable}" 
+                                                                     isEditable="{!locField.isEditable}"
+                                                                     picklistValues="{!locField.pickListValues}" 
+                                                                     label="{!locField.fieldLabel}" 
+                                                                     />
+                                                
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </aura:iteration>
+                                
+                                <br/>
+                                
+                                <aura:if isTrue="{!v.deviceExchangeActive}">
+                                    <div class="slds-text-title_caps">{!$Label.c.LoAp_DeviceExchangeSelectionHeading}</div><br/>
+                                    <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" selectHeader=" " />
+                                    <aura:set attribute="else">
+                                        <div class="slds-container_fluid">
+                                            <div class="slds-notify_container slds-is-relative">
+                                                <div class="slds-notify slds-notify--alert slds-theme--alt-inverse" role="alert">
+                                                    <h2>{!$Label.c.LoAp_NoDeviceFound}</h2>
+                                                </div>
+                                            </div>  
+                                        </div>
+                                    </aura:set>
+                                </aura:if>                                
+                            </div>                    
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aura:if>
+</aura:component>

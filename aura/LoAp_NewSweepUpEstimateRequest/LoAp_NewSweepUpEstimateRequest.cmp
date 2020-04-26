@@ -1,0 +1,67 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		28 May 2018
+@description 	New Sweep Up Estimate Lightning Component
+@param			
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                controller="LoAp_NewSweepUpEstimateRequestCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- Row Event methods -->
+    <aura:handler name="rowEvent" 		event="c:GlAp_GenericListRowSelectEvent" 	action="{!c.handleRowSelectEvent}"/>
+    <aura:handler name="rowClickEvent"	event="c:GlAp_GenericListRowClickEvent" 	action="{!c.handleRowClickEvent}"/> 
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <!-- Component variables -->
+    <aura:attribute name="periodId"      type="List" 	    access="public"/>
+    <aura:attribute name="timetableID"   type="List" 	    access="public"/>
+    <aura:attribute name="isActive"      type="boolean" 	access="public"       default="false"/>
+    <aura:attribute name="selectedBooks" type="List"        access="public"/>
+    <aura:attribute name="SubHeader"     type="string"      access="public"       default="Select Books To Sweep Up"     description="Sub Header for select book to Sweep Up component"/>
+    <aura:attribute name="executionMode" type="string"      access="public"       default=""/>
+    <aura:attribute name="screenName"    type="string"      access="public"       default="EstimationSchedule"/>
+    <aura:attribute name="mapOfPicklistLabelWithValues"  type="Map" 	    access="public"	/>
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <div id="" style="height: 630px;">
+        <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1" class="slds-modal slds-fade-in-open slds-modal_large">
+            <div class="modal-container slds-modal__container">
+                <div class="slds-modal__container">
+                    <header class="slds-modal__header">
+                        <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.close}">
+                            <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                        xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                            <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                        </button>
+                    </header>
+                    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">  
+                        <!-- Notifications -->
+                        <c:GlAp_NotificationComponent aura:id="notification"/>
+                    </div>
+                    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+                        <div class="slds-text-heading_small slds-text-align_center">
+                            <b>{!$Label.c.LoAp_RequestDataExport}<hr style="margin:0.5rem;"/></b>
+                        </div>
+                        <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">                        
+                            <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                                <c:GlAp_ReadTimetableReadPeriod />  
+                            </div>
+                        </article>
+                        <c:GlAp_SelectBook aura:id="selectbook" periodId="{!v.periodId}" isActive="{!v.isActive}" SubHeader="{!v.SubHeader}"  
+                                           mapOfPicklistLabelWithValues="{!v.mapOfPicklistLabelWithValues}" executionMode="{!v.executionMode}" screenName="{!v.screenName}"/>
+                        <br/>
+                        <div class="slds-form-element slds-size_1-of-2 slds-p-right--xx-large slds-align_absolute-center" >
+                            <lightning:button variant="brand"  label="Save" onclick="{!c.save}" />
+                            <lightning:button variant="brand"  label="Cancel" onclick="{!c.close}" />
+                        </div>
+                    </div>
+                </div>   
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop--open"></div>
+    </div>
+</aura:component>

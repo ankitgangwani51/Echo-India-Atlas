@@ -1,0 +1,87 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Luke Emberton
+@date      		2017
+@description 	Generic form component - part of the lightning framework.
+Revision(s)		26 Feb 2018, P Dixon
+*******************************************************************************/
+ -->
+<aura:component implements="flexipage:availableForRecordHome,force:hasRecordId" 
+		access="global" 
+		extends="c:GlAp_LightningComponentBase">
+		
+    <aura:attribute access="public" type="Id" name="recordId"/>
+    <aura:attribute access="public" type="String" name="objectType"/>
+    <aura:attribute access="public" type="String" name="headerLabel" />
+    <aura:attribute access="public" type="Boolean" name="readOnly" default="false"/>
+    <aura:attribute access="public" type="Boolean" name="editMode" default="false"/>
+    <aura:attribute access="public" type="String" name="currencyCode"/>
+    <aura:attribute access="public" type="Boolean" name="allowSectionToggle" default="false"/>
+        
+    <!-- Component Methods -->
+	<aura:method name="validate" action="{!c.validateForm}" access="public"/>
+	<aura:method name="save" action="{!c.doSave}"/>
+	<aura:method name="cancel" action="{!c.doCancel}"/>
+	
+    <!--Event Handlers-->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="editModeEvent" event="c:GlAp_SwitchToEditEvent" action="{!c.doEdit}"/>
+
+	<!-- Markup -->
+	<c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<div aura:id="detail">
+	
+		<!-- Notifications -->
+		<c:GlAp_NotificationComponent aura:id="notification"/>
+	            
+		<fieldset class="slds-box slds-theme--default slds-container">
+
+			<!-- Form Section -->
+			<div class="slds-section slds-is-open" aura:id="formSect">
+			 
+				<!-- Title -->
+				<h3 class="slds-section__title">
+					<button class="slds-button slds-section__title-action" onclick="{!c.doToggleSection}">
+			      		<aura:if isTrue="allowSectionToggle">
+							<lightning:icon aura:id="DownIcon" iconName="utility:switch" size="x-small" alternativeText="{!$Label.c.GlUt_Close}"/>
+							<lightning:icon aura:id="RightIcon" iconName="utility:chevronright" size="x-small" alternativeText="{!$Label.c.GlUt_Expand}" class="slds-hide"/>
+						</aura:if>
+						<div>
+							{!v.headerLabel}
+						</div>
+					</button>
+				</h3>
+			      
+				<!-- Content -->
+				<div class="slds-section__content">
+	        		<fieldset class="slds-form--compound">
+						<div class="slds-form-element__group">
+						    <aura:iteration items="{!v.fieldSetResults}" var="FSREntry">								    	
+						    	<div class="slds-form-element__row slds-size--1-of-1">
+						    		<aura:iteration items="{!FSREntry}" var="FSR">	      
+								      	<div class="slds-form-element slds-size--1-of-2">                         											                                                       	  
+											<c:GlAp_GenericField aura:id="{!FSR.label}" 
+											                     recordId="{!v.recordId}"
+											                     object="{!v.client}" 
+											                     objectName="{!v.objectType}" 
+											                     fieldType="{!FSR.fieldType}" 
+											                     fieldName="{!FSR.fieldName}" 
+											                     editMode="{!v.editMode}" 
+											                     isEditable="{!and(FSR.isEditable, !v.readOnly)}" 
+											                     picklistValues="{!FSR.pickListValues}" 
+											                     label="{!FSR.fieldLabel}" 
+											                     required="{!FSR.isRequired}" 
+											                     currencyCode="{!v.currencyCode}"
+											                     helpText="{!FSR.fldHelpText}"
+											                     />
+								      	</div>
+							      	</aura:iteration> 
+						  		</div>				  		
+							</aura:iteration>
+						</div>
+					</fieldset>
+	    		</div>
+			</div>
+		</fieldset>
+	</div>
+</aura:component>

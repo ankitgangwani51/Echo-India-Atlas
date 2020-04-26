@@ -1,0 +1,54 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Vivek Sethi
+@date      		28-March-2018
+@description 	My Bills Lightning Component
+    Displays a list of Bills owned by the Community User including link to Bill PDF.
+@param			recordId - Account Id
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,forceCommunity:availableForAllPageTypes" 
+                controller="CmAp_MyBillsCtlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- Component Variables -->
+    <aura:attribute name="billsfieldList" type="List" access="private"/>
+    <aura:attribute name="billsrecordList" type="List" access="private"/>
+    <aura:attribute name="billItmFldList" type="List" access="private"/>
+    <aura:attribute name="billItmRecordList" type="List" access="private"/>
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowSelectEvent}"/>     
+    
+    <!-- Page Specific Methods -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <!-- Spinner Component -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    
+    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+        <!-- Component Header-->
+        <!-- HEADING AREA -->
+        <div class="slds-media slds-no-space slds-grow">
+            <div class="slds-media__figure">
+                <span class="slds-avatar slds-avatar_large">
+                       <img src="{!$Resource.myBillsLogo}" title="{!$Label.c.CmAp_MyBillsHeader}" />  
+                </span>
+            </div>
+            <div class="slds-media__body">
+                <p class="slds-text-title--caps slds-line-height--reset">{!$Label.c.CmAp_MyBillsTitle}</p>
+                <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title="My Accounts">{!$Label.c.CmAp_MyBillsHeader}</h1>
+            </div>
+        </div>
+        <div class="slds-modal__header"></div>
+        
+        <!-- / HEADING AREA -->
+        <!-- Bills table -->
+        <div class="slds-container_fluid">
+            <div class="slds-box--x-small slds-theme--inverse">
+                {!$Label.c.CmAp_MyBillsInformation}
+            </div>
+            <div class="slds-p-bottom_small"></div>
+            <c:GlAp_GenericTable tableName="{!$Label.c.CmAp_MyBillsHeader}" fieldList="{!v.billsfieldList}" recordList="{!v.billsrecordList}" showSelect="false" forceEditMode="false"/>
+        </div>
+    </div>
+</aura:component>

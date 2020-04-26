@@ -1,0 +1,125 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		11 May 2018
+@description 	Select Book Export Lightning Component
+@param			
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                controller="GlAp_SelectBookCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    
+    <!-- Row Event methods -->
+    <aura:handler name="rowEvent" 		event="c:GlAp_GenericListRowSelectEvent" 	action="{!c.handleRowSelectEvent}"/>
+    <!-- Component handler -->
+    <aura:handler name="change" value="{!v.areaVal}"   action="{!c.isPickValChange}"/>
+    <aura:handler name="change" value="{!v.depotVal}"  action="{!c.isPickValChange}"/> 
+    <aura:handler name="change" value="{!v.selectVal}" action="{!c.isPickValChange}"/>
+    <aura:handler name="change" value="{!v.periodId}"  action="{!c.periodChange}"/>
+    
+    
+    <!-- Component variables -->
+    <aura:attribute name="selectPicklistLabel"   type="string" 	 access="public"        description="Select/All Picklist Label"/>
+    <aura:attribute name="filterList" 			 type="List" 	 access="private"/>
+    <aura:attribute name="serverRecordList" 	 type="List" 	 access="private"/>
+    <aura:attribute name="periodId" 			 type="List" 	 access="public"/>
+    <aura:attribute name="fieldList"  			 type="List" 	 access="private"/>
+    <aura:attribute name="recordList" 			 type="List" 	 access="private"/>
+    <aura:attribute name="resultContainer" 	     type="object" 	 access="private"/>
+    <aura:attribute name="noResultFound"         type="boolean"  access="private"      default="false" />
+    <aura:attribute name="selectedRecords" 	     type="List" 	 access="public"/>
+    <aura:attribute name="SubHeader"             type="string"   access="public"       default="Select Books To Download"     description="Sub Header for select book for export/Sweep Up component"/>
+    <aura:attribute name="isActive"              type="boolean"  access="public"       default="false"                        description="Indicator for show/hide select book export componenet from Parent Component"/>
+    <aura:attribute name="selectOptions"         type="string[]" access="public"       />
+    <aura:attribute name="selectVal"             type="string"   access="public"/>
+    <aura:attribute name="areaOptions"           type="string[]" access="public"/>
+    <aura:attribute name="areaVal"               type="string"   access="public"       default="--None--"/>
+    <aura:attribute name="depotOptions"          type="string[]" access="public"/>
+    <aura:attribute name="depotVal"              type="string"   access="public"       default="--None--"/>
+    <aura:attribute name="isFilterActive"        type="boolean"  access="public"       default="true"                         description="Indicator for show/hide select book export componenet from Select options"/>
+    <aura:attribute name="executionMode"         type="string"   access="public"/>
+    <aura:attribute name="screenName"            type="string"   access="public"/>
+    <aura:attribute name="objectName"            type="string"   access="public"       default="{!v.namespace + 'Book__c'}"/>
+    <aura:attribute name="object"                type="Map"      access="private"     description="map of the object properties"/>
+    <aura:attribute name="mapOfPicklistLabelWithValues"  type="Map" access="public"	/>
+    <!-- Aura Methods -->
+    <aura:method name="getSelectedBooks" description="Get Selected Book Ids"/>
+    <div class="slds-form slds-form_compound slds-p-top_medium"/>	
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-container_fluid">
+            <div class="slds-box--x-small slds-theme--inverse">
+                {!v.SubHeader}
+            </div>
+
+            <aura:if isTrue="{!v.noResultFound}">
+                <div class="slds-notify_container slds-is-relative slds-p-top_medium">
+                    <div class="slds-notify slds-notify--alert slds-theme--alt-inverse" role="alert">
+                        <h2>{!$Label.c.GlUt_NoRecordsFound}</h2>
+                    </div>
+                </div>
+                <aura:set attribute="else">
+                    <div class="slds-container_fluid">
+                        <div class="slds-form slds-form_compound slds-p-top_medium">
+                            <fieldset class="slds-form-element">
+                                <div class="slds-form-element__group">
+                                    <div class="slds-form-element__row slds-grid_vertical-align-center">
+                                        <div class="slds-form-element slds-size_1-of-8 slds-text-align_right">
+                                            {!v.selectPicklistLabel}
+                                        </div>
+                                        <div class="slds-form-element slds-size_1-of-8">
+                                            <c:GlAp_InputField value="{!v.selectVal}" type="select" picklistValues="{!v.selectOptions}"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    <aura:if isTrue="{!v.isFilterActive}">
+                        <div class="slds-container_fluid">
+                            <div class="slds-form slds-form_compound slds-p-around_medium">
+                                <fieldset class="slds-form-element">
+                                    <div class="slds-form-element__group">
+                                        <div class="slds-form-element__row slds-grid_vertical-align-center">
+                                            <div class="slds-form-element slds-size_1-of-8 slds-text-align_right">
+                                                {!$Label.c.GlAp_FilterResult}
+                                            </div>
+                                            <div class="slds-form-element slds-size_1-of-8 slds-text-align_right">
+                                                {!$Label.c.GlAp_Area}
+                                            </div>
+                                            <div class="slds-form-element slds-size_1-of-8">
+                                                <c:GlAp_InputField value="{!v.areaVal}" type="select" picklistValues="{!v.areaOptions}"/>
+                                            </div>
+                                            <div class="slds-form-element slds-size_1-of-8 slds-text-align_right">
+                                                {!$Label.c.GlAp_Depot}
+                                            </div>
+                                            <div class="slds-form-element slds-size_1-of-8">
+                                                <c:GlAp_InputField value="{!v.depotVal}" type="select" picklistValues="{!v.depotOptions}"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <article class="slds-card slds-card_boundary">                        
+                            <div class="slds-card__body slds-scrollable_y medium_height">
+
+								<div class="slds-card__header">
+								    <header class="slds-grid slds-grid_align-spread">
+								        <div class="slds-media slds-media--center">
+                                    		<c:GlAp_RecordListTitleWithIcon objectName="{!v.objectName}" object="{!v.object}" numberOfRecords="{!v.recordList.length}"/>
+                                    	</div>
+                                    </header>
+                                </div>
+                                <c:GlAp_GenericTable tableName="selectBooks"  fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true"  />
+
+                            </div>
+                        </article> 
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+        </div>
+    </aura:if>
+</aura:component>

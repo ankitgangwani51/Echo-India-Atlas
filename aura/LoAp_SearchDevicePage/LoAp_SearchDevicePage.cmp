@@ -1,0 +1,141 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Mohit Tayal
+                Echo: Amit K.
+@date      		20-Nov-2017
+                16-Feb-2018
+@description 	WS3: Search For Device
+                Wizard screen to search a device as part of the Device Manage Wizard
+			
+@param			wizardprop - need it from the previous screen to fetch the Old device Id
+							and to set the variables to be returned to next screen
+                wizardprop.wizardType - Type of scenario(Exchange,Remove,Add)
+
+@return			Exchange Device Scenario: 
+                newDeviceId - contains the new device Id searched on the screen	
+                removalDate - Removal date of the new device from the previous supply point
+                newSPDservices - containing services which matches between the new Device and 
+                                 the current supply point
+                spDeviceToBeAdded - (Object - SupplyPointDevice__c)
+                New Device:
+                selectedSupplyPointAdded - (Object - SupplyPoint__c)
+                newSPDservices - (Object - SupplyPointDeviceService__c)
+                spDeviceToBeAdded - (Object - SupplyPointDevice__c)
+@revision       MT - Changed to display the manufacture and device size fields of device detials
+                     from the devicetype object and not from the device relation. 
+               AK: Adding scenarios for Add,Exchange,Remove the devices
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+                controller="LoAp_SearchDevicePageCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component local variables -->
+    <aura:attribute access="private" name="deviceFound" type="boolean" default="false" />
+    <aura:attribute access="private" name="hasSearched" type="boolean" default="false" description="true if a search has been performed"/>
+    <aura:attribute access="private" name="isInitialised" type="boolean" default="false" description="true if a object are defined"/>
+    <aura:attribute access="private" name="searchManufacture" type="object"/>  
+    <aura:attribute access="private" name="searchSerialNumber" type="object"/>
+    <aura:attribute access="private" name="manufactureTypeOptions" type="String[]" />
+    <!--<aura:attribute access="private" name="deviceRef" type="LoAp_SearchDevicePageCtrlr.DeviceDetails" />-->
+    <aura:attribute access="private" name="deviceRef" type="object" />
+    
+    <aura:attribute access="private" type="List" name="deviceFields"/>
+    <aura:attribute access="private" type="List" name="inputFields"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        <c:GlAp_Notifier aura:id="notifier"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->    
+        
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <div class="slds-container_fluid">            
+                <div class="slds-form slds-form_compound slds-p-top_medium">
+                    <fieldset class="slds-form-element slds-size_1-of-1">
+                        <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium">{!$Label.c.LoAp_SearchDevicePageTitle}</legend>
+                        <div class="slds-form-element__group">                      
+                                <aura:iteration items="{!v.inputFields}" var="inputFields">
+                                    <div class="slds-form-element__row">          
+                                        <aura:iteration items="{!inputFields}" var="inputField">
+                                            <div class="slds-form-element slds-size_1-of-3">                                   
+                                                <c:GlAp_GenericField aura:id="{!inputField.fieldLabel}" 
+                                                                     object="{!(inputField.parentObject == v.namespace + 'Device__c' 
+                                                                     			?  v.searchSerialNumber 
+                                                                     			: v.searchManufacture)}" 
+                                                                     objectName="{!inputField.parentObject}" 
+                                                                     fieldType="{!inputField.fieldType}" 
+                                                                     fieldName="{!inputField.fieldName}"
+                                                                     listView="{!inputField.showLabel}"
+                                                                     showLabel="{!inputField.showLabel}"
+                                                                     editMode="{!inputField.isEditable}" 
+                                                                     isEditable="{!inputField.isEditable}"
+                                                                     picklistValues="{!inputField.pickListValues}" 
+                                                                     label="{!inputField.fieldLabel}" 
+                                                                     />
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </aura:iteration>                        
+                            <lightning:button variant="neutral" label="{!$Label.c.CuAp_SearchButton}" onclick="{!c.doSearch}" />
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <aura:if isTrue="{!v.deviceFound}"> 
+                <div class="slds-container_fluid">
+                    <div class="slds-m-top_xx-large"> </div>
+                    <b>Device Details</b>  
+                    <div class="slds-form slds-form_compound slds-p-top_medium">
+                        <fieldset class="slds-form-element">                    
+                            <div class="slds-form-element__group">
+                                <aura:iteration items="{!v.deviceFields}" var="deviceFields">
+                                    <div class="slds-form-element__row">          
+                                        <aura:iteration items="{!deviceFields}" var="deviceField">
+                                            <div class="slds-form-element slds-size_1-of-2">                                   
+                                                <c:GlAp_GenericField aura:id="{!deviceField.fieldLabel}" 
+                                                                     object="{!(deviceField.parentObject == v.namespace + 'Device__c' 
+                                                                     			?  v.deviceRef.device 
+                                                                     			: deviceField.parentObject == v.namespace + 'Reading__c' 
+                                                                     				?  v.deviceRef.reading 
+                                                                     				: v.deviceRef.deviceType)}" 
+                                                                     objectName="{!deviceField.parentObject}" 
+                                                                     fieldType="{!deviceField.fieldType}" 
+                                                                     fieldName="{!deviceField.fieldName}"
+                                                                     listView="{!deviceField.showLabel}"
+                                                                     showLabel="{!deviceField.showLabel}"
+                                                                     editMode="{!deviceField.isEditable}" 
+                                                                     isEditable="{!deviceField.isEditable}"
+                                                                     picklistValues="" 
+                                                                     label="{!deviceField.fieldLabel}" 
+                                                                     />
+                                            </div>
+                                        </aura:iteration>
+                                    </div>
+                                </aura:iteration>
+                            </div>                        
+                        </fieldset>
+                    </div>                      
+                </div>
+                <aura:set attribute="else">
+                    <aura:if isTrue="{!v.hasSearched}"> 
+                        <div class="slds-notify_container slds-is-relative">
+                            <div>&nbsp;</div>
+                            <div class="slds-notify slds-notify--alert slds-theme--alt-inverse" role="alert">
+                                <h2>{!$Label.c.GlUt_NoRecordsFound}</h2>
+                            </div>
+                        </div>
+                    </aura:if>
+                </aura:set>
+            </aura:if>
+        </div>
+    </aura:if>
+</aura:component>

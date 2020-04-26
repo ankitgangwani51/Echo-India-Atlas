@@ -1,0 +1,6 @@
+<aura:documentation>
+	<aura:description>        
+        <strong>CuAp_AdditionalBillerPage</strong> is component page of the Customer Moves Wizard, the wizard allows the user to add the additional billers. 
+        When additional billers are added, the Location Occupant list to be inserted is added to the wizard properties object.
+ 	</aura:description>
+</aura:documentation>

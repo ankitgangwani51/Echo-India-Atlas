@@ -1,0 +1,56 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun Gupta
+@date      		06-Nov-2017
+@description 	WS4: Select Services
+    Wizard screen to select available services as part of the Move In Wizard
+ 
+@param			wizardprop - need it from the previous screen to fetch the locationId
+       and to set the variables to be returned to next screen
+@return			wizardprop.selectedServices - the list of the selected services
+
+21/11 - Tarun - Made changes according to new Wizard Framework
+@Revisions		AT-3494, Modified to add SI start date 
+@Revisions		28/03/2019, AT-5336,5504 , Tarun
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                controller="CuAp_SelectServicesPageCtrlr"  
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+
+	<!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+	<c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->  
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="locationId" default="" />
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/>
+    <aura:attribute access="private" type="List" name="recordListFull"/>
+    <aura:attribute access="private" type="String" name="serviceItemStartDate"/>
+    <aura:attribute access="private" type="List" name="recordListNew"/>
+    <aura:attribute access="private" type="Boolean" name="isAuRegion" default="false" />
+    
+    <aura:if isTrue="{!v.isActive}">
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+            <div class="slds-p-bottom_medium">
+                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.CuAp_SelectServicePageHeader}</legend>
+            </div>
+
+            <div class="slds-container_fluid">
+                <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" />
+            </div>       
+        </div>
+    </aura:if>
+</aura:component>

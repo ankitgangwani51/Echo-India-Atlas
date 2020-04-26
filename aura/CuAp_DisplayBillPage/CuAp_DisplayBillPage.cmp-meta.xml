@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AuraDefinitionBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>45.0</apiVersion>
+    <description>This component is used for the wizard step which will contain the &apos;view bill&apos; component and wizard buttons component, passing the billId from wizardprop to the component&apos;s recordId.</description>
+</AuraDefinitionBundle>

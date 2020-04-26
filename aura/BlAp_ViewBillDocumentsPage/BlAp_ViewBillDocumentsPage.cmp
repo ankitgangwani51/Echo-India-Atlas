@@ -1,0 +1,36 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Tarun\Dependra
+@date      		25-May-2018
+@description 	View Documents Lightning Component Displays a list of documents.
+@param			
+@revision		Echo: Sudhir Kumar AT-4095(AU1) : Making this component reusable for other object types
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId"                 
+                controller="BlAp_ViewBillDocumentsCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- Component Variables -->
+    <aura:attribute name="billsfieldList" type="List" access="private"/>
+    <aura:attribute name="billsrecordList" type="List" access="private"/>
+    <aura:attribute name="billItmFldList" type="List" access="private"/>
+    <aura:attribute name="billItmRecordList" type="List" access="private"/>
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowSelectEvent}"/>     
+    
+
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <!-- Spinner Component -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <!-- Notifier Component -->
+    <c:GlAp_Notifier aura:id="notification"/>
+    
+    <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">
+        <!-- Bills table -->
+        <div class="slds-container_fluid">
+            <div class="slds-p-bottom_small"></div>
+            <c:GlAp_GenericTable tableName="{!$Label.c.CmAp_MyBillsHeader}" fieldList="{!v.billsfieldList}" recordList="{!v.billsrecordList}" showSelect="false" forceEditMode="false"/>
+        </div>
+    </div>
+</aura:component>

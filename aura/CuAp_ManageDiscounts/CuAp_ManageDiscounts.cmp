@@ -1,0 +1,78 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      		25 Jan 2018
+@description 	Manage Discount Lightning Component
+				It shows all Discount applied against the Contract
+@param			recordId - Contract Id
+*******************************************************************************/
+ -->
+<aura:component access="global"
+                implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                controller="CuAp_ManageDiscountsCtrlr" 
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="false" description="object that holds all the wizard properties"/>
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" 	description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" 	description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" 	description="validates this component when pressing 'next'"/>
+    
+    <!-- Row Event methods -->
+    <aura:handler name="rowEvent" 		event="c:GlAp_GenericListRowSelectEvent" 	action="{!c.handleRowSelectEvent}"/>
+    <aura:handler name="rowClickEvent"	event="c:GlAp_GenericListRowClickEvent" 	action="{!c.handleRowClickEvent}"/> 
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->
+    <aura:attribute name="DiscountFieldList" 	type="List" 	access="private"/>
+    <aura:attribute name="DiscountRecordList" 	type="List" 	access="private"/>
+    <aura:attribute name="fieldList"  			type="List" 	access="private"/>
+    <aura:attribute name="recordList" 			type="List" 	access="private"/>
+    <aura:attribute name="showSecond" 			type="Boolean" 	access="private" default="false"/>    
+    <aura:attribute name="oldEndDate" 			type="Date" 	access="private"/>
+    <aura:attribute name="mapOldEndDate" 		type="Map" 		access="private"/>
+    
+    <aura:if isTrue="{!v.isActive}">
+        
+        <!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        <c:GlAp_Notifier aura:id="notifier"/>
+        <c:GlAp_SpinnerComponent aura:id="spinner"/>
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        <div class="slds-text-heading_small slds-text-align_center">
+            <b>{!$Label.c.CuAp_ManageDiscount}<hr style="margin:0.5rem;"/></b>
+        </div>           
+        <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.CuAp_ManageDiscountsHeader}</b></div> 
+        
+        
+        <div class="slds-border_top slds-border_bottom slds-border_right slds-border_left">                                   
+            <div class="slds-container_fluid slds-p-horizontal_small slds-p-around_small">
+                <div style="height:195px;">
+                    <div class="slds-scrollable_y" style="height:100%;">
+                        <!-- Displays Discount records in the upper browser -->
+                        <c:GlAp_GenericTable tableName="{!$Label.c.CuAp_DiscountLabel}" fieldList="{!v.DiscountFieldList}" 
+                                             recordList="{!v.DiscountRecordList}" selectHeader="Select" showSelect="true"/><!-- Changes for AT-3448 Starts/Ends here --> 
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="slds-form slds-form_compound slds-p-top_medium"/>
+        <aura:if isTrue="{!v.showSecond}">
+            <div class="slds-text-heading_small slds-text-align_left"><b>{!$Label.c.Cuap_AllocationToBillItems}</b></div> 
+            <div class="slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                <div class="slds-container_fluid slds-p-horizontal_small slds-p-around_small">
+                    <div style="height:120px;">
+                        <div class="slds-scrollable_y" style="height:100%;">
+                            <!-- Displays Allocation to Bill Items records in the lower browser based on Discount Records -->
+                            <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="false"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aura:if>
+    </aura:if>
+</aura:component>

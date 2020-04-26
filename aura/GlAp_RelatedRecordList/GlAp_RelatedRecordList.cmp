@@ -1,0 +1,92 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Patrick Dixon
+@date      		27 Feb 2018
+@description 	Related List component
+*******************************************************************************/
+ -->
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,force:hasRecordId,force:hasSObjectName" 
+		access="global" 
+		controller="GlAp_RelatedRecordListCtrlr" 
+		extends="c:GlAp_LightningComponentBase">
+	
+	<!-- Attributes -->
+    <aura:attribute access="global" type="Id" name="recordId" description="parent record Id"/>
+    <aura:attribute access="global" type="String" name="objectName" description="related object type"/>
+    <aura:attribute access="global" type="String" name="parentField" description="API name of the field on the object 
+    																	(corresponds to the id which is passed in as the record id so that related records can be retrieved)"/>
+    <aura:attribute access="global" type="String" name="detailListFields" description="name of the detail list fieldset"/>
+    <aura:attribute access="global" type="String" name="filter" description="filter used to restrict the records displayed"/>
+    <aura:attribute access="global" type="Object" name="selectedRecord" description="this is the selected record"/>
+    <aura:attribute access="global" type="Boolean" name="showNew" default="false" description="shows the new button if true"/>
+    <aura:attribute access="global" type="Boolean" name="forAmendments" default="false" description="this related list is used to select amendments"/>
+    <!-- Changes for AT-3317 start Here -->
+    <aura:attribute access="public" type="Boolean" name="deleteOption"  default="false" description="show/Hide delete button"/>
+    <!-- Changes for AT-3317 Ends Here -->
+    
+	<!-- these only required when a new record button is shown (showNew == true) -->
+    <aura:attribute access="global" type="Id" name="sObjectName" description="parent record object type"/>
+    <aura:attribute access="global" type="Boolean" name="enableNew" default="true" description="disables the new readings button if false"/>
+    <aura:attribute access="global" type="String" name="newRecordFields" description="name of the new record fieldset"/>
+    <aura:attribute access="global" type="String" name="selfLookupField" description="The API name of the amended by field"/>
+    <aura:attribute access="global" type="List" name="selectedRecords" description="these are the related records for the selected record"/>
+    <aura:attribute access="global" type="Boolean" name="amendAllAfter" description="true if the amendment should be for all records 
+    																		after the record selected"/>
+
+    <aura:attribute access="private" type="Map" name="object" description="map of the object properties"/>
+    <aura:attribute access="private" type="List" name="records"/>
+    <aura:attribute access="private" type="List" name="fields"/>
+    <!-- Changes for AT-3317 starts Here -->
+    <aura:attribute access="private" type="Id" name="invalidRecordId" description="this is the new record Id"/>
+    <!-- Changes for AT-3317 Ends Here -->
+    <!-- Event handlers -->
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler name="rowClickEvent" event="c:GlAp_GenericListRowClickEvent" action="{!c.handleRowClickEvent}"/> 
+	<aura:handler name="change" value="{!v.recordId}" action="{!c.parentRecordChange}"/>
+    <aura:handler name="wizEvent" event="c:GlAp_WizardEvent" action="{!c.handleWizardEvent}" description="handler for wizard button events"/>
+    <!--Changes for AT-3317 Start Here -->
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/> 
+   <!-- Calculate Bill Component -->
+    <c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" recordId="{!v.invalidRecordId}" sObjectName="{!v.objectName}" showButton="false" 
+                                   calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+    <!--Changes for AT-3317 End Here -->
+    
+	<div class="slds-container_fluid">
+		<c:GlAp_SpinnerComponent aura:id="spinner"/>
+
+		<!-- Related Records -->
+		<article class="slds-card slds-card_boundary">
+			<div class="slds-card__header">
+                <header class="slds-grid slds-grid_align-spread">
+                    <div class="slds-media slds-media--center">
+                        
+                        <!-- Title with Icon -->
+                        <c:GlAp_RecordListTitleWithIcon objectName="{!v.objectName}" object="{!v.object}" numberOfRecords="{!v.records.length}"/>
+                    </div>
+                    
+                    <!-- New Button -->
+                    <aura:if isTrue="{!v.showNew}">
+                        <div class="slds-float_right">
+                            <c:GlAp_NewRecordWithAmendment objectName="{!v.objectName}" recordId="{!v.recordId}" sObjectName="{!v.sObjectName}" 
+                                                           parentField="{!v.parentField}" detailListFields="{!v.detailListFields}" newRecordFields="{!v.newRecordFields}" 
+                                                           selfLookupField="{!v.selfLookupField}" amendAllAfter="{!v.amendAllAfter}" 
+                                                           title="{!'New ' + v.object.label}" buttonName="New" disabled="{!!v.enableNew}"/>
+                        </div>						
+                    </aura:if>
+                </header>
+			</div>
+
+			<div class="slds-card__body slds-scrollable_y medium_height">
+				<div class="useHeaderBarFix forceRelatedListPreviewGrid">
+					<c:GlAp_GenericTable tableName="{!v.object.labelPlural + 'Table'}" fieldList="{!v.fields}" recordList="{!v.records}" showSelect="{!v.forAmendments}"/>
+				</div>
+				<aura:if isTrue="{!v.records.length == 0}">
+					<div class="slds-align_absolute-center">
+						{!$Label.c.GlAp_NoItemsToDisplayMsg}
+					</div>
+				</aura:if>
+			</div>
+		</article>
+	</div>
+	
+</aura:component>

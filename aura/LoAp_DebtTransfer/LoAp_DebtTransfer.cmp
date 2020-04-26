@@ -1,0 +1,130 @@
+<!--/******************************************************************************
+@author    		Echo: Dependra Singh
+@date      		23 Oct 2018
+@description 	Debt Transfer Lightning Component
+@param			
+*******************************************************************************/-->
+<aura:component implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:lightningQuickAction"
+                extends="c:GlAp_LightningComponentBase" access="global" 
+                controller="LoAp_DebtTransferCtrlr">
+    
+    <aura:attribute name="isActive" type="Boolean" default="false"/>  
+    <aura:attribute name="sObjectName" type="String" />     
+    <aura:attribute access="public" type="String" name="buttonName" default="Debt Transfer"  description="The button name to start "/>
+    <aura:attribute access="public" type="String" name="buttonStyle" default="brand" description="The start button css style"/>
+    <aura:attribute access="public" type="Boolean" name="disabled" default="false" description="true if the button is disabled"/>
+    <aura:attribute access="public" type="List" name="locationFieldList"/>
+    <aura:attribute access="public" type="List" name="billFieldList"/>
+    <!--<aura:attribute access="public" type="Boolean" name="isDebtExist" default="false" description="true if the button is disabled"/>-->
+    <aura:attribute access="private" type="object" name="objLocation" description="Object is used to capture location information"/>
+    <aura:attribute access="private" type="object" name="objWrapper" description="Object is used to capture wrapper class data"/>
+    <aura:attribute access="private" type="string"  name="selectedContractId" description="string is used to capture selected contract id."/>
+    <aura:attribute access="private" type="object" name="objBillTransfer" description="Object is used to capture bill data"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>    
+    <!-- Passing is active variable on button click of "Debt Transfer" from location page -->
+    <aura:if isTrue="{!v.isActive}">
+        <section class="slds-modal slds-slide-up-open slds-modal_medium" 
+                 role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content-id-1">
+            <div class="slds-modal__container "> 
+                <header class="slds-modal__header">
+                    <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick="{!c.doCancel}">
+                        <c:GlAp_Svg class="slds-button__icon slds-button__icon_large" aria-hidden="true" 
+                                    xlinkHref="{!$Resource.SLDS24 + '/assets/icons/utility-sprite/svg/symbols.svg#close'}" />
+                        <span class="slds-assistive-text">{!$Label.c.GlUt_Close}</span>
+                    </button>  
+                    <div class="slds-text-heading_medium">{!$Label.c.LoAp_LocationDebtTransfer}</div>
+                </header>
+                <!-- Spinner Component -->
+                <c:GlAp_SpinnerComponent aura:id="spinner"/>
+                <div class="slds-container_fluid slds-border_top slds-border_bottom slds-border_right slds-border_left">
+                    
+                    <div class="slds-grid slds-grid_vertical slds-modal__content ">
+                        <!-- Notification Component -->
+                        <c:GlAp_NotificationComponent aura:id="notification"/>
+                        <!-- Using this division showing location field in read only mode -->
+                        <div class="slds-form slds-form_compound slds-p-top_medium slds-p-around--medium">
+                            <fieldset class="slds-form-element slds-size_1-of-1">
+                                <legend class="slds-form-element__label slds-text-title_caps"></legend>
+                                <div class="slds-form-element__group">
+                                    <aura:iteration items="{!v.locationFieldList}" var="locFields">
+                                        <div class="slds-form-element__row">          
+                                            <aura:iteration items="{!locFields}" var="locField">
+                                                <div class="slds-form-element slds-size_1-of-2">
+                                                    <c:GlAp_GenericField 
+                                                                         aura:id="{!locField.fieldLabel}" 
+                                                                         object="{!v.objLocation}" 
+                                                                         objectName="{!locField.parentObject}" 
+                                                                         fieldType="{!locField.fieldType}" 
+                                                                         fieldName="{!locField.fieldName}" 
+                                                                         editMode="{!locField.isEditable}" 
+                                                                         isEditable="{!locField.isEditable}"
+                                                                         showLabel="{!locField.showLabel}"
+                                                                         listView="{!locField.showLabel}"
+                                                                         label="{!locField.fieldLabel}" 
+                                                                         required= "true"
+                                                                         />
+                                                </div>
+                                            </aura:iteration>
+                                        </div>
+                                    </aura:iteration>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <!-- Using this division Contract and bill fields in edit mode -->
+                        <div class="slds-form slds-form_compound slds-p-top_medium slds-p-around--medium slds-m-bottom_large">
+                            <fieldset class="slds-form-element slds-size_1-of-1">
+                                <legend class="slds-form-element__label slds-text-title_caps"></legend>
+                                <div class="slds-form-element__group">
+                                    <div class="slds-form-element__row">          
+                                        <div class="slds-form-element slds-size_1-of-2">
+                                            {!$Label.c.PyAp_ContractToTransfer}
+                                            <c:GlAp_CustomLookup objectName="{!v.namespace + 'BillingContract__c'}"
+                                                                 field_API_text="Id, Name"
+                                                                 limit="10"
+                                                                 field_API_search="Name"
+                                                                 lookupIcon="custom:custom2" 
+                                                                 placeholder="{!$Label.c.CuAp_SearchText}"
+                                                                 selItem="{!v.selectedContractId}"
+                                                                 />        
+                                            
+                                        </div>
+                                        <aura:iteration items="{!v.billFieldList}" var="billFields">
+                                            <aura:iteration items="{!billFields}" var="billField">
+                                                <div class="slds-form-element slds-size_1-of-2">
+                                                    <c:GlAp_GenericField 
+                                                                         aura:id="{!billField.fieldLabel}" 
+                                                                         object="{!v.objBillTransfer}" 
+                                                                         objectName="{!billField.parentObject}" 
+                                                                         fieldType="{!billField.fieldType}" 
+                                                                         fieldName="{!billField.fieldName}" 
+                                                                         editMode="{!billField.isEditable}" 
+                                                                         isEditable="{!billField.isEditable}"
+                                                                         label="{!billField.fieldLabel}" 
+                                                                         picklistValues="{!billField.pickListValues}" 
+                                                                         required= "true"
+                                                                         />
+                                                </div>
+                                            </aura:iteration>
+                                        </aura:iteration>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <footer class="slds-modal__footer">
+                    <button type="button" class="slds-button slds-button--neutral" onclick="{!c.doCancel}">{!$Label.c.GlAp_CancelButton}</button>
+                    <button type="button" class="slds-button slds-button--brand" onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                </footer>       
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop--open"></div> 
+        <!-- Else section to show button only, On click of this button showingn modal box -->
+        <aura:set attribute="else">
+            <lightning:button variant="{!v.buttonStyle}" disabled="{!v.disabled}" label="{!v.buttonName}" onclick="{!c.doActive}" />        	
+        </aura:set>
+        
+    </aura:if>
+    
+</aura:component>

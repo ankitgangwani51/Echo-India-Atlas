@@ -1,0 +1,64 @@
+<!-- 
+/******************************************************************************
+@author    		Accenture: Patrick Dixon
+@date      		20 Nov 2017
+@description 	Component to fire notifier component events from child components 
+				to show notifications in a component on a parent component
+
+	USAGE:	
+			Include:
+    			<aura:handler name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" 
+    					description="handler for notification events"/>
+
+				<c:GlAp_NotificationComponent aura:id="notification"/>
+			in a parent component markup.
+
+			Include the following methods in the parent component helper:
+			
+			    // call the notification component method to show a notification
+			    showNotification: function(component, message, type) {
+			    	notificationCmp = component.getSuper().find('notification');
+			    	notificationCmp.showNotification(message, type);
+			    },
+			
+			    // call the notification component method to clear a notification
+			    clearNotification: function(component) {
+			    	var notificationCmp = component.find('notification');
+			    	notificationCmp = component.getSuper().find('notification');
+			    	notificationCmp.clearNotification();
+			    }
+
+			Include:
+				<c:GlAp_Notifier aura:id="notifier"/>
+			in the child(s) component markup.
+			
+			Include the following methods in the child(s) component helper:
+			
+			    // call the notifier method to show a message on the notification component
+			    showNotification: function(component, message, type) {
+			    	component.find('notifier').showNotification(message, type);
+			    },
+			
+			    // call the notifier method to clear message on the notification component
+			    clearNotification: function(component) {
+			    	component.find('notifier').clearNotification();
+			    }
+			    
+			Calling the helper methods will fire an application event which is handled by 
+			the Notification component on the parent.
+			
+*******************************************************************************/
+ -->
+<aura:component >
+	
+    <!-- component event fired to show notification on parent component -->
+	<aura:registerEvent name="notificationEvent" type="c:GlAp_NotificationEvent"/>
+
+    <aura:method name="showNotification" description="shows a notification message">
+        <aura:attribute type="String[]" name="message" default="" required="true" description="message body" />
+        <aura:attribute type="String" name="type" default="error" required="false" description="message type [error: warn: etc]" />
+    </aura:method>
+
+    <aura:method name="clearNotification" description="clears a notification message"/>
+
+</aura:component>

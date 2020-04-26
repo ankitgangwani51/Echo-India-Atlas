@@ -1,0 +1,56 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Neha R
+@date      		22 June 2018
+@description 	Lightning component to add Leak Record Reading
+*******************************************************************************/
+-->
+<aura:component implements="force:appHostable,flexipage:availableForRecordHome,force:hasRecordId,force:hasSObjectName"
+				access="global"        
+        		controller="LoAp_LeakRecordingCtrlr"
+				extends="c:GlAp_LightningComponentBase">           
+   
+	<!-- Component variables -->
+    <aura:attribute name="EffDeviceReading" type="String" /> 
+    <aura:attribute name="finalReadingId"   type="Id"         access="private"      description="Id of the final reading for bill calculation"/>
+    <aura:attribute name="isVisible"        type="Boolean"    access="private"      default="false"/>
+    <!-- Constructor for lightning page load-->
+     <aura:handler   name="init" value="{!this}" action="{!c.doInit}" description="initialisation event handler"/>
+
+    <!-- Event Handler for Bill calculation messages-->
+    <aura:handler   name="notificationEvent" event="c:GlAp_NotificationEvent" action="{!c.showNotification}" description="handler for notification events"/>
+    <aura:handler name="billCalculationCompleteEvent" event="c:BlAp_BillCalculationCompleteEvent" action="{!c.handleBillCalculationComplete}" 
+			description="handler for bill calculation complete events"/>
+    <!-- Bill Calculation components -->
+	<c:BlAp_CalculateBillComponent aura:id="calculatePendingBillComponent" 
+    								recordId="{!v.finalReadingId}" sObjectName="{!v.namespace + 'Reading__c'}" 
+    								showButton="false" calculationType="{!$Label.c.BlIn_BillCalculationTypePending}"/>
+    <aura:if isTrue="{!v.isVisible}"> 
+        <div class="containerComponent">
+            <div class="slds-card slds-card_boundary ">			
+                <div class="slds-card__body slds-card__body_inner">	               
+                    <div class="slds-grid">
+                        <h2 class="slds-text-heading--small">{!$Label.c.LoAp_LeakRecording}</h2>
+                    </div>  
+                    <div class="slds-grid">
+                        <c:GlAp_NotificationComponent aura:id="notification"/>
+                        <div class="slds-m-bottom_xx-small"></div>
+                    </div> 	
+                    
+                    <!-- Actions -->
+                    <div class="slds-grid slds-wrap">	
+                        
+                        <div class="slds-col">                            
+                            <c:GlAp_InputField type='text'
+                                               value='{!v.EffDeviceReading}' 
+                                               label='{!$Label.c.LoAp_EffDeviceReadingLabel}'/>
+                        </div>
+                        <div class="slds-col ">  				   
+                            <button type="button" class="slds-button slds-button--brand slds-m-top_large slds-m-left_medium"  onclick="{!c.doSave}">{!$Label.c.GlUt_Save}</button>
+                        </div>				
+                    </div>	
+                </div>
+            </div>
+        </div>
+    </aura:if>   
+</aura:component>

@@ -1,0 +1,105 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Ankit Gangwani
+@date      	    17 Sept 2018
+@description 	Enter Reading Page for Cust Move Amend
+*******************************************************************************/
+-->
+<aura:component access="global"
+                controller="CuAp_CustMoveAmendEnterReadingCtrlr"  
+                extends="c:GlAp_LightningComponentBase">
+    
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>   
+    
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates the component when moving on to the next step"/>
+    
+    <!-- required components -->
+    <c:GlAp_SpinnerComponent aura:id="spinner"/>
+    <c:GlAp_Notifier aura:id="notifier"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component variables -->  
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <aura:attribute access="private" type="String" name="locationId" default="" />
+    <aura:attribute access="private" type="List" name="SPFieldList"/>
+    <aura:attribute access="private" type="List" name="SPRecordList"/>
+    <aura:attribute access="private" type="List" name="ReadingFieldList"/>
+    <aura:attribute access="private" type="List" name="ReadingRecordList"/>    
+    <aura:attribute access="private" type="List" name="recordListFull"/>
+    <aura:attribute access="private" type="Boolean" name="showSecond" default="false"/>
+    <aura:attribute access="private" type="String" name="locationName" default=""/>
+    <aura:attribute access="private" type="String" name="moveInDate" default=""/>
+    <aura:attribute access="private" type="Map"    name="mapOfDeviceId2Reading"/>   <!--AT-5276-->
+    
+    <!--Page specific handlers -->
+    <aura:handler name="rowButtonEvent" event="c:GlAp_GenericListRowButtonEvent" action="{!c.handleRowButtonPressEvent}"/>
+    <aura:handler name="rowClickEvent"	event="c:GlAp_GenericListRowClickEvent" 	action="{!c.handleRowClickEvent}"/> 
+    
+    <aura:if isTrue="{!v.isActive}">
+        <c:CuAp_ReadingEstimate aura:id="readingEstimate" showButton="false"/>
+        <div class="slds-grid slds-grid_vertical slds-modal__content slds-p-around_medium">                        
+            <div class="slds-form slds-form_compound slds-p-top_medium">
+                <fieldset class="slds-form-element slds-size_1-of-1">
+                    <legend class="slds-form-element__label slds-text-title_caps slds-p-bottom_medium"></legend>
+                    <div class="slds-form-element__group">
+                        <div class="slds-form-element__row">
+                            <div class="slds-form-element slds-size_1-of-3">    
+                                <legend class="slds-form-element__label slds-text-title_caps slds-text-align_left">{!$Label.c.CuAp_EnterReadingLocation} : {!v.locationName}</legend>
+                            </div>
+                            <div class="slds-form-element slds-size_1-of-3">                                 
+                                <legend class="slds-form-element__label slds-text-title_caps slds-text-align_right">{!$Label.c.CuAp_NewMoveDate} : {!v.moveInDate}</legend>
+                            </div>                        
+                            <div class="slds-form-element slds-size_1-of-3"/> 
+                            
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+            
+            
+            <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+                <div class="slds-card__body slds-scrollable_y medium_height">
+                    <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                        <c:GlAp_GenericTable aura:id="SupplyPoint" 
+                                             tableName="SupplyPoint" 
+                                             fieldList="{!v.SPFieldList}" 
+                                             recordList="{!v.SPRecordList}"
+                                             showSelect="false"/>                        
+                    </div>
+                    <aura:if isTrue="{!v.SPRecordList.length == 0}">
+                        <div class="slds-align_absolute-center">
+                            {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                        </div>
+                    </aura:if>
+                </div>
+            </article>    
+            
+            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+            <div class="slds-form slds-form_compound slds-p-top_medium"/>
+            <aura:if isTrue="{!v.showSecond}">
+                <article class="slds-card slds-card_boundary forceRelatedListCardDesktop">
+                    <div class="slds-card__body slds-scrollable_y medium_height">
+                        <div class="useHeaderBarFix forceRelatedListPreviewGrid">
+                            <c:GlAp_GenericTable aura:id="Reading" 
+                                                 tableName="Reading" 
+                                                 fieldList="{!v.ReadingFieldList}" 
+                                                 recordList="{!v.ReadingRecordList}"
+                                                 showSelect="false"/>                        
+                        </div>
+                        <aura:if isTrue="{!v.ReadingRecordList.length == 0}">
+                            <div class="slds-align_absolute-center">
+                                {!$Label.c.GlAp_NoItemsToDisplayMsg}
+                            </div>
+                        </aura:if>
+                    </div>
+                </article>   
+            </aura:if> 
+        </div>                
+    </aura:if>
+</aura:component>

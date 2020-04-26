@@ -1,0 +1,7 @@
+<aura:documentation>
+	<aura:description>
+        <strong>BlAp_CreateNewReadingPage</strong> is parent component for the New Reading screen. It displays all the essential parameters to create a reading record.
+        It is designed to be override the standard New button on Readings screen . It displays Reading date dafault as TODAY,Reading source as 'Agent Eneterd' and Billable Type as 'Billable'.
+    </aura:description>
+	
+</aura:documentation>

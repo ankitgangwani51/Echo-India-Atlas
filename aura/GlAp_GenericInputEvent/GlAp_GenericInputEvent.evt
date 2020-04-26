@@ -1,0 +1,4 @@
+<aura:event type="COMPONENT" description="Component Event To indicate input event">
+	<aura:attribute name="objectName" type="String"/>
+    <aura:attribute name="fieldName"  type="String"/>
+</aura:event>

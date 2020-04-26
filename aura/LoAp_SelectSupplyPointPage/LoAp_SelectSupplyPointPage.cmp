@@ -1,0 +1,62 @@
+<!-- 
+/******************************************************************************
+@author    		Echo: Amit K.
+@date      		06-Feb-2018
+@description 	WS(6) Select Supply Point - Component to display the supply point associated with location having no Active Supply Point Device associated with Supply Point.
+@param			wizardprop - need it from the previous screen to fetch the wizard type
+							 and to set the variables to be returned to next screen
+                wizardprop.wizardType - Type of scenario(Exchange,Remove,Add)
+@return	        New Device Scenario:
+                newSPDservices - (object - SupplyPointDeviceService__c)
+                spDeviceToBeAdded - (object - SupplyPointDevice__c)
+                selectedSupplyPointAdded - (object - SupplyPoint__c)
+*******************************************************************************/
+ -->
+<aura:component access="global" 
+                controller="LoAp_SelectSupplyPointPageCtrlr"
+                extends="c:GlAp_LightningComponentBase">
+    <!-- REQUIRED BY FRAMEWORK - must be included/implemented by the wizard page -->
+    <aura:attribute access="public" type="boolean" name="isActive" default="false" description="true if this is the active page"/>
+    <aura:attribute access="public" type="object" name="wizardprop" required="true" description="object that holds all the wizard properties"/>
+    <aura:attribute access="private" type="Boolean" name="isInitialised" default="false" description="true once the fields to display have been initialised"/>
+    <!-- entry/exit validation methods -->
+    <aura:method name="reInitialise" description="re-initialises the component when the wizard is closed"/>
+    <aura:method name="checksOnEntry" description="checks the component data when it becomes active"/>
+    <aura:method name="validateOnNext" description="validates this component when pressing 'next'"/>
+    <!-- END: REQUIRED BY FRAMEWORK -->
+    
+    <!-- Component Variables -->
+    <aura:attribute access="public" name="recordId" type="String" default="" />
+    <aura:attribute access="private" name="errorMessage" type="String" default="" />
+    <aura:attribute access="private" name="noResultFound" type="boolean" default="false" />
+    <aura:attribute access="private" type="boolean" name="supplyPointExist" default="false" />
+    <aura:attribute access="private" type="List" name="fieldList"/>
+    <aura:attribute access="private" type="List" name="recordList"/> 
+    <aura:attribute access="private" type="List" name="serviceTypeId"/> 
+    <aura:attribute access="private" type="Boolean" name="recordNotFound" default="false"/> 
+    
+    <!-- Page Specific Methods -->
+    <aura:handler name="rowEvent" event="c:GlAp_GenericListRowSelectEvent" action="{!c.handleRowSelectEvent}"/>
+    <aura:if isTrue="{!v.isActive}">
+        <!-- Spinner Component -->
+        <c:GlAp_SpinnerComponent aura:id="spinner"/><!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page -->
+        <c:GlAp_Notifier aura:id="notifier"/>		<!-- REQUIRED BY FRAMEWORK  - must be included in the wizard page --> 
+        <aura:if isTrue="{!v.supplyPointExist}">
+            <br></br>
+            <div>
+                <legend class="slds-form-element__label slds-text-title_caps">{!$Label.c.LoAp_SelectSupplyPointHeader}</legend>
+            </div>
+            <br></br>
+            <div class="slds-container_fluid">
+                <c:GlAp_GenericTable fieldList="{!v.fieldList}" recordList="{!v.recordList}" showSelect="true" forceEditMode="true"/> 
+            </div>
+        </aura:if>
+        <aura:if isTrue="{!v.noResultFound}">
+            <div class="slds-notify_container slds-is-relative">
+                <div class="slds-notify slds-notify--alert slds-theme--alt-inverse" role="alert">
+                    <h2>{!$Label.c.GlUt_NoRecordsFound}</h2>
+                </div>
+            </div>
+        </aura:if>
+    </aura:if>
+</aura:component>
